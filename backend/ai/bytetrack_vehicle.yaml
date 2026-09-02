@@ -1,0 +1,41 @@
+# SentinelVision - ByteTrack configuration for vehicle tracking
+# Compatible with Ultralytics 8.x model.track() API
+#
+# Design goals:
+#   - Allow reasonable low-confidence association (motorcycles)
+#   - Avoid aggressively creating false tracks
+#   - Maintain persistence through normal short occlusions
+
+tracker_type: bytetrack
+
+# First-stage match threshold.
+# Detections with confidence >= track_high_thresh are matched first.
+# Default: 0.25 | We keep 0.25 to avoid discarding weak motorcycle detections.
+track_high_thresh: 0.25
+
+# Second-stage threshold for low-score matches.
+# Unmatched detections with confidence >= track_low_thresh are matched
+# against remaining tracks. This helps recover weak detections.
+# Default: 0.1 | We keep 0.1 to allow low-confidence motorcycle association.
+track_low_thresh: 0.1
+
+# Threshold to start a new track.
+# If no existing track matches a detection with score >= new_track_thresh,
+# a new track is created. Higher values reduce false tracks.
+# Default: 0.25 | We keep 0.25 for conservative track creation.
+new_track_thresh: 0.25
+
+# Number of frames to keep a lost track alive after it disappears.
+# Higher values handle longer occlusions but increase ID switch risk.
+# Default: 30 | 30 frames ≈ 1 second at 30 fps.
+track_buffer: 30
+
+# Association similarity threshold (IoU/cost).
+# Higher values require stricter overlap for matching.
+# Default: 0.8 | We keep 0.8 for standard IoU-based association.
+match_thresh: 0.8
+
+# Fuse detection score with motion/IoU for matching.
+# Stabilizes weak detections by considering both score and position.
+# Default: True | We keep True to help motorcycle tracking stability.
+fuse_score: True
