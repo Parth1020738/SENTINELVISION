@@ -7,8 +7,25 @@ __pycache__/
 
 # Virtual Environment
 venv/
+myenv/
 env/
 ENV/
+
+# Runtime / data
+data/
+testdata/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary runtime/test files
+cam01_run.txt
+cam01_test.txt
+phase8_test_results.txt
+run_cam01_test.py
+run_phase8_tests.py
 
 # YOLO Models
 *.pt
@@ -24,5 +41,16 @@ videos/
 .DS_Store
 Thumbs.db
 
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+.vite/
+
 # Project specific
 *.log
+
+# Local environment (never commit credentials)
+.env
+.env.*
+!.env.example

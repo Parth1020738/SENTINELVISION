@@ -23,11 +23,12 @@ import cv2
 import numpy as np
 
 # ---------------------------------------------------------------------------
-# Camera configuration
+# Camera configuration - credentials come from environment variables ONLY
 # ---------------------------------------------------------------------------
-CAMERA_URLS = {
-    "cam01": "rtsp://103.250.160.189:8554/stream/cam01",
-}
+# The authenticated RTSP URL is built centrally by
+# backend.camera.rtsp_credentials.build_authenticated_rtsp_url().
+# Camera IDs stay dynamic; no URL or credential is hard-coded here.
+DEFAULT_CAMERA_ID = "cam01"
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,8 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--camera",
         type=str,
-        default="cam01",
-        choices=list(CAMERA_URLS.keys()),
+        default=DEFAULT_CAMERA_ID,
         help="Camera identifier (default: cam01)",
     )
     parser.add_argument(
@@ -113,17 +113,29 @@ def main() -> None:
     from backend.ai.vehicle_tracker import VehicleTracker
 
     # ------------------------------------------------------------------
-    # Resolve camera URL
+    # Resolve camera URL (central authenticated builder - never logged)
     # ------------------------------------------------------------------
+    from backend.camera.camera_stream import configure_rtsp_tcp
+    from backend.camera.rtsp_credentials import (
+        RTCredentialError,
+        build_authenticated_rtsp_url,
+        describe_rtsp_target,
+    )
+
     camera_id = args.camera
-    camera_url = CAMERA_URLS[camera_id]
     print(f"[TEST] Camera: {camera_id}")
-    print(f"[TEST] RTSP URL: {camera_url}")
+    print(f"[TEST] RTSP target: {describe_rtsp_target(camera_id)} (credentials redacted)")
+    try:
+        camera_url = build_authenticated_rtsp_url(camera_id)
+    except RTCredentialError as exc:
+        print(f"[TEST] FAIL: {exc}")
+        sys.exit(1)
 
     # ------------------------------------------------------------------
-    # Open RTSP stream
+    # Open RTSP stream (TCP forced before opening)
     # ------------------------------------------------------------------
-    print("[TEST] Opening RTSP stream...")
+    print("[TEST] Opening RTSP stream (TCP)...")
+    configure_rtsp_tcp()
     cap = cv2.VideoCapture(camera_url)
 
     if not cap.isOpened():

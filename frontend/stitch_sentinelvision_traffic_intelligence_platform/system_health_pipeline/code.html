@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary-fixed":"#002113","on-error":"#690005","secondary-fixed":"#6ffbbe","secondary":"#4edea3","surface-tint":"#89ceff","primary-fixed-dim":"#89ceff","outline":"#88929b","inverse-on-surface":"#2d3038","surface-container-high":"#272a32","surface":"#10131a","error":"#ffb4ab","surface-container-low":"#191b23","on-primary-fixed":"#001e2f","secondary-container":"#00a572","on-primary-container":"#003751","on-tertiary-fixed-variant":"#930013","on-error-container":"#ffdad6","primary-container":"#0ea5e9","on-primary-fixed-variant":"#004c6e","tertiary-fixed":"#ffdad7","primary":"#89ceff","background":"#10131a","surface-dim":"#10131a","on-tertiary-container":"#6e000c","inverse-surface":"#e1e2ec","surface-bright":"#363941","tertiary-container":"#ff6c66","on-surface":"#e1e2ec","inverse-primary":"#006591","on-primary":"#00344d","surface-container":"#1d1f27","on-secondary":"#003824","tertiary-fixed-dim":"#ffb3ad","on-secondary-fixed-variant":"#005236","error-container":"#93000a","secondary-fixed-dim":"#4edea3","outline-variant":"#3e4850","on-background":"#e1e2ec","surface-container-lowest":"#0b0e15","on-tertiary":"#68000a","primary-fixed":"#c9e6ff","surface-variant":"#32353d","surface-container-highest":"#32353d","on-tertiary-fixed":"#410004","on-secondary-container":"#00311f","on-surface-variant":"#bec8d2","tertiary":"#ffb3ad"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"0.75rem","space-sm":"0.5rem","space-2xs":"0.125rem","panel-padding":"0.875rem","space-xs":"0.25rem","gutter":"0.75rem","space-base":"1rem","space-xl":"1.5rem","space-lg":"1.25rem","space-2xl":"2rem"},"fontFamily":{"body-md":["JetBrains Mono"],"body-lg":["JetBrains Mono"],"code-telemetry":["JetBrains Mono"],"body-sm":["JetBrains Mono"],"headline-md":["Inter"],"headline-sm":["Inter"],"headline-lg":["Inter"],"label-sm":["JetBrains Mono"],"headline-xl":["Inter"],"label-md":["JetBrains Mono"]},"fontSize":{"body-md":["0.8125rem",{"lineHeight":"1.25rem","letterSpacing":"0em","fontWeight":"400"}],"body-lg":["0.875rem",{"lineHeight":"1.375rem","letterSpacing":"0em","fontWeight":"400"}],"code-telemetry":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.02em","fontWeight":"500"}],"body-sm":["0.75rem",{"lineHeight":"1.125rem","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["1.125rem",{"lineHeight":"1.5rem","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["0.875rem",{"lineHeight":"1.25rem","letterSpacing":"0.02em","fontWeight":"600"}],"headline-lg":["1.5rem",{"lineHeight":"2rem","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["0.625rem",{"lineHeight":"0.875rem","letterSpacing":"0.1em","fontWeight":"600"}],"headline-xl":["2rem",{"lineHeight":"2.5rem","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["0.6875rem",{"lineHeight":"1rem","letterSpacing":"0.08em","fontWeight":"600"}]}}}};</script></head><body class="bg-background font-body-sm text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-14 px-space-base flex items-center gap-space-sm border-b border-outline-variant bg-surface-container-low"><div class="flex items-center justify-center w-6 h-6 rounded bg-primary-container/20 text-primary"><span class="material-symbols-outlined text-[16px]">radar</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-wider uppercase leading-none">SENTINEL<span class="text-primary">VISION</span></span><span class="font-code-telemetry text-label-sm text-outline tracking-widest leading-none mt-1">TACTICAL AI COMMAND</span></div></div><nav class="flex flex-col py-space-sm gap-space-2xs px-space-xs" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary font-semibold"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span class="font-body-md text-body-md">Overview</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="live-monitoring" href="#"><span class="material-symbols-outlined text-[18px]">videocam</span><span class="font-body-md text-body-md">Live Monitoring</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="vehicles" href="#"><span class="material-symbols-outlined text-[18px]">directions_car</span><span class="font-body-md text-body-md">Vehicles</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="anpr" href="#"><span class="material-symbols-outlined text-[18px]">badge</span><span class="font-body-md text-body-md">ANPR</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="watchlist" href="#"><span class="material-symbols-outlined text-[18px]">shield</span><span class="font-body-md text-body-md">Watchlist</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="alerts" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">notification_important</span><span class="font-body-md text-body-md">Alerts</span></div><span class="px-1.5 py-0.5 rounded bg-error-container text-error font-code-telemetry text-label-sm">3 CRIT</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="vehicle-history" href="#"><span class="material-symbols-outlined text-[18px]">history</span><span class="font-body-md text-body-md">Vehicle History</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-all bg-surface-container-high text-primary border-l-2 border-primary font-semibold" data-path="system-health" href="#"><span class="material-symbols-outlined text-[18px]">memory</span><span class="font-body-md text-body-md">System Health</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-body-md text-body-md">Settings</span></a></nav></div><div class="border-t border-outline-variant bg-surface-container-lowest p-space-sm flex flex-col gap-space-xs"><div class="p-space-xs rounded bg-surface-container-low border border-outline-variant/50 flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-code-telemetry text-label-sm text-outline uppercase">GPU HW</span><span class="font-code-telemetry text-label-sm text-primary font-medium">RTX 3050</span></div><div class="flex items-center justify-between"><span class="font-code-telemetry text-label-sm text-on-surface-variant">VRAM: 3.4 / 4.0 GB</span><span class="font-code-telemetry text-label-sm text-secondary">85%</span></div><div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden"><div class="bg-primary h-full rounded-full" style="width:85%"></div></div></div><div class="flex items-center justify-between px-space-xs py-space-2xs text-label-sm font-code-telemetry"><div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse"></span><span class="text-secondary">Operational</span></div><div class="flex items-center gap-1 text-outline"><span class="material-symbols-outlined text-[12px]">network_check</span><span>24ms</span></div></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-14 bg-surface-container-low border-b border-outline-variant z-40 px-space-base flex items-center justify-between select-none"><div class="flex items-center gap-space-md"><img alt="SentinelVision Wordmark Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WfQi1ZmshoVmY8GLqIS1_9N2yTOSV6oZ8SR78SEfwPPqYjZciyH3vYDDjq_8gnxmZM9ttSKeyX6_k_Nl9OYIxyziu60TdtOaAoZ1F6HnVfhC0yE5mmUmUSZhWYM-5ZQAusYIuc9_C6N9lsxvLF5bpDlcbZcpy7aKfOAL0Pr-25qMIAhOcqcPBz6VoEnXYrnvHQVMDGJNP-9vXeK4kVkj3fQc21BSLY_lW8uD2fVdJajbMxelJLpaek"/><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm bg-surface-container px-space-sm py-space-2xs rounded border border-outline-variant"><span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-code-telemetry text-code-telemetry text-on-surface font-semibold">CAM-01 / cam01</span><span class="font-code-telemetry text-label-sm text-outline border-l border-outline-variant pl-space-xs">1920x1080 @ 30 FPS</span></div></div><div class="hidden xl:flex items-center gap-space-lg font-code-telemetry text-code-telemetry bg-surface-container-lowest px-space-md py-space-2xs rounded border border-outline-variant"><div class="flex items-center gap-1.5"><span class="text-outline">FEEDS:</span><span class="text-secondary font-semibold">4 ONLINE</span></div><span class="text-outline-variant">|</span><div class="flex items-center gap-1.5"><span class="text-outline">LATENCY:</span><span class="text-primary font-semibold">18ms</span></div><span class="text-outline-variant">|</span><div class="flex items-center gap-1.5"><span class="text-outline">PIPELINE:</span><span class="text-secondary font-semibold">STABLE</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs"><button class="p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Refresh Video Stream" type="button"><span class="material-symbols-outlined text-[20px]">refresh</span></button><button class="p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Toggle Multi-Grid Fullscreen" type="button"><span class="material-symbols-outlined text-[20px]">fullscreen</span></button><button class="relative p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Operational Alerts" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-error text-on-error font-code-telemetry text-[9px] font-bold">3</span></button></div><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-1.5 font-code-telemetry text-label-sm bg-surface-container-high/60 px-space-sm py-1 rounded border border-secondary/30"><span class="h-1.5 w-1.5 rounded-full bg-secondary"></span><span class="text-secondary font-semibold tracking-wider uppercase">SYS ONLINE</span></div><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm"><div class="flex flex-col text-right hidden sm:flex"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">K. VANCE</span><span class="font-code-telemetry text-label-sm text-outline leading-tight">TACTICAL DISPATCH</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center border border-primary-fixed"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-background flex-1"><div class="flex flex-col w-full">
+<!-- Sub-Header & Breadcrumb Bar -->
+<div class="px-space-base py-space-sm bg-surface-container-low flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs font-code-telemetry text-label-md text-outline">
+<span class="hover:text-on-surface cursor-pointer">SENTINEL</span>
+<span>/</span>
+<span class="hover:text-on-surface cursor-pointer">INFRASTRUCTURE</span>
+<span>/</span>
+<span class="text-primary font-semibold">DIAGNOSTICS &amp; TELEMETRY</span>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5 font-code-telemetry text-label-sm text-secondary bg-surface-container-high px-2 py-1 rounded">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary animate-ping"></span>
+<span>TELEMETRY BUS: ACTIVE (SYNC 100Hz)</span>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline">
+        NODE: <span class="text-on-surface font-semibold">EDGE-TERMINAL-01</span>
+</div>
+</div>
+</div>
+<div class="p-space-base flex flex-col gap-space-lg max-w-[1760px] mx-auto w-full">
+<!-- Header Block -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-base">
+<div>
+<div class="font-code-telemetry text-label-sm text-primary tracking-widest uppercase mb-1">DEFENSE MATRIX HARDWARE SUBSYSTEM</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">System Health &amp; AI Pipeline Infrastructure</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 max-w-4xl">
+            Hardware utilization, deep neural network inference telemetry, RTSP stream ingestion, and tactical service microkernel state.
+          </p>
+</div>
+<div class="flex items-center gap-space-sm self-start lg:self-auto">
+<button class="flex items-center gap-1.5 px-space-md py-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface font-code-telemetry text-label-md rounded transition-all" id="btn-purge-cache">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+<span>CYCLE BUFFERS</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-space-xs bg-primary hover:bg-surface-tint text-on-primary font-headline-sm text-headline-sm font-semibold rounded shadow-md transition-all" id="btn-run-diag">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span>RUN SELF-TEST</span>
+</button>
+</div>
+</div>
+<!-- Overall Health Banner -->
+<div class="mt-space-sm p-space-panel-padding bg-surface-container-low rounded flex flex-col md:flex-row md:items-center justify-between gap-space-base shadow-sm relative overflow-hidden">
+<div class="absolute inset-y-0 left-0 w-1.5 bg-secondary"></div>
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded bg-secondary/15 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">verified_user</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+<span class="font-headline-sm text-headline-sm font-semibold text-secondary tracking-wide uppercase">ALL SERVICES OPERATIONAL</span>
+<span class="text-outline text-label-sm font-code-telemetry">―</span>
+<span class="font-code-telemetry text-label-md text-on-surface font-bold">99.98% PIPELINE UPTIME</span>
+</div>
+<div class="font-code-telemetry text-label-sm text-on-surface-variant mt-0.5">
+              Zero drop-outs in last 72h • Host synchronization delta: <span class="text-primary">+0.002ms</span> • Thermal ceiling headroom: <span class="text-secondary">+23°C</span>
+</div>
+</div>
+</div>
+<!-- Quick Stats Pill Ribbon -->
+<div class="flex items-center flex-wrap gap-space-sm font-code-telemetry text-label-md">
+<div class="bg-surface-container px-space-sm py-1.5 rounded flex items-center gap-2">
+<span class="text-outline">API LATENCY</span>
+<span class="text-primary font-bold">12ms</span>
+</div>
+<div class="bg-surface-container px-space-sm py-1.5 rounded flex items-center gap-2">
+<span class="text-outline">DROPPED FRAMES</span>
+<span class="text-secondary font-bold">0.00%</span>
+</div>
+<div class="bg-surface-container px-space-sm py-1.5 rounded flex items-center gap-2">
+<span class="text-outline">GPU TEMP</span>
+<span class="text-on-surface font-bold">62°C</span>
+</div>
+<div class="bg-surface-container px-space-sm py-1.5 rounded flex items-center gap-2">
+<span class="text-outline">POWER DRAW</span>
+<span class="text-secondary font-bold">85W</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Pipeline Subsystem Flow (Interactive Tactical Node Graph) -->
+<div class="bg-surface-container-low rounded p-space-base flex flex-col gap-space-md shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<div class="font-code-telemetry text-label-sm text-primary uppercase">NEURAL COMPUTATION GRAPH</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold">AI Pipeline Subsystem Flow</h2>
+</div>
+<div class="flex items-center gap-space-md font-code-telemetry text-label-sm">
+<span class="flex items-center gap-1 text-on-surface-variant"><span class="h-2 w-2 rounded-full bg-secondary"></span> Synchronous Execution</span>
+<span class="text-outline">TOTAL GRAPH LATENCY: <strong class="text-primary">18.4ms</strong></span>
+</div>
+</div>
+<!-- Visual Node Diagram -->
+<div class="w-full overflow-x-auto py-space-sm">
+<div class="min-w-[1240px] flex items-center justify-between gap-1 relative">
+<!-- Connector Base Line SVG -->
+<svg class="absolute top-1/2 left-4 right-4 -translate-y-1/2 w-[calc(100%-32px)] h-6 pointer-events-none -z-0 opacity-40 text-outline-variant" preserveaspectratio="none">
+<line stroke="currentColor" stroke-dasharray="4 4" stroke-width="2" x1="0" x2="100%" y1="12" y2="12"></line>
+</svg>
+<!-- Node 1 -->
+<div class="relative z-10 w-36 p-space-xs bg-surface-container hover:bg-surface-container-high rounded transition-transform duration-150 hover:-translate-y-0.5 shadow-sm group cursor-pointer">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-telemetry text-label-sm text-primary font-bold">NODE 01</span>
+<span class="h-2 w-2 rounded-full bg-secondary animate-ping"></span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate leading-tight">CameraStream</div>
+<div class="font-code-telemetry text-label-sm text-outline-variant truncate">cam01 (1080p)</div>
+<div class="mt-2 pt-1 bg-surface-container-lowest px-1.5 py-0.5 rounded flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">LAT</span>
+<span class="text-secondary font-semibold">2.1ms</span>
+</div>
+<div class="mt-1 flex justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>BUF</span>
+<span>0/256</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] z-10 shrink-0">arrow_forward</span>
+<!-- Node 2 -->
+<div class="relative z-10 w-36 p-space-xs bg-surface-container hover:bg-surface-container-high rounded transition-transform duration-150 hover:-translate-y-0.5 shadow-sm group cursor-pointer">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-telemetry text-label-sm text-primary font-bold">NODE 02</span>
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate leading-tight">VehicleTracker</div>
+<div class="font-code-telemetry text-label-sm text-outline-variant truncate">ByteTrack v1.4</div>
+<div class="mt-2 pt-1 bg-surface-container-lowest px-1.5 py-0.5 rounded flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">LAT</span>
+<span class="text-secondary font-semibold">3.4ms</span>
+</div>
+<div class="mt-1 flex justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>BUF</span>
+<span>2/256</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] z-10 shrink-0">arrow_forward</span>
+<!-- Node 3 -->
+<div class="relative z-10 w-36 p-space-xs bg-surface-container hover:bg-surface-container-high rounded transition-transform duration-150 hover:-translate-y-0.5 shadow-sm group cursor-pointer">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-telemetry text-label-sm text-primary font-bold">NODE 03</span>
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate leading-tight">VehicleClass</div>
+<div class="font-code-telemetry text-label-sm text-outline-variant truncate">Stabilizer-v2</div>
+<div class="mt-2 pt-1 bg-surface-container-lowest px-1.5 py-0.5 rounded flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">LAT</span>
+<span class="text-secondary font-semibold">1.2ms</span>
+</div>
+<div class="mt-1 flex justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>BUF</span>
+<span>0/256</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] z-10 shrink-0">arrow_forward</span>
+<!-- Node 4 -->
+<div class="relative z-10 w-36 p-space-xs bg-surface-container hover:bg-surface-container-high rounded transition-transform duration-150 hover:-translate-y-0.5 shadow-sm group cursor-pointer">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-telemetry text-label-sm text-primary font-bold">NODE 04</span>
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate leading-tight">TrackContinuity</div>
+<div class="font-code-telemetry text-label-sm text-outline-variant truncate">KalmanManager</div>
+<div class="mt-2 pt-1 bg-surface-container-lowest px-1.5 py-0.5 rounded flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">LAT</span>
+<span class="text-secondary font-semibold">0.9ms</span>
+</div>
+<div class="mt-1 flex justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>BUF</span>
+<span>0/256</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] z-10 shrink-0">arrow_forward</span>
+<!-- Node 5 -->
+<div class="relative z-10 w-36 p-space-xs bg-surface-container hover:bg-surface-container-high rounded transition-transform duration-150 hover:-translate-y-0.5 shadow-sm group cursor-pointer">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-telemetry text-label-sm text-primary font-bold">NODE 05</span>
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate leading-tight">ZoneCounter</div>
+<div class="font-code-telemetry text-label-sm text-outline-variant truncate">IN / OUT Polygons</div>
+<div class="mt-2 pt-1 bg-surface-container-lowest px-1.5 py-0.5 rounded flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">LAT</span>
+<span class="text-secondary font-semibold">0.4ms</span>
+</div>
+<div class="mt-1 flex justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>BUF</span>
+<span>0/256</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] z-10 shrink-0">arrow_forward</span>
+<!-- Node 6 -->
+<div class="relative z-10 w-36 p-space-xs bg-surface-container hover:bg-surface-container-high rounded transition-transform duration-150 hover:-translate-y-0.5 shadow-sm group cursor-pointer">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-telemetry text-label-sm text-primary font-bold">NODE 06</span>
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate leading-tight">ANPREngine</div>
+<div class="font-code-telemetry text-label-sm text-outline-variant truncate">TensorRT OCR</div>
+<div class="mt-2 pt-1 bg-surface-container-lowest px-1.5 py-0.5 rounded flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">LAT</span>
+<span class="text-secondary font-semibold">8.4ms</span>
+</div>
+<div class="mt-1 flex justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>BUF</span>
+<span>1/256</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] z-10 shrink-0">arrow_forward</span>
+<!-- Node 7 -->
+<div class="relative z-10 w-36 p-space-xs bg-surface-container hover:bg-surface-container-high rounded transition-transform duration-150 hover:-translate-y-0.5 shadow-sm group cursor-pointer">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-telemetry text-label-sm text-primary font-bold">NODE 07</span>
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate leading-tight">EventRecorder</div>
+<div class="font-code-telemetry text-label-sm text-outline-variant truncate">PostgreSQL Hook</div>
+<div class="mt-2 pt-1 bg-surface-container-lowest px-1.5 py-0.5 rounded flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">LAT</span>
+<span class="text-secondary font-semibold">1.1ms</span>
+</div>
+<div class="mt-1 flex justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>BUF</span>
+<span>0/256</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] z-10 shrink-0">arrow_forward</span>
+<!-- Node 8 -->
+<div class="relative z-10 w-36 p-space-xs bg-surface-container hover:bg-surface-container-high rounded transition-transform duration-150 hover:-translate-y-0.5 shadow-sm group cursor-pointer">
+<div class="flex items-center justify-between mb-1">
+<span class="font-code-telemetry text-label-sm text-primary font-bold">NODE 08</span>
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate leading-tight">AlertEngine</div>
+<div class="font-code-telemetry text-label-sm text-outline-variant truncate">Solenoid &amp; Webhook</div>
+<div class="mt-2 pt-1 bg-surface-container-lowest px-1.5 py-0.5 rounded flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">LAT</span>
+<span class="text-secondary font-semibold">0.5ms</span>
+</div>
+<div class="mt-1 flex justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>BUF</span>
+<span>0/256</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Core Service Status Matrix (7 Components in Bento Grid) -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div>
+<div class="font-code-telemetry text-label-sm text-outline uppercase">MICROSERVICE ARCHITECTURE</div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold">Core Infrastructure Service Matrix</h2>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline">7 OF 7 CLUSTERS RESPONDING</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-space-sm">
+<!-- 1. Backend API (FastAPI) -->
+<div class="bg-surface-container-low p-space-panel-padding rounded flex flex-col justify-between gap-space-sm shadow-sm hover:bg-surface-container transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Backend API</span>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary/10 text-secondary font-code-telemetry text-label-sm">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+<span>Operational</span>
+</div>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline mt-0.5">FastAPI Async Daemon</div>
+<div class="mt-space-md flex flex-col gap-1.5 font-code-telemetry text-body-sm">
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Latency:</span>
+<span class="text-secondary font-semibold">12ms</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Health Endpoint:</span>
+<span class="text-primary font-mono truncate max-w-[140px]">GET /health</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Availability:</span>
+<span class="text-on-surface font-semibold">99.99%</span>
+</div>
+</div>
+</div>
+<div class="pt-space-xs font-code-telemetry text-label-sm text-outline flex items-center justify-between">
+<span>THREAD POOL: 16 WORKERS</span>
+<span class="text-secondary">READY</span>
+</div>
+</div>
+<!-- 2. Database (PostgreSQL & Redis) -->
+<div class="bg-surface-container-low p-space-panel-padding rounded flex flex-col justify-between gap-space-sm shadow-sm hover:bg-surface-container transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Database &amp; Cache</span>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary/10 text-secondary font-code-telemetry text-label-sm">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+<span>Operational</span>
+</div>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline mt-0.5">PostgreSQL &amp; Redis PubSub</div>
+<div class="mt-space-md flex flex-col gap-1.5 font-code-telemetry text-body-sm">
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Query Latency:</span>
+<span class="text-secondary font-semibold">2ms</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Active Pool:</span>
+<span class="text-on-surface font-semibold">18 / 100 conns</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Replication:</span>
+<span class="text-primary font-semibold">Active Sync (0ms lag)</span>
+</div>
+</div>
+</div>
+<div class="pt-space-xs font-code-telemetry text-label-sm text-outline flex items-center justify-between">
+<span>MEM USAGE: 412 MB</span>
+<span class="text-secondary">OPTIMAL</span>
+</div>
+</div>
+<!-- 3. Camera Stream Ingestion (RTSP) -->
+<div class="bg-surface-container-low p-space-panel-padding rounded flex flex-col justify-between gap-space-sm shadow-sm hover:bg-surface-container transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Camera Ingestion</span>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary/10 text-secondary font-code-telemetry text-label-sm">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+<span>Operational</span>
+</div>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline mt-0.5">RTSP / GStreamer Demux</div>
+<div class="mt-space-md flex flex-col gap-1.5 font-code-telemetry text-body-sm">
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Primary Inflow:</span>
+<span class="text-on-surface font-semibold truncate max-w-[140px]">cam01 (1080p@30)</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Inbound Bitrate:</span>
+<span class="text-primary font-semibold">4.2 Mbps</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Jitter Buffer:</span>
+<span class="text-secondary font-semibold">0.02s (Smooth)</span>
+</div>
+</div>
+</div>
+<div class="pt-space-xs font-code-telemetry text-label-sm text-outline flex items-center justify-between">
+<span>CODEC: H.264 / NVDEC</span>
+<span class="text-secondary">LOCKED</span>
+</div>
+</div>
+<!-- 4. AI Inference Engine -->
+<div class="bg-surface-container-low p-space-panel-padding rounded flex flex-col justify-between gap-space-sm shadow-sm hover:bg-surface-container transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">AI Inference Engine</span>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary/10 text-secondary font-code-telemetry text-label-sm">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+<span>Operational</span>
+</div>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline mt-0.5">NVIDIA TensorRT v8.6</div>
+<div class="mt-space-md flex flex-col gap-1.5 font-code-telemetry text-body-sm">
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Quantization:</span>
+<span class="text-primary font-semibold">FP16 / INT8 Mixed</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Inference Batch:</span>
+<span class="text-on-surface font-semibold">Batch Size 4</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Execution Stream:</span>
+<span class="text-secondary font-semibold">CUDA Stream #2</span>
+</div>
+</div>
+</div>
+<div class="pt-space-xs font-code-telemetry text-label-sm text-outline flex items-center justify-between">
+<span>CUDA CORES: 2048</span>
+<span class="text-secondary">ACTIVE</span>
+</div>
+</div>
+<!-- 5. GPU Acceleration (Double wide on large desktop) -->
+<div class="bg-surface-container-low p-space-panel-padding rounded flex flex-col justify-between gap-space-sm shadow-sm hover:bg-surface-container transition-colors md:col-span-2 lg:col-span-1 xl:col-span-2">
+<div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">GPU Acceleration</span>
+<span class="font-code-telemetry text-label-sm text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded">CUDA 12.2</span>
+</div>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary/10 text-secondary font-code-telemetry text-label-sm">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+<span>Operational</span>
+</div>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline mt-0.5">NVIDIA GeForce RTX 3050 Laptop GPU</div>
+<div class="mt-space-md grid grid-cols-1 sm:grid-cols-2 gap-space-sm font-code-telemetry text-body-sm">
+<div class="flex flex-col gap-1 bg-surface-container-lowest p-2 rounded">
+<div class="flex justify-between">
+<span class="text-outline">VRAM Allocation</span>
+<span class="text-primary font-semibold">3.4 / 4.0 GB (85%)</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1 bg-surface-container-lowest p-2 rounded">
+<div class="flex justify-between">
+<span class="text-outline">Core Clock</span>
+<span class="text-on-surface font-semibold">1740 MHz</span>
+</div>
+<div class="flex justify-between text-label-sm">
+<span class="text-outline">Core Temp:</span>
+<span class="text-secondary font-semibold">62°C (Limit: 87°C)</span>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-space-xs font-code-telemetry text-label-sm text-outline flex items-center justify-between">
+<span>BUS INTERFACE: PCIe Gen4 x8</span>
+<span class="text-primary">ENCODER LOAD: 28%</span>
+</div>
+</div>
+<!-- 6. ANPR Optical OCR Engine -->
+<div class="bg-surface-container-low p-space-panel-padding rounded flex flex-col justify-between gap-space-sm shadow-sm hover:bg-surface-container transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">ANPR Optical OCR</span>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary/10 text-secondary font-code-telemetry text-label-sm">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+<span>Operational</span>
+</div>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline mt-0.5">TensorRT-OCR-v4.2 Network</div>
+<div class="mt-space-md flex flex-col gap-1.5 font-code-telemetry text-body-sm">
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Avg Inference:</span>
+<span class="text-secondary font-semibold">8.4ms / frame</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Confidence Floor:</span>
+<span class="text-primary font-semibold">85.0%</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Character Accuracy:</span>
+<span class="text-on-surface font-semibold">99.4%</span>
+</div>
+</div>
+</div>
+<div class="pt-space-xs font-code-telemetry text-label-sm text-outline flex items-center justify-between">
+<span>DICTIONARY: REGION-US/EU</span>
+<span class="text-secondary">LOADED</span>
+</div>
+</div>
+<!-- 7. Alert & Interdiction Engine -->
+<div class="bg-surface-container-low p-space-panel-padding rounded flex flex-col justify-between gap-space-sm shadow-sm hover:bg-surface-container transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Alert &amp; Interdiction</span>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary/10 text-secondary font-code-telemetry text-label-sm">
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+<span>Operational</span>
+</div>
+</div>
+<div class="font-code-telemetry text-label-sm text-outline mt-0.5">Dispatcher &amp; Relay Controller</div>
+<div class="mt-space-md flex flex-col gap-1.5 font-code-telemetry text-body-sm">
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Event Queue:</span>
+<span class="text-secondary font-semibold">0 pending</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Webhook Latency:</span>
+<span class="text-primary font-semibold">14ms</span>
+</div>
+<div class="flex justify-between py-1 bg-surface-container-lowest px-2 rounded">
+<span class="text-outline">Solenoid Relay:</span>
+<span class="text-error font-semibold">Armed (Gate #1)</span>
+</div>
+</div>
+</div>
+<div class="pt-space-xs font-code-telemetry text-label-sm text-outline flex items-center justify-between">
+<span>FAILSAFE: MANUAL OVERRIDE</span>
+<span class="text-secondary">STANDBY</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Gauges & Hardware Health Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-space-base">
+<!-- Hardware Telemetry Gauges (2 Cols) -->
+<div class="xl:col-span-2 bg-surface-container-low p-space-base rounded flex flex-col gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div>
+<div class="font-code-telemetry text-label-sm text-outline uppercase">COMPUTE LOAD &amp; BUS INTEGRITY</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Real-Time Hardware Telemetry Gauges</h3>
+</div>
+<span class="font-code-telemetry text-label-sm text-secondary bg-secondary/10 px-2 py-0.5 rounded">SAMPLING RATE: 1000ms</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-base">
+<!-- Gauge 1: GPU Memory Utilization -->
+<div class="bg-surface-container p-space-base rounded flex flex-col items-center justify-between gap-space-sm text-center">
+<span class="font-code-telemetry text-label-sm text-outline uppercase tracking-wider">GPU VRAM DENSITY</span>
+<!-- Circular Progress SVG -->
+<div class="relative w-32 h-32 flex items-center justify-center my-2">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<!-- Background Circle -->
+<path class="text-surface-container-highest" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<!-- Progress Circle (85%) -->
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="85, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">85%</span>
+<span class="font-code-telemetry text-label-sm text-outline">ALLOCATED</span>
+</div>
+</div>
+<div class="w-full font-code-telemetry text-label-md flex justify-between px-1">
+<span class="text-outline">USED: <strong class="text-on-surface">3.4 GB</strong></span>
+<span class="text-outline">TOTAL: <strong class="text-on-surface">4.0 GB</strong></span>
+</div>
+</div>
+<!-- Gauge 2: CPU Utilization -->
+<div class="bg-surface-container p-space-base rounded flex flex-col items-center justify-between gap-space-sm text-center">
+<span class="font-code-telemetry text-label-sm text-outline uppercase tracking-wider">HOST CPU DOCK (8-CORE i7)</span>
+<!-- Circular Progress SVG -->
+<div class="relative w-32 h-32 flex items-center justify-center my-2">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<!-- Background Circle -->
+<path class="text-surface-container-highest" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<!-- Progress Circle (24%) -->
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="24, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">24%</span>
+<span class="font-code-telemetry text-label-sm text-secondary">NORMAL</span>
+</div>
+</div>
+<div class="w-full font-code-telemetry text-label-md flex justify-between px-1">
+<span class="text-outline">CORES: <strong class="text-on-surface">8C / 16T</strong></span>
+<span class="text-outline">TEMP: <strong class="text-on-surface">48°C</strong></span>
+</div>
+</div>
+<!-- Gauge 3: RTSP Stream Jitter & Packet Loss -->
+<div class="bg-surface-container p-space-base rounded flex flex-col items-center justify-between gap-space-sm text-center">
+<span class="font-code-telemetry text-label-sm text-outline uppercase tracking-wider">RTSP INGEST PACKET LOSS</span>
+<!-- Circular Progress SVG -->
+<div class="relative w-32 h-32 flex items-center justify-center my-2">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<!-- Background Circle -->
+<path class="text-surface-container-highest" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<!-- Progress Circle (100% full green ring indicating 0% loss) -->
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<span class="font-headline-lg text-headline-lg font-bold text-secondary">0.00%</span>
+<span class="font-code-telemetry text-label-sm text-outline">ZERO DROP</span>
+</div>
+</div>
+<div class="w-full font-code-telemetry text-label-md flex justify-between px-1">
+<span class="text-outline">JITTER: <strong class="text-secondary">0.8ms</strong></span>
+<span class="text-outline">BITRATE: <strong class="text-on-surface">4.21 Mbps</strong></span>
+</div>
+</div>
+</div>
+<!-- Inline Sparkline History -->
+<div class="bg-surface-container-lowest p-space-panel-padding rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between font-code-telemetry text-label-sm">
+<span class="text-outline">HISTORICAL GPU LOAD (LAST 60 SECONDS)</span>
+<span class="text-primary font-semibold">CURRENT: 85% PEAK</span>
+</div>
+<!-- 60-second telemetry sparkline -->
+<svg class="w-full h-12 text-primary" preserveaspectratio="none" viewbox="0 0 600 50">
+<path d="M0,35 L20,32 L40,36 L60,25 L80,28 L100,20 L120,24 L140,18 L160,22 L180,15 L200,19 L220,16 L240,24 L260,20 L280,18 L300,12 L320,15 L340,14 L360,18 L380,15 L400,12 L420,14 L440,16 L460,10 L480,12 L500,11 L520,14 L540,10 L560,12 L580,9 L600,11" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path>
+<!-- Subtle baseline -->
+<line stroke="currentColor" stroke-opacity="0.15" stroke-width="1" x1="0" x2="600" y1="48" y2="48"></line>
+</svg>
+</div>
+</div>
+<!-- Edge System Health Breakdown -->
+<div class="bg-surface-container-low p-space-base rounded flex flex-col justify-between gap-space-base shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="font-code-telemetry text-label-sm text-outline uppercase">THERMAL &amp; POWER REGULATION</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Node Edge Environment</h3>
+<div class="mt-space-md flex flex-col gap-space-sm font-code-telemetry">
+<!-- GPU Temp -->
+<div class="bg-surface-container p-space-sm rounded flex flex-col gap-1">
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">thermostat</span>
+                  GPU Die Temperature
+                </span>
+<span class="text-on-surface font-bold">62°C</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 71%"></div>
+</div>
+<div class="flex justify-between text-label-sm text-outline">
+<span>Threshold: 85°C</span>
+<span class="text-secondary">Margin: +23°C OK</span>
+</div>
+</div>
+<!-- Host Power Draw -->
+<div class="bg-surface-container p-space-sm rounded flex flex-col gap-1">
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-secondary">bolt</span>
+                  Active Power Draw
+                </span>
+<span class="text-on-surface font-bold">85W / 120W</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 70%"></div>
+</div>
+<div class="flex justify-between text-label-sm text-outline">
+<span>PSU: 230V AC Supply</span>
+<span class="text-primary">EFFICIENT (70%)</span>
+</div>
+</div>
+<!-- Disk I/O Write -->
+<div class="bg-surface-container p-space-sm rounded flex flex-col gap-1">
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline">hard_drive</span>
+                  NVMe I/O Throughput
+                </span>
+<span class="text-on-surface font-bold">14.8 MB/s</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 15%"></div>
+</div>
+<div class="flex justify-between text-label-sm text-outline">
+<span>Drive Life: 99% Health</span>
+<span class="text-secondary">WRITE BUFFER CLEAR</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Action Trigger Panel -->
+<div class="p-space-sm bg-surface-container-lowest rounded flex items-center justify-between">
+<div class="flex items-center gap-2 font-code-telemetry text-label-sm">
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant">AI Auto-Scaler: ENABLED</span>
+</div>
+<button class="px-2 py-1 bg-surface-container hover:bg-surface-container-high text-primary font-code-telemetry text-label-sm rounded transition-colors">
+            CONFIG
+          </button>
+</div>
+</div>
+</div>
+<!-- Diagnostic Stream & Log Monitor Terminal -->
+<div class="bg-surface-container-low p-space-base rounded flex flex-col gap-space-sm shadow-sm mb-space-2xl">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Real-Time Diagnostic Telemetry Log</h3>
+<span class="font-code-telemetry text-label-sm text-outline">LIVE EVENT BUS STREAM (STDOUT / STDERR FORK)</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm font-code-telemetry text-label-sm">
+<span class="bg-surface-container-lowest px-2 py-1 rounded text-outline">FILTER: <strong class="text-on-surface">ALL SEVERITIES</strong></span>
+<button class="bg-surface-container hover:bg-surface-container-high text-on-surface px-2.5 py-1 rounded transition-colors" id="btn-clear-logs">
+            CLEAR
+          </button>
+<button class="bg-primary/20 hover:bg-primary/30 text-primary px-2.5 py-1 rounded transition-colors" id="btn-pause-logs">
+            PAUSE FEED
+          </button>
+</div>
+</div>
+<!-- Terminal Box -->
+<div class="bg-surface-container-lowest rounded p-space-panel-padding font-code-telemetry text-code-telemetry flex flex-col gap-1.5 h-64 overflow-y-auto" id="log-terminal-container">
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.104]</span>
+<span class="text-primary font-semibold shrink-0">[INFO]</span>
+<span class="text-on-surface-variant">CameraStream cam01 frame sync locked (1920x1080 @ 30.00 FPS)</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.112]</span>
+<span class="text-secondary font-semibold shrink-0">[HEALTH]</span>
+<span class="text-on-surface-variant">FastAPI endpoint <code class="text-on-surface font-bold">GET /health</code> responded with 200 OK (latency: 11.8ms)</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.218]</span>
+<span class="text-primary font-semibold shrink-0">[INFO]</span>
+<span class="text-on-surface-variant">Model TensorRT INT8 inference latency 11.2ms | active bounding boxes: 4</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.240]</span>
+<span class="text-secondary font-semibold shrink-0">[SYNC]</span>
+<span class="text-on-surface-variant">VehicleTracker assigned TrackID #84920 to classification SEDAN (conf: 0.942)</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.298]</span>
+<span class="text-primary font-semibold shrink-0">[INFO]</span>
+<span class="text-on-surface-variant">ANPR OCR TensorRT invocation complete in 8.4ms for frame #48102</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.350]</span>
+<span class="text-primary font-semibold shrink-0">[INFO]</span>
+<span class="text-on-surface-variant">TrackContinuityManager reconciled 3 active Kalman velocity vectors</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.402]</span>
+<span class="text-secondary font-semibold shrink-0">[HEALTH]</span>
+<span class="text-on-surface-variant">Redis PubSub heartbeat OK • Channel: sentinel:events:stream • clients: 3</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.488]</span>
+<span class="text-primary font-semibold shrink-0">[INFO]</span>
+<span class="text-on-surface-variant">ZoneCounter (ZONE_A_ENTRY) trigger registered: Vehicle #84920 INBOUND</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.554]</span>
+<span class="text-outline-variant font-semibold shrink-0">[DEBUG]</span>
+<span class="text-on-surface-variant">GPU VRAM pool allocated: 3565158400 bytes (85.00%) • Host page hits: 99.8%</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="text-outline shrink-0">[14:32:01.621]</span>
+<span class="text-secondary font-semibold shrink-0">[HEALTH]</span>
+<span class="text-on-surface-variant">Solenoid Relay controller ping response: 1.2ms [GATE_ARMED]</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    let paused = false;
+    const logBox = document.getElementById('log-terminal-container');
+    const pauseBtn = document.getElementById('btn-pause-logs');
+    const clearBtn = document.getElementById('btn-clear-logs');
+    const runDiagBtn = document.getElementById('btn-run-diag');
+
+    const sampleLogs = [
+      { tag: 'INFO', color: 'text-primary', msg: 'CameraStream cam01 frame sync locked (1920x1080 @ 30.00 FPS)' },
+      { tag: 'HEALTH', color: 'text-secondary', msg: 'FastAPI /health 200 OK (latency: 12.1ms)' },
+      { tag: 'INFO', color: 'text-primary', msg: 'Model TensorRT INT8 inference latency 10.9ms' },
+      { tag: 'SYNC', color: 'text-secondary', msg: 'VehicleTracker matched Kalman state vector: ID #84921' },
+      { tag: 'INFO', color: 'text-primary', msg: 'ANPR OCR optical confidence reached 96.8% on plate check' },
+      { tag: 'DEBUG', color: 'text-outline-variant', msg: 'PostgreSQL connection pool verified: 18 active, 0 wait' }
+    ];
+
+    setInterval(function() {
+      if (paused || !logBox) return;
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+      const item = sampleLogs[Math.floor(Math.random() * sampleLogs.length)];
+
+      const row = document.createElement('div');
+      row.className = 'flex items-start gap-2';
+      row.innerHTML = `<span class="text-outline shrink-0">[${timeStr}]</span>
+                       <span class="${item.color} font-semibold shrink-0">[${item.tag}]</span>
+                       <span class="text-on-surface-variant">${item.msg}</span>`;
+      logBox.appendChild(row);
+      logBox.scrollTop = logBox.scrollHeight;
+
+      if (logBox.children.length > 50) {
+        logBox.removeChild(logBox.firstChild);
+      }
+    }, 2800);
+
+    if (pauseBtn) {
+      pauseBtn.addEventListener('click', function() {
+        paused = !paused;
+        this.textContent = paused ? 'RESUME FEED' : 'PAUSE FEED';
+        this.classList.toggle('bg-primary/20');
+        this.classList.toggle('bg-secondary/20');
+      });
+    }
+
+    if (clearBtn && logBox) {
+      clearBtn.addEventListener('click', function() {
+        logBox.innerHTML = '';
+      });
+    }
+
+    if (runDiagBtn) {
+      runDiagBtn.addEventListener('click', function() {
+        const originalText = this.innerHTML;
+        this.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>TESTING...</span>`;
+        this.disabled = true;
+        setTimeout(() => {
+          this.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span><span>TEST PASSED</span>`;
+          setTimeout(() => {
+            this.innerHTML = originalText;
+            this.disabled = false;
+          }, 2000);
+        }, 1200);
+      });
+    }
+  })();
+</script></main></div></body></html>

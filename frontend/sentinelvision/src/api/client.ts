@@ -1,0 +1,118 @@
+// SentinelVision API Client
+// Centralized API service layer - all backend communication goes through here
+
+import {
+  Camera,
+  PlateSearchResponse,
+  CountsResponse,
+  WatchlistListResponse,
+  WatchlistEntry,
+  WatchlistEntryCreate,
+  WatchlistEntryUpdate,
+  AlertListResponse,
+  Alert,
+  VehicleEvent,
+  HealthResponse,
+} from '../types';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+    this.name = 'ApiError';
+  }
+}
+
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const url = `${API_BASE_URL}${path}`;
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    let detail = 'Request failed';
+    try {
+      const errorBody = await response.json();
+      detail = errorBody.detail || detail;
+    } catch {
+      // Response wasn't JSON
+    }
+    throw new ApiError(detail, response.status);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  return response.json();
+}
+
+export const api = {
+  // Health
+  getHealth: () => request<HealthResponse>('/health'),
+
+  // Cameras
+  getCameras: () => request<Camera[]>('/api/cameras'),
+  getCamera: (cameraId: string) => request<Camera>(`/api/cameras/${cameraId}`),
+
+  // Vehicles
+  getVehicleHistory: (canonicalVehicleId: number) => request<VehicleEvent[]>(`/api/vehicles/${canonicalVehicleId}/history`),
+
+  // Plates
+  searchPlates: (plate: string, match: 'exact' | 'partial' = 'partial') =>
+    request<PlateSearchResponse>(`/api/plates/search?plate=${encodeURIComponent(plate)}&match=${match}`),
+
+  // Counts
+  getCounts: (params?: { camera_id?: string; vehicle_class?: string; direction?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.camera_id) searchParams.set('camera_id', params.camera_id);
+    if (params?.vehicle_class) searchParams.set('vehicle_class', params.vehicle_class);
+    if (params?.direction) searchParams.set('direction', params.direction);
+    const query = searchParams.toString();
+    return request<CountsResponse>(`/api/counts${query ? `?${query}` : ''}`);
+  },
+
+  // Watchlist
+  getWatchlist: () => request<WatchlistListResponse>('/api/watchlist'),
+  getWatchlistEntry: (plate: string) => request<WatchlistEntry>(`/api/watchlist/${plate}`),
+  createWatchlistEntry: (data: WatchlistEntryCreate) =>
+    request<WatchlistEntry>('/api/watchlist', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateWatchlistEntry: (plate: string, data: WatchlistEntryUpdate) =>
+    request<WatchlistEntry>(`/api/watchlist/${plate}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  deleteWatchlistEntry: (plate: string) =>
+    request<{ detail: string; plate: string }>(`/api/watchlist/${plate}`, {
+      method: 'DELETE',
+    }),
+
+  // Alerts
+  getAlerts: (params?: { status?: string; priority?: string; camera_id?: string; plate?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.priority) searchParams.set('priority', params.priority);
+    if (params?.camera_id) searchParams.set('camera_id', params.camera_id);
+    if (params?.plate) searchParams.set('plate', params.plate);
+    const query = searchParams.toString();
+    return request<AlertListResponse>(`/api/alerts${query ? `?${query}` : ''}`);
+  },
+  getAlert: (alertId: number) => request<Alert>(`/api/alerts/${alertId}`),
+  updateAlertStatus: (alertId: number, status: string) =>
+    request<Alert>(`/api/alerts/${alertId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }),
+};
+
+export { API_BASE_URL, ApiError };

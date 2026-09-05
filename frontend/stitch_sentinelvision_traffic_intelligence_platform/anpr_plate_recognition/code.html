@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary-fixed":"#002113","on-error":"#690005","secondary-fixed":"#6ffbbe","secondary":"#4edea3","surface-tint":"#89ceff","primary-fixed-dim":"#89ceff","outline":"#88929b","inverse-on-surface":"#2d3038","surface-container-high":"#272a32","surface":"#10131a","error":"#ffb4ab","surface-container-low":"#191b23","on-primary-fixed":"#001e2f","secondary-container":"#00a572","on-primary-container":"#003751","on-tertiary-fixed-variant":"#930013","on-error-container":"#ffdad6","primary-container":"#0ea5e9","on-primary-fixed-variant":"#004c6e","tertiary-fixed":"#ffdad7","primary":"#89ceff","background":"#10131a","surface-dim":"#10131a","on-tertiary-container":"#6e000c","inverse-surface":"#e1e2ec","surface-bright":"#363941","tertiary-container":"#ff6c66","on-surface":"#e1e2ec","inverse-primary":"#006591","on-primary":"#00344d","surface-container":"#1d1f27","on-secondary":"#003824","tertiary-fixed-dim":"#ffb3ad","on-secondary-fixed-variant":"#005236","error-container":"#93000a","secondary-fixed-dim":"#4edea3","outline-variant":"#3e4850","on-background":"#e1e2ec","surface-container-lowest":"#0b0e15","on-tertiary":"#68000a","primary-fixed":"#c9e6ff","surface-variant":"#32353d","surface-container-highest":"#32353d","on-tertiary-fixed":"#410004","on-secondary-container":"#00311f","on-surface-variant":"#bec8d2","tertiary":"#ffb3ad"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"0.75rem","space-sm":"0.5rem","space-2xs":"0.125rem","panel-padding":"0.875rem","space-xs":"0.25rem","gutter":"0.75rem","space-base":"1rem","space-xl":"1.5rem","space-lg":"1.25rem","space-2xl":"2rem"},"fontFamily":{"body-md":["JetBrains Mono"],"body-lg":["JetBrains Mono"],"code-telemetry":["JetBrains Mono"],"body-sm":["JetBrains Mono"],"headline-md":["Inter"],"headline-sm":["Inter"],"headline-lg":["Inter"],"label-sm":["JetBrains Mono"],"headline-xl":["Inter"],"label-md":["JetBrains Mono"]},"fontSize":{"body-md":["0.8125rem",{"lineHeight":"1.25rem","letterSpacing":"0em","fontWeight":"400"}],"body-lg":["0.875rem",{"lineHeight":"1.375rem","letterSpacing":"0em","fontWeight":"400"}],"code-telemetry":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.02em","fontWeight":"500"}],"body-sm":["0.75rem",{"lineHeight":"1.125rem","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["1.125rem",{"lineHeight":"1.5rem","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["0.875rem",{"lineHeight":"1.25rem","letterSpacing":"0.02em","fontWeight":"600"}],"headline-lg":["1.5rem",{"lineHeight":"2rem","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["0.625rem",{"lineHeight":"0.875rem","letterSpacing":"0.1em","fontWeight":"600"}],"headline-xl":["2rem",{"lineHeight":"2.5rem","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["0.6875rem",{"lineHeight":"1rem","letterSpacing":"0.08em","fontWeight":"600"}]}}}};</script></head><body class="bg-background font-body-sm text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-14 px-space-base flex items-center gap-space-sm border-b border-outline-variant bg-surface-container-low"><div class="flex items-center justify-center w-6 h-6 rounded bg-primary-container/20 text-primary"><span class="material-symbols-outlined text-[16px]">radar</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-wider uppercase leading-none">SENTINEL<span class="text-primary">VISION</span></span><span class="font-code-telemetry text-label-sm text-outline tracking-widest leading-none mt-1">TACTICAL AI COMMAND</span></div></div><nav class="flex flex-col py-space-sm gap-space-2xs px-space-xs" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary font-semibold"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span class="font-body-md text-body-md">Overview</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="live-monitoring" href="#"><span class="material-symbols-outlined text-[18px]">videocam</span><span class="font-body-md text-body-md">Live Monitoring</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="vehicles" href="#"><span class="material-symbols-outlined text-[18px]">directions_car</span><span class="font-body-md text-body-md">Vehicles</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-all bg-surface-container-high text-primary border-l-2 border-primary font-semibold" data-path="anpr" href="#"><span class="material-symbols-outlined text-[18px]">badge</span><span class="font-body-md text-body-md">ANPR</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="watchlist" href="#"><span class="material-symbols-outlined text-[18px]">shield</span><span class="font-body-md text-body-md">Watchlist</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="alerts" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">notification_important</span><span class="font-body-md text-body-md">Alerts</span></div><span class="px-1.5 py-0.5 rounded bg-error-container text-error font-code-telemetry text-label-sm">3 CRIT</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="vehicle-history" href="#"><span class="material-symbols-outlined text-[18px]">history</span><span class="font-body-md text-body-md">Vehicle History</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="system-health" href="#"><span class="material-symbols-outlined text-[18px]">memory</span><span class="font-body-md text-body-md">System Health</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-body-md text-body-md">Settings</span></a></nav></div><div class="border-t border-outline-variant bg-surface-container-lowest p-space-sm flex flex-col gap-space-xs"><div class="p-space-xs rounded bg-surface-container-low border border-outline-variant/50 flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-code-telemetry text-label-sm text-outline uppercase">GPU HW</span><span class="font-code-telemetry text-label-sm text-primary font-medium">RTX 3050</span></div><div class="flex items-center justify-between"><span class="font-code-telemetry text-label-sm text-on-surface-variant">VRAM: 3.4 / 4.0 GB</span><span class="font-code-telemetry text-label-sm text-secondary">85%</span></div><div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden"><div class="bg-primary h-full rounded-full" style="width:85%"></div></div></div><div class="flex items-center justify-between px-space-xs py-space-2xs text-label-sm font-code-telemetry"><div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse"></span><span class="text-secondary">Operational</span></div><div class="flex items-center gap-1 text-outline"><span class="material-symbols-outlined text-[12px]">network_check</span><span>24ms</span></div></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-14 bg-surface-container-low border-b border-outline-variant z-40 px-space-base flex items-center justify-between select-none"><div class="flex items-center gap-space-md"><img alt="SentinelVision Wordmark Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WfQi1ZmshoVmY8GLqIS1_9N2yTOSV6oZ8SR78SEfwPPqYjZciyH3vYDDjq_8gnxmZM9ttSKeyX6_k_Nl9OYIxyziu60TdtOaAoZ1F6HnVfhC0yE5mmUmUSZhWYM-5ZQAusYIuc9_C6N9lsxvLF5bpDlcbZcpy7aKfOAL0Pr-25qMIAhOcqcPBz6VoEnXYrnvHQVMDGJNP-9vXeK4kVkj3fQc21BSLY_lW8uD2fVdJajbMxelJLpaek"/><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm bg-surface-container px-space-sm py-space-2xs rounded border border-outline-variant"><span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-code-telemetry text-code-telemetry text-on-surface font-semibold">CAM-01 / cam01</span><span class="font-code-telemetry text-label-sm text-outline border-l border-outline-variant pl-space-xs">1920x1080 @ 30 FPS</span></div></div><div class="hidden xl:flex items-center gap-space-lg font-code-telemetry text-code-telemetry bg-surface-container-lowest px-space-md py-space-2xs rounded border border-outline-variant"><div class="flex items-center gap-1.5"><span class="text-outline">FEEDS:</span><span class="text-secondary font-semibold">4 ONLINE</span></div><span class="text-outline-variant">|</span><div class="flex items-center gap-1.5"><span class="text-outline">LATENCY:</span><span class="text-primary font-semibold">18ms</span></div><span class="text-outline-variant">|</span><div class="flex items-center gap-1.5"><span class="text-outline">PIPELINE:</span><span class="text-secondary font-semibold">STABLE</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs"><button class="p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Refresh Video Stream" type="button"><span class="material-symbols-outlined text-[20px]">refresh</span></button><button class="p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Toggle Multi-Grid Fullscreen" type="button"><span class="material-symbols-outlined text-[20px]">fullscreen</span></button><button class="relative p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Operational Alerts" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-error text-on-error font-code-telemetry text-[9px] font-bold">3</span></button></div><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-1.5 font-code-telemetry text-label-sm bg-surface-container-high/60 px-space-sm py-1 rounded border border-secondary/30"><span class="h-1.5 w-1.5 rounded-full bg-secondary"></span><span class="text-secondary font-semibold tracking-wider uppercase">SYS ONLINE</span></div><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm"><div class="flex flex-col text-right hidden sm:flex"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">K. VANCE</span><span class="font-code-telemetry text-label-sm text-outline leading-tight">TACTICAL DISPATCH</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center border border-primary-fixed"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-background flex-1"><div class="flex flex-col w-full">
+<section class="w-full px-space-base xl:px-space-xl py-space-lg flex flex-col gap-space-lg bg-surface-container-lowest relative overflow-hidden">
+<div class="absolute -top-32 right-10 w-96 h-96 rounded-full bg-primary-container/10 blur-3xl pointer-events-none"></div>
+<div class="absolute top-20 right-1/3 w-64 h-64 rounded-full bg-secondary-container/5 blur-3xl pointer-events-none"></div>
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md z-10">
+<div class="flex flex-col max-w-3xl">
+<div class="flex items-center gap-space-xs font-code-telemetry text-label-sm text-primary tracking-widest uppercase mb-1">
+<span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>OPTICAL SENSOR PIPELINE // OCR SUB-NODE 04</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">
+          Automatic Number Plate Recognition (ANPR)
+        </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+          Real-time optical character extraction, vehicle class association, and confidence scoring across tactical perimeter sensors.
+        </p>
+</div>
+<div class="flex items-center gap-space-sm self-start lg:self-auto font-code-telemetry text-label-sm">
+<div class="bg-surface-container px-space-md py-space-xs rounded-lg shadow-sm flex items-center gap-2">
+<span class="text-outline">MODEL:</span>
+<span class="text-primary font-semibold">TENSORRT-OCR-V4.2</span>
+</div>
+<div class="bg-surface-container px-space-md py-space-xs rounded-lg shadow-sm flex items-center gap-2">
+<span class="text-outline">FRAME SYNC:</span>
+<span class="text-secondary font-semibold">0.034s</span>
+</div>
+</div>
+</div>
+<!-- 4 Key ANPR metric cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md z-10">
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col justify-between relative overflow-hidden group hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between text-outline">
+<span class="font-code-telemetry text-label-sm tracking-wider uppercase">Plates Detected</span>
+<span class="material-symbols-outlined text-[20px] text-primary">view_carousel</span>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold tabular-nums">11,204</span>
+<span class="font-code-telemetry text-label-sm text-secondary font-medium">+14.2%</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>24H Aggregation</span>
+<span class="text-primary">100% SENSORS</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 mt-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col justify-between relative overflow-hidden group hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between text-outline">
+<span class="font-code-telemetry text-label-sm tracking-wider uppercase">Readable Plates</span>
+<span class="material-symbols-outlined text-[20px] text-secondary">check_circle</span>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold tabular-nums">10,891</span>
+<span class="font-code-telemetry text-label-sm text-secondary font-medium">97.2% OCR</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>Reject / Occluded: 313</span>
+<span class="text-secondary">NORMAL FLUX</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 mt-2 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 97%"></div>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col justify-between relative overflow-hidden group hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between text-outline">
+<span class="font-code-telemetry text-label-sm tracking-wider uppercase">Recognition Rate</span>
+<span class="material-symbols-outlined text-[20px] text-primary-container">bolt</span>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold tabular-nums">98.4%</span>
+<span class="font-code-telemetry text-label-sm text-primary font-medium">PASS</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm text-on-surface-variant truncate">
+<span class="truncate">TensorRT OCR Engine v4</span>
+<span class="text-primary-container">GPU ACCEL</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 mt-2 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 98%"></div>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col justify-between relative overflow-hidden group hover:bg-surface-container transition-colors">
+<div class="flex items-center justify-between text-outline">
+<span class="font-code-telemetry text-label-sm tracking-wider uppercase">Recent Reads (15m)</span>
+<span class="material-symbols-outlined text-[20px] text-tertiary">speed</span>
+</div>
+<div class="my-space-sm flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold tabular-nums">142</span>
+<span class="font-code-telemetry text-label-sm text-secondary font-medium">9.4/min</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm text-on-surface-variant">
+<span>Traffic Flow: Elevated</span>
+<span class="text-tertiary">GATE 01 PEAK</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 mt-2 overflow-hidden">
+<div class="bg-tertiary h-full rounded-full" style="width: 65%"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Search & Filter Toolbar -->
+<section class="w-full px-space-base xl:px-space-xl py-space-md bg-surface-container-low shadow-md">
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col xl:flex-row gap-space-md xl:items-center justify-between">
+<!-- Search Plate -->
+<div class="relative flex-1 min-w-[320px]">
+<div class="absolute inset-y-0 left-0 pl-space-md flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full pl-10 pr-space-xl py-space-sm bg-surface-container-lowest rounded-lg font-code-telemetry text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface shadow-sm" id="plateSearchInput" placeholder="Search license plate (e.g., 7XYZ890, 5ABC, BUS...)" type="text"/>
+<div class="absolute inset-y-0 right-0 pr-space-md flex items-center">
+<span class="font-code-telemetry text-label-sm bg-surface-container-high px-1.5 py-0.5 rounded text-outline font-semibold">ESC</span>
+</div>
+</div>
+<!-- Mode Toggles & Export -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="bg-surface-container-lowest p-1 rounded-lg flex items-center shadow-sm">
+<button class="px-space-sm py-1 rounded font-code-telemetry text-label-sm font-semibold bg-surface-container-high text-primary flex items-center gap-1.5 transition-all" id="exactMatchBtn" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              Exact Match
+            </button>
+<button class="px-space-sm py-1 rounded font-code-telemetry text-label-sm font-semibold text-outline hover:text-on-surface flex items-center gap-1.5 transition-all" id="partialMatchBtn" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-transparent"></span>
+              Partial Match
+            </button>
+</div>
+<button class="px-space-md py-space-sm rounded-lg bg-primary text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center gap-space-xs hover:bg-primary-fixed-dim transition-colors shadow-sm" id="exportCsvBtn" type="button">
+<span class="material-symbols-outlined text-[18px]">ios_share</span>
+<span>Export CSV / Report</span>
+</button>
+</div>
+</div>
+<!-- Secondary Filter Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-space-sm font-code-telemetry text-body-sm">
+<div class="bg-surface-container-lowest px-space-sm py-space-xs rounded-lg flex items-center justify-between shadow-sm">
+<span class="text-outline text-label-sm uppercase">Camera:</span>
+<select class="bg-transparent text-on-surface focus:outline-none cursor-pointer font-code-telemetry text-body-sm" id="cameraFilter">
+<option class="bg-surface-container text-on-surface" value="ALL">All Cameras</option>
+<option class="bg-surface-container text-on-surface" value="CAM-01">CAM-01 (N-Gate)</option>
+<option class="bg-surface-container text-on-surface" value="CAM-02">CAM-02 (S-Exit)</option>
+<option class="bg-surface-container text-on-surface" value="CAM-03">CAM-03 (East)</option>
+<option class="bg-surface-container text-on-surface" value="CAM-04">CAM-04 (Cargo)</option>
+</select>
+</div>
+<div class="bg-surface-container-lowest px-space-sm py-space-xs rounded-lg flex items-center justify-between shadow-sm">
+<span class="text-outline text-label-sm uppercase">Class:</span>
+<select class="bg-transparent text-on-surface focus:outline-none cursor-pointer font-code-telemetry text-body-sm" id="classFilter">
+<option class="bg-surface-container text-on-surface" value="ALL">All Classes</option>
+<option class="bg-surface-container text-on-surface" value="Sedan">Sedan</option>
+<option class="bg-surface-container text-on-surface" value="SUV">SUV</option>
+<option class="bg-surface-container text-on-surface" value="Truck">Truck</option>
+<option class="bg-surface-container text-on-surface" value="Motorcycle">Motorcycle</option>
+<option class="bg-surface-container text-on-surface" value="Bus">Bus</option>
+</select>
+</div>
+<div class="bg-surface-container-lowest px-space-sm py-space-xs rounded-lg flex items-center justify-between shadow-sm">
+<span class="text-outline text-label-sm uppercase">Time:</span>
+<select class="bg-transparent text-on-surface focus:outline-none cursor-pointer font-code-telemetry text-body-sm" id="timeFilter">
+<option class="bg-surface-container text-on-surface" value="24H">Today (Last 24 Hours)</option>
+<option class="bg-surface-container text-on-surface" value="1H">Last 1 Hour</option>
+<option class="bg-surface-container text-on-surface" value="6H">Last 6 Hours</option>
+<option class="bg-surface-container text-on-surface" value="7D">Last 7 Days</option>
+</select>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-full bg-surface-container px-space-sm py-space-xs rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors font-code-telemetry text-label-sm flex items-center justify-center gap-1 shadow-sm" id="toggleEmptyStateBtn" type="button">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>Simulate Empty State</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Live Feeds Snapshot Bar (Visual Richness) -->
+<section class="w-full px-space-base xl:px-space-xl py-space-sm bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-space-xs font-code-telemetry text-label-sm text-outline uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px] text-primary">sensors</span>
+<span>Sensor Optical Plate Crops // High-Speed Shutter Snapshot Feeds</span>
+</div>
+<span class="font-code-telemetry text-label-sm text-secondary">FPS LOCK: 30.0</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-sm">
+<div class="relative rounded-lg overflow-hidden bg-surface-container shadow-sm group">
+<img class="w-full h-24 object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="High-contrast surveillance snapshot of a dark vehicle front bumper under security floodlights with a glowing license plate area crisp and sharp, cold tactical blue nighttime atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOSmwqixV_EnGaF8d3NYOXx3K0WsQQIZ4oTbrJwOKXxG5pp434QeLamhEoEZEOOf3oxJxdgKiL2a0Yn-w4azhtTYWI5NjEiKWQh2CiA9kXxkkpFFYSpyuHv4wp4M-9Ki74UkD2sl3OoGF48pPCEP_Cuo8dSpGXsVnbWNMukk-MJZwEVy6TE16mqw-TlokIFG5Eet1OwwSczcfqz_wAaA1_H3KNvS7Vz6IUeiV_o3XU5CrAoc7bPCA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute top-1.5 left-1.5 font-code-telemetry text-label-sm bg-surface-container-lowest/80 px-1.5 py-0.5 rounded text-primary">CAM-01</div>
+<div class="absolute bottom-1.5 left-1.5 right-1.5 flex justify-between items-end font-code-telemetry text-label-sm">
+<span class="text-on-surface font-bold tracking-wider">7XYZ890</span>
+<span class="text-error font-semibold text-[9px] bg-error-container px-1 py-0.5 rounded">WATCHLIST</span>
+</div>
+</div>
+<div class="relative rounded-lg overflow-hidden bg-surface-container shadow-sm group">
+<img class="w-full h-24 object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Monochrome optical sensor capture of a heavy transport truck front grill, sharp metal texture, night vision illuminated license plate surface, industrial gate backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyt4PwZ0E8TX294a9G6fo-DLyzk3X4HZt-GyNqkCkMEu0ArEUIyic3yvSX9xe8V7pjfQ-LNCH6_c4oFwI1WWA-cXszUA_NM2a9b_nQ4lxlzaiv0HjOXxT9JQVqefQpKY19wdI7jFIWSdp_BQjyzvvi8KqEvRYpitTt9SA5MPlZm9xzz0jmjaKRXRMkaJdO5avsNVQ4R_L5JGXaDjIU3R1alDCmZEh7Sm9LRULBc9WMu-GLz4uzmsw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute top-1.5 left-1.5 font-code-telemetry text-label-sm bg-surface-container-lowest/80 px-1.5 py-0.5 rounded text-primary">CAM-01</div>
+<div class="absolute bottom-1.5 left-1.5 right-1.5 flex justify-between items-end font-code-telemetry text-label-sm">
+<span class="text-on-surface font-bold tracking-wider">9KLM442</span>
+<span class="text-secondary font-semibold text-[9px] bg-surface-container-high px-1 py-0.5 rounded">CLEARED</span>
+</div>
+</div>
+<div class="relative rounded-lg overflow-hidden bg-surface-container shadow-sm group">
+<img class="w-full h-24 object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Tactical street view zoom of a motorcycle rear plate illuminated by LED lane markers, high ISO motion freeze, dark asphalt and concrete background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-IHyTgzdfB--Sic6laouQEr8mx3ny8eDRYv2l3rxMnEtPE391CAgCv-StO2jLg7hxyMsuFd95ocQ6QStAkq53coMHGCo_pdD3DaphTlk30JWsDBRAKY8_vzFJiJFSClWzl2vEgSXsRWkDAW5BZxkZ7knB2Qr38rOLghCo0SIJixn6gAdvsDNBXKJ8EZelUNHXHIhjBNc3pMktMtEpFkmPOQeuIa47cBjTkx6Opl3p5AuXo-ZLIBY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute top-1.5 left-1.5 font-code-telemetry text-label-sm bg-surface-container-lowest/80 px-1.5 py-0.5 rounded text-primary">CAM-02</div>
+<div class="absolute bottom-1.5 left-1.5 right-1.5 flex justify-between items-end font-code-telemetry text-label-sm">
+<span class="text-on-surface font-bold tracking-wider">2MTC811</span>
+<span class="text-secondary font-semibold text-[9px] bg-surface-container-high px-1 py-0.5 rounded">CLEARED</span>
+</div>
+</div>
+<div class="relative rounded-lg overflow-hidden bg-surface-container shadow-sm group">
+<img class="w-full h-24 object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Telephoto telemetric camera capture of commercial bus rear registration number, reflective plate elements, high clarity tactical defense aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhqYtfeWu1hgY3Os3oKlEurs_O3DFPTI3lfap2bPmfJoLDUIOjUzV9LO5RfCVRW5R9_Cx7yFDQTtfFQAtd2GApJdgj_mt5lWaIu2VmfsUpAUUXSla6Gn7JAMArCbGXHR9VCILH_Frfj7tacTIoFLsyZTG6Asy9KEUnyPgskrUG-VphLbX0peBLz1O35YplE6p5xNuCmjGQ2jw8tjLENTDvRGeCwKQZy-OQSc3poY1dWjrmFtf51YI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute top-1.5 left-1.5 font-code-telemetry text-label-sm bg-surface-container-lowest/80 px-1.5 py-0.5 rounded text-primary">CAM-04</div>
+<div class="absolute bottom-1.5 left-1.5 right-1.5 flex justify-between items-end font-code-telemetry text-label-sm">
+<span class="text-on-surface font-bold tracking-wider">BUS-9020</span>
+<span class="text-primary font-semibold text-[9px] bg-primary-container/20 px-1 py-0.5 rounded">MUNICIPAL</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Main ANPR Table Component (GET /api/plates/search) -->
+<section class="w-full px-space-base xl:px-space-xl py-space-md flex-1">
+<div class="bg-surface-container-low rounded-xl shadow-lg overflow-hidden flex flex-col">
+<!-- Table Context Header -->
+<div class="p-space-md bg-surface-container flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold uppercase tracking-wider">
+            ANPR Detection Log
+          </span>
+<span class="font-code-telemetry text-label-sm bg-surface-container-highest text-primary px-2 py-0.5 rounded font-bold">
+            GET /api/plates/search
+          </span>
+</div>
+<div class="flex items-center gap-space-md font-code-telemetry text-label-sm text-outline">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span> POLLING ACTIVE</span>
+<span>LATENCY: 12ms</span>
+<button class="text-on-surface hover:text-primary transition-colors flex items-center gap-1" id="refreshTableBtn" type="button">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+<span>SYNC</span>
+</button>
+</div>
+</div>
+<!-- Table Viewport Container -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left font-code-telemetry border-collapse" id="anprDataTable">
+<thead>
+<tr class="bg-surface-container-lowest text-outline text-label-sm uppercase tracking-wider">
+<th class="py-3 px-4 font-semibold">Plate Number</th>
+<th class="py-3 px-4 font-semibold">Crop / Thumbnail</th>
+<th class="py-3 px-4 font-semibold">Vehicle ID</th>
+<th class="py-3 px-4 font-semibold">Vehicle Class</th>
+<th class="py-3 px-4 font-semibold">OCR Confidence</th>
+<th class="py-3 px-4 font-semibold">Camera Sensor</th>
+<th class="py-3 px-4 font-semibold">Speed &amp; Direction</th>
+<th class="py-3 px-4 font-semibold">Timestamp</th>
+<th class="py-3 px-4 font-semibold">Watchlist Status</th>
+<th class="py-3 px-4 font-semibold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="text-body-sm" id="anprTableBody">
+<!-- Row 1 -->
+<tr class="bg-surface-container-low hover:bg-surface-container transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest text-primary font-bold tracking-widest text-code-telemetry shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+                  7XYZ890
+                </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="w-20 h-10 rounded bg-surface-container-lowest overflow-hidden relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Tight macro crop of a California style white and black embossed license plate reading 7XYZ890 with vehicle bumper visible in dark lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsstVMqmVTDZjBBjFBsUkaSp2DnoRT4XRHr17JuZ_Pj-wrLY1e7O4mY4_zQxe4MVkXkhq8SUSURX6Yu5s7ag3p3gSdfZ1eih6S0wYiEAXPRbhV01aNdV4dPN6o5LNJEki91WdBM8K-nA5isiBTGpTQJy_bsc_aX-MmahvNMFmFmMncrNUSPnA3V8cc2baZwHgqJuekTYGlNP0snDWGSGUQOz_PesH4DQbhiAGnxxRVsgc2n5eZYSc"/>
+<span class="absolute bottom-0.5 right-0.5 text-[8px] font-code-telemetry bg-surface-container-lowest/80 text-outline px-1 rounded">HD</span>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant font-medium whitespace-nowrap">#TRK-8821</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-surface-container-highest shadow-sm"></span>
+<span class="text-on-surface">Sedan (Black)</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex flex-col gap-1 w-28">
+<div class="flex justify-between text-label-sm font-semibold">
+<span class="text-secondary">99.4%</span>
+<span class="text-outline">HIGH</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 99.4%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-primary font-semibold">CAM-01</span>
+<span class="text-outline text-label-sm ml-1">(N-Gate)</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-on-surface font-semibold tabular-nums">42 km/h</span>
+<span class="text-secondary font-bold text-label-sm ml-1.5 bg-secondary-container/20 px-1.5 py-0.5 rounded">[IN]</span>
+</td>
+<td class="py-3 px-4 text-outline tabular-nums whitespace-nowrap">
+                14:32:06 <span class="text-[10px]">UTC</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm font-bold bg-error-container text-error tracking-wider uppercase shadow-sm">
+<span class="material-symbols-outlined text-[12px]">gavel</span>
+                  MATCH: STOLEN
+                </span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5">
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors font-label-sm text-label-sm" type="button">
+                    View Trace
+                  </button>
+<button class="px-2 py-1 rounded bg-error-container hover:bg-error text-on-error hover:text-white transition-colors font-label-sm text-label-sm font-bold animate-pulse" type="button">
+                    Alert
+                  </button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="bg-surface-container-low hover:bg-surface-container transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest text-on-surface font-bold tracking-widest text-code-telemetry shadow-sm">
+                  9KLM442
+                </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="w-20 h-10 rounded bg-surface-container-lowest overflow-hidden relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Optical zoom crop of commercial trailer license plate 9KLM442 with bolt fixtures and dust wear under cold daylight illumination" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgGcgbLp4ZwUYzG3Vm9yQ3F3m5KAAYydhhzGC9_gwgOjPIg3P9IEAcGr0NjzUam_WSrLxm32UW1BO3QvgFNYdnKohwva3XXaDncCaJHT5KPaP5ZCWUz9_-TtHngMmzx9bQLkxp1X8aid2W4QCIrWS33dZ0nXMkDUIP3f0D3Ty7CyDLKA-JOI9fcnxhaxNfQbOCdvKz0nn9sS22i4GIf38NW7C3s62ikNQITHbbB-4MVusFfitf7Jw"/>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant font-medium whitespace-nowrap">#TRK-8825</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-outline shadow-sm"></span>
+<span class="text-on-surface">Heavy Truck</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex flex-col gap-1 w-28">
+<div class="flex justify-between text-label-sm font-semibold">
+<span class="text-secondary">96.8%</span>
+<span class="text-outline">STABLE</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 96.8%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-primary font-semibold">CAM-01</span>
+<span class="text-outline text-label-sm ml-1">(N-Gate)</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-on-surface font-semibold tabular-nums">31 km/h</span>
+<span class="text-secondary font-bold text-label-sm ml-1.5 bg-secondary-container/20 px-1.5 py-0.5 rounded">[IN]</span>
+</td>
+<td class="py-3 px-4 text-outline tabular-nums whitespace-nowrap">
+                14:32:02 <span class="text-[10px]">UTC</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm font-semibold bg-surface-container-highest text-secondary tracking-wider uppercase">
+<span class="material-symbols-outlined text-[12px]">verified</span>
+                  CLEARED
+                </span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors font-label-sm text-label-sm" type="button">
+                  View Trace
+                </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="bg-surface-container-low hover:bg-surface-container transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest text-on-surface font-bold tracking-widest text-code-telemetry shadow-sm">
+                  2MTC811
+                </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="w-20 h-10 rounded bg-surface-container-lowest overflow-hidden relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Close up crop of compact square motorcycle registration plate 2MTC811 under amber perimeter light with reflector glare" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZ0SMlRAvaurhhN67hIPw0y1kFJ0I6iixsPrfewcJ7rBN3wZNymwS_aNoHNGbNRwRHpy0aEvwV0kwnXH0EcUlywbrUjo601Bbl58p6hJ6viSyW6b6GQJWgSCJdyQHUGvSvrfGYnZxFhmkVd1gEIKo_RATEHCE-_k82U6d9MKrrQ8nd1jqlOJREEhm-7UzQXS0R8L2n_CmE41k6HcOF3LedY7DnEo7N8_x0QbFk-ehF5VaKEoNy4K8"/>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant font-medium whitespace-nowrap">#TRK-8826</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container shadow-sm"></span>
+<span class="text-on-surface">Motorcycle</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex flex-col gap-1 w-28">
+<div class="flex justify-between text-label-sm font-semibold">
+<span class="text-secondary">92.1%</span>
+<span class="text-outline">STABLE</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 92.1%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-primary font-semibold">CAM-02</span>
+<span class="text-outline text-label-sm ml-1">(S-Exit)</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-on-surface font-semibold tabular-nums">54 km/h</span>
+<span class="text-primary font-bold text-label-sm ml-1.5 bg-primary-container/20 px-1.5 py-0.5 rounded">[OUT]</span>
+</td>
+<td class="py-3 px-4 text-outline tabular-nums whitespace-nowrap">
+                14:31:54 <span class="text-[10px]">UTC</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm font-semibold bg-surface-container-highest text-secondary tracking-wider uppercase">
+<span class="material-symbols-outlined text-[12px]">verified</span>
+                  CLEARED
+                </span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors font-label-sm text-label-sm" type="button">
+                  View Trace
+                </button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="bg-surface-container-low hover:bg-surface-container transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest text-primary font-bold tracking-widest text-code-telemetry shadow-sm">
+                  BUS-9020
+                </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="w-20 h-10 rounded bg-surface-container-lowest overflow-hidden relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Cropped view of city transit vehicle bumper with blue municipal plate BUS-9020 in clear sharp focus against concrete roadway" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXTLXWS4f-SojtGcGRO-ZCIuh725WKPOeCBNFoDz1n2CqQ1pCZuQzjdt2JhNw1f98GgZJ85xcUn3PD-LcAUwnjWvRy8LxEJUKMrf6ai8wSTlGjDFlNQ3Sh5VLZtxtx5OjSBfOvOrxbuo3UkZGjb9nZOIJzP3lmuaZDBp4V2iUu9hNCl3BCbgmgHeBzssc98A8onircepBU3is85Qix2iSPBeN2ydrqrPie1Y0QrUF5gmkKz0YI0xA"/>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant font-medium whitespace-nowrap">#TRK-8827</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary shadow-sm"></span>
+<span class="text-on-surface">Transit Bus</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex flex-col gap-1 w-28">
+<div class="flex justify-between text-label-sm font-semibold">
+<span class="text-secondary">98.9%</span>
+<span class="text-outline">HIGH</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 98.9%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-primary font-semibold">CAM-04</span>
+<span class="text-outline text-label-sm ml-1">(Cargo)</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-on-surface font-semibold tabular-nums">38 km/h</span>
+<span class="text-primary font-bold text-label-sm ml-1.5 bg-primary-container/20 px-1.5 py-0.5 rounded">[OUT]</span>
+</td>
+<td class="py-3 px-4 text-outline tabular-nums whitespace-nowrap">
+                14:31:48 <span class="text-[10px]">UTC</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm font-semibold bg-primary-container/20 text-primary tracking-wider uppercase">
+<span class="material-symbols-outlined text-[12px]">apartment</span>
+                  MUNICIPAL
+                </span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors font-label-sm text-label-sm" type="button">
+                  View Trace
+                </button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="bg-surface-container-low hover:bg-surface-container transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest text-on-surface font-bold tracking-widest text-code-telemetry shadow-sm">
+                  5FLEET1
+                </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="w-20 h-10 rounded bg-surface-container-lowest overflow-hidden relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Telephoto snapshot of modern white SUV front grill with centered plate 5FLEET1 illuminated by surveillance strobe, clean metallic lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuXIZw7sf-NDdivXOGgDeuXuG0ZMe-RRSqjB7CuIji8Nvz-JSC4rJJbmecmC_bOuM7ZNRQOstuWCHSHZN0bYw7VY7eUUuRY7KVJGuLiYQpYTwaFvaYEuhkbv6datuVGWavU0-sjUWL50miiHtx0wo7YNBarwQmFqIJ5RASYd9jlmZavlD3SbOvc_8WhtWSIL0S-TMGlXk4iNDOZ-1PeFDBkJUqNaCLBqd9q20DLMLvCt8rjVKddGM"/>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant font-medium whitespace-nowrap">#TRK-8828</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-surface-bright shadow-sm"></span>
+<span class="text-on-surface">SUV (White)</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex flex-col gap-1 w-28">
+<div class="flex justify-between text-label-sm font-semibold">
+<span class="text-secondary">99.1%</span>
+<span class="text-outline">HIGH</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 99.1%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-primary font-semibold">CAM-03</span>
+<span class="text-outline text-label-sm ml-1">(East)</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-on-surface font-semibold tabular-nums">26 km/h</span>
+<span class="text-secondary font-bold text-label-sm ml-1.5 bg-secondary-container/20 px-1.5 py-0.5 rounded">[IN]</span>
+</td>
+<td class="py-3 px-4 text-outline tabular-nums whitespace-nowrap">
+                14:31:39 <span class="text-[10px]">UTC</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm font-semibold bg-surface-container-highest text-secondary tracking-wider uppercase">
+<span class="material-symbols-outlined text-[12px]">verified</span>
+                  CLEARED
+                </span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors font-label-sm text-label-sm" type="button">
+                  View Trace
+                </button>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="bg-surface-container-low hover:bg-surface-container transition-colors group">
+<td class="py-3 px-4 font-medium text-on-surface whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest text-tertiary font-bold tracking-widest text-code-telemetry shadow-sm">
+                  3XTR991
+                </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="w-20 h-10 rounded bg-surface-container-lowest overflow-hidden relative shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Angled speed-blur capture of pickup truck tailgate with partially dirt-splattered license plate 3XTR991, tactical infrared camera filter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5gISwsq4qn0i2ELqZgp9YRSwRfJ-7eiAddPq9wFHBtenvuZCi_HrtohbWEZnVblG-O707fb2Aqqsfoy8WyjZ3GMXNlslNmQZPeOsFCZ063nKj8oS-XPL-JK9WcnbtnqXmc4uh2kqN2LM6zVoulDAzs37r6s6xDHp1eSxfeWXoC6KfUFO6yPpTzwki_2Jt4SlsN63RNXxd7xRM3TGPnFhjhafDaTA_lOtVuYE3eI_UXn9nDdwr9uc"/>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant font-medium whitespace-nowrap">#TRK-8830</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-outline-variant shadow-sm"></span>
+<span class="text-on-surface">Pickup Truck</span>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex flex-col gap-1 w-28">
+<div class="flex justify-between text-label-sm font-semibold">
+<span class="text-tertiary">88.5%</span>
+<span class="text-outline">DEGRADED</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden">
+<div class="bg-tertiary h-full rounded-full" style="width: 88.5%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-primary font-semibold">CAM-02</span>
+<span class="text-outline text-label-sm ml-1">(S-Exit)</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="text-on-surface font-semibold tabular-nums">61 km/h</span>
+<span class="text-primary font-bold text-label-sm ml-1.5 bg-primary-container/20 px-1.5 py-0.5 rounded">[OUT]</span>
+</td>
+<td class="py-3 px-4 text-outline tabular-nums whitespace-nowrap">
+                14:30:15 <span class="text-[10px]">UTC</span>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-label-sm text-label-sm font-semibold bg-tertiary-container/20 text-tertiary tracking-wider uppercase">
+<span class="material-symbols-outlined text-[12px]">warning</span>
+                  SUSPICIOUS
+                </span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="px-2 py-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors font-label-sm text-label-sm" type="button">
+                  View Trace
+                </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Empty State Mockup Preview (Hidden by default, toggled via button) -->
+<div class="hidden p-space-2xl flex-col items-center justify-center text-center bg-surface-container-lowest" id="anprEmptyState">
+<div class="w-14 h-14 rounded-full bg-surface-container flex items-center justify-center text-outline mb-space-md shadow-sm">
+<span class="material-symbols-outlined text-[28px] text-primary">filter_alt_off</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-1">
+          Search State: No license plates detected matching query
+        </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md mb-space-md">
+          Zero optical character records found for current plate pattern and camera sensors. Verify OCR confidence threshold or expand time range.
+        </p>
+<div class="flex items-center gap-space-sm font-code-telemetry text-label-sm">
+<button class="px-space-md py-space-xs rounded bg-surface-container-high text-primary hover:bg-surface-bright transition-colors font-semibold" id="resetSearchBtn" type="button">
+            Clear Filters
+          </button>
+<button class="px-space-md py-space-xs rounded bg-primary text-on-primary font-semibold" id="recalibrateEngineBtn" type="button">
+            Recalibrate TensorRT OCR
+          </button>
+</div>
+</div>
+<!-- Tactical Pagination Bar -->
+<div class="p-space-md bg-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-sm font-code-telemetry text-label-sm">
+<div class="flex items-center gap-space-sm text-outline">
+<span>Showing <span class="text-on-surface font-semibold">1-25</span> of <span class="text-on-surface font-semibold">11,204</span> plates</span>
+<span class="hidden sm:inline text-outline-variant">|</span>
+<span class="hidden sm:inline text-secondary">BUFFER HEALTH 99.8%</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-40" disabled="" type="button">
+<span class="material-symbols-outlined text-[16px] align-middle">chevron_left</span>
+<span>PREV</span>
+</button>
+<div class="flex items-center gap-1">
+<button class="w-7 h-7 rounded bg-primary text-on-primary font-bold shadow-sm" type="button">1</button>
+<button class="w-7 h-7 rounded bg-surface-container-lowest text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button">2</button>
+<button class="w-7 h-7 rounded bg-surface-container-lowest text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button">3</button>
+<span class="px-1 text-outline">...</span>
+<button class="w-7 h-7 rounded bg-surface-container-lowest text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button">449</button>
+</div>
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+<span>NEXT</span>
+<span class="material-symbols-outlined text-[16px] align-middle">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Deep Telemetry Quick Inspector Drawer / Modal Footer -->
+<section class="w-full px-space-base xl:px-space-xl py-space-sm bg-surface-container-lowest">
+<div class="p-space-sm rounded-xl bg-surface-container-low shadow-sm flex flex-col md:flex-row items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">document_scanner</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">OCR Batch Inference Stream</span>
+<span class="font-code-telemetry text-label-sm bg-secondary-container/20 text-secondary px-1.5 py-0.2 rounded font-bold">READY</span>
+</div>
+<span class="font-code-telemetry text-label-sm text-outline">Active Pipeline: Camera Matrix CAM-01 through CAM-04 // Inference: INT8 CUDA</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-space-xs rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-code-telemetry text-label-sm font-semibold" id="viewTraceActiveBtn" type="button">
+          ANPR Node Telemetry
+        </button>
+<button class="px-space-md py-space-xs rounded bg-surface-container-highest text-primary hover:bg-primary hover:text-on-primary transition-all font-code-telemetry text-label-sm font-semibold" id="exportCsvFooterBtn" type="button">
+          Download Telemetry Log
+        </button>
+</div>
+</div>
+</section>
+<!-- Client-side Interactive Logic -->
+<script>
+    (function () {
+      const searchInput = document.getElementById('plateSearchInput');
+      const tableBody = document.getElementById('anprTableBody');
+      const emptyState = document.getElementById('anprEmptyState');
+      const toggleEmptyBtn = document.getElementById('toggleEmptyStateBtn');
+      const resetSearchBtn = document.getElementById('resetSearchBtn');
+      const exactBtn = document.getElementById('exactMatchBtn');
+      const partialBtn = document.getElementById('partialMatchBtn');
+      const cameraFilter = document.getElementById('cameraFilter');
+      const classFilter = document.getElementById('classFilter');
+      const exportCsvBtn = document.getElementById('exportCsvBtn');
+
+      let isPartial = false;
+
+      // Filter rows dynamically on search
+      function filterTable() {
+        const query = searchInput.value.trim().toUpperCase();
+        const selectedCamera = cameraFilter.value;
+        const selectedClass = classFilter.value;
+        const rows = tableBody.querySelectorAll('tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+          const plateText = row.children[0]?.textContent.trim() || '';
+          const classText = row.children[3]?.textContent.trim() || '';
+          const cameraText = row.children[5]?.textContent.trim() || '';
+
+          let matchesPlate = true;
+          if (query) {
+            if (isPartial) {
+              matchesPlate = plateText.includes(query);
+            } else {
+              matchesPlate = plateText.replace(/[^A-Z0-9]/g, '') === query.replace(/[^A-Z0-9]/g, '');
+            }
+          }
+
+          const matchesCamera = selectedCamera === 'ALL' || cameraText.includes(selectedCamera);
+          const matchesClass = selectedClass === 'ALL' || classText.toLowerCase().includes(selectedClass.toLowerCase());
+
+          if (matchesPlate && matchesCamera && matchesClass) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+
+        if (visibleCount === 0) {
+          emptyState.classList.remove('hidden');
+          emptyState.classList.add('flex');
+        } else {
+          emptyState.classList.add('hidden');
+          emptyState.classList.remove('flex');
+        }
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', filterTable);
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            searchInput.value = '';
+            filterTable();
+          }
+        });
+      }
+
+      if (cameraFilter) cameraFilter.addEventListener('change', filterTable);
+      if (classFilter) classFilter.addEventListener('change', filterTable);
+
+      // Match toggles
+      if (exactBtn && partialBtn) {
+        exactBtn.addEventListener('click', () => {
+          isPartial = false;
+          exactBtn.className = 'px-space-sm py-1 rounded font-code-telemetry text-label-sm font-semibold bg-surface-container-high text-primary flex items-center gap-1.5 transition-all';
+          exactBtn.querySelector('span').className = 'w-1.5 h-1.5 rounded-full bg-primary';
+          partialBtn.className = 'px-space-sm py-1 rounded font-code-telemetry text-label-sm font-semibold text-outline hover:text-on-surface flex items-center gap-1.5 transition-all';
+          partialBtn.querySelector('span').className = 'w-1.5 h-1.5 rounded-full bg-transparent';
+          filterTable();
+        });
+
+        partialBtn.addEventListener('click', () => {
+          isPartial = true;
+          partialBtn.className = 'px-space-sm py-1 rounded font-code-telemetry text-label-sm font-semibold bg-surface-container-high text-primary flex items-center gap-1.5 transition-all';
+          partialBtn.querySelector('span').className = 'w-1.5 h-1.5 rounded-full bg-primary';
+          exactBtn.className = 'px-space-sm py-1 rounded font-code-telemetry text-label-sm font-semibold text-outline hover:text-on-surface flex items-center gap-1.5 transition-all';
+          exactBtn.querySelector('span').className = 'w-1.5 h-1.5 rounded-full bg-transparent';
+          filterTable();
+        });
+      }
+
+      // Empty State Toggle
+      if (toggleEmptyBtn) {
+        toggleEmptyBtn.addEventListener('click', () => {
+          if (emptyState.classList.contains('hidden')) {
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(r => r.style.display = 'none');
+            emptyState.classList.remove('hidden');
+            emptyState.classList.add('flex');
+            toggleEmptyBtn.querySelector('span:last-child').textContent = 'Restore Records';
+          } else {
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(r => r.style.display = '');
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+            toggleEmptyBtn.querySelector('span:last-child').textContent = 'Simulate Empty State';
+          }
+        });
+      }
+
+      if (resetSearchBtn) {
+        resetSearchBtn.addEventListener('click', () => {
+          if (searchInput) searchInput.value = '';
+          if (cameraFilter) cameraFilter.value = 'ALL';
+          if (classFilter) classFilter.value = 'ALL';
+          filterTable();
+          if (toggleEmptyBtn) toggleEmptyBtn.querySelector('span:last-child').textContent = 'Simulate Empty State';
+        });
+      }
+
+      // CSV Export Notification
+      if (exportCsvBtn) {
+        exportCsvBtn.addEventListener('click', () => {
+          const originalText = exportCsvBtn.innerHTML;
+          exportCsvBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Generating CSV...</span>';
+          setTimeout(() => {
+            exportCsvBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">done</span><span>Report Exported</span>';
+            setTimeout(() => {
+              exportCsvBtn.innerHTML = originalText;
+            }, 2000);
+          }, 800);
+        });
+      }
+    })();
+  </script>
+</div></main></div></body></html>

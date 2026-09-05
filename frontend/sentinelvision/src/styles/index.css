@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+@theme {
+  --color-on-secondary-fixed: #002113;
+  --color-on-error: #690005;
+  --color-secondary-fixed: #6ffbbe;
+  --color-secondary: #4edea3;
+  --color-surface-tint: #89ceff;
+  --color-primary-fixed-dim: #89ceff;
+  --color-outline: #88929b;
+  --color-inverse-on-surface: #2d3038;
+  --color-surface-container-high: #272a32;
+  --color-surface: #10131a;
+  --color-error: #ffb4ab;
+  --color-surface-container-low: #191b23;
+  --color-on-primary-fixed: #001e2f;
+  --color-secondary-container: #00a572;
+  --color-on-primary-container: #003751;
+  --color-on-tertiary-fixed-variant: #930013;
+  --color-on-error-container: #ffdad6;
+  --color-primary-container: #0ea5e9;
+  --color-on-primary-fixed-variant: #004c6e;
+  --color-tertiary-fixed: #ffdad7;
+  --color-primary: #89ceff;
+  --color-background: #10131a;
+  --color-surface-dim: #10131a;
+  --color-on-tertiary-container: #6e000c;
+  --color-inverse-surface: #e1e2ec;
+  --color-surface-bright: #363941;
+  --color-tertiary-container: #ff6c66;
+  --color-on-surface: #e1e2ec;
+  --color-inverse-primary: #006591;
+  --color-on-primary: #00344d;
+  --color-surface-container: #1d1f27;
+  --color-on-secondary: #003824;
+  --color-tertiary-fixed-dim: #ffb3ad;
+  --color-on-secondary-fixed-variant: #005236;
+  --color-error-container: #93000a;
+  --color-secondary-fixed-dim: #4edea3;
+  --color-outline-variant: #3e4850;
+  --color-on-background: #e1e2ec;
+  --color-surface-container-lowest: #0b0e15;
+  --color-on-tertiary: #68000a;
+  --color-primary-fixed: #c9e6ff;
+  --color-surface-variant: #32353d;
+  --color-surface-container-highest: #32353d;
+  --color-on-tertiary-fixed: #410004;
+  --color-on-secondary-container: #00311f;
+  --color-on-surface-variant: #bec8d2;
+  --color-tertiary: #ffb3ad;
+}
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    overscroll-behavior: none;
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #10131a;
+    color: #e1e2ec;
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  }
+}
+
+@layer components {
+  .font-code-telemetry {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    letter-spacing: 0.025em;
+  }
+  
+  .font-label-sm {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+  }
+  
+  .font-label-md {
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+  }
+  
+  .font-body-sm {
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+  }
+  
+  .font-body-md {
+    font-size: 0.9375rem;
+    line-height: 1.5rem;
+  }
+  
+  .font-headline-sm {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+  }
+  
+  .font-headline-md {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+  }
+  
+  .font-headline-lg {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 700;
+  }
+  
+  .font-headline-xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+  }
+
+  .card {
+    @apply bg-surface-container-low rounded-lg shadow-sm;
+  }
+
+  .card-header {
+    @apply px-4 py-3 border-b border-outline-variant/20;
+  }
+
+  .status-badge {
+    @apply px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 rounded bg-primary text-on-primary font-semibold text-sm hover:bg-primary/90 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 rounded bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-bright transition-colors;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 bg-surface-container-lowest text-on-surface rounded border border-outline-variant/40 focus:outline-none focus:border-primary transition-colors;
+  }
+
+  .select-field {
+    @apply w-full px-3 py-2 bg-surface-container-lowest text-on-surface rounded border border-outline-variant/40 focus:outline-none focus:border-primary transition-colors cursor-pointer;
+  }
+}

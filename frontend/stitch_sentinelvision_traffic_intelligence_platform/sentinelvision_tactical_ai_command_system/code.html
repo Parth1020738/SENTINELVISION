@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary-fixed":"#002113","on-error":"#690005","secondary-fixed":"#6ffbbe","secondary":"#4edea3","surface-tint":"#89ceff","primary-fixed-dim":"#89ceff","outline":"#88929b","inverse-on-surface":"#2d3038","surface-container-high":"#272a32","surface":"#10131a","error":"#ffb4ab","surface-container-low":"#191b23","on-primary-fixed":"#001e2f","secondary-container":"#00a572","on-primary-container":"#003751","on-tertiary-fixed-variant":"#930013","on-error-container":"#ffdad6","primary-container":"#0ea5e9","on-primary-fixed-variant":"#004c6e","tertiary-fixed":"#ffdad7","primary":"#89ceff","background":"#10131a","surface-dim":"#10131a","on-tertiary-container":"#6e000c","inverse-surface":"#e1e2ec","surface-bright":"#363941","tertiary-container":"#ff6c66","on-surface":"#e1e2ec","inverse-primary":"#006591","on-primary":"#00344d","surface-container":"#1d1f27","on-secondary":"#003824","tertiary-fixed-dim":"#ffb3ad","on-secondary-fixed-variant":"#005236","error-container":"#93000a","secondary-fixed-dim":"#4edea3","outline-variant":"#3e4850","on-background":"#e1e2ec","surface-container-lowest":"#0b0e15","on-tertiary":"#68000a","primary-fixed":"#c9e6ff","surface-variant":"#32353d","surface-container-highest":"#32353d","on-tertiary-fixed":"#410004","on-secondary-container":"#00311f","on-surface-variant":"#bec8d2","tertiary":"#ffb3ad"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"0.75rem","space-sm":"0.5rem","space-2xs":"0.125rem","panel-padding":"0.875rem","space-xs":"0.25rem","gutter":"0.75rem","space-base":"1rem","space-xl":"1.5rem","space-lg":"1.25rem","space-2xl":"2rem"},"fontFamily":{"body-md":["JetBrains Mono"],"body-lg":["JetBrains Mono"],"code-telemetry":["JetBrains Mono"],"body-sm":["JetBrains Mono"],"headline-md":["Inter"],"headline-sm":["Inter"],"headline-lg":["Inter"],"label-sm":["JetBrains Mono"],"headline-xl":["Inter"],"label-md":["JetBrains Mono"]},"fontSize":{"body-md":["0.8125rem",{"lineHeight":"1.25rem","letterSpacing":"0em","fontWeight":"400"}],"body-lg":["0.875rem",{"lineHeight":"1.375rem","letterSpacing":"0em","fontWeight":"400"}],"code-telemetry":["0.75rem",{"lineHeight":"1rem","letterSpacing":"0.02em","fontWeight":"500"}],"body-sm":["0.75rem",{"lineHeight":"1.125rem","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["1.125rem",{"lineHeight":"1.5rem","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["0.875rem",{"lineHeight":"1.25rem","letterSpacing":"0.02em","fontWeight":"600"}],"headline-lg":["1.5rem",{"lineHeight":"2rem","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["0.625rem",{"lineHeight":"0.875rem","letterSpacing":"0.1em","fontWeight":"600"}],"headline-xl":["2rem",{"lineHeight":"2.5rem","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["0.6875rem",{"lineHeight":"1rem","letterSpacing":"0.08em","fontWeight":"600"}]}}}};</script></head><body class="bg-background font-body-sm text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-14 px-space-base flex items-center gap-space-sm border-b border-outline-variant bg-surface-container-low"><div class="flex items-center justify-center w-6 h-6 rounded bg-primary-container/20 text-primary"><span class="material-symbols-outlined text-[16px]">radar</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-wider uppercase leading-none">SENTINEL<span class="text-primary">VISION</span></span><span class="font-code-telemetry text-label-sm text-outline tracking-widest leading-none mt-1">TACTICAL AI COMMAND</span></div></div><nav class="flex flex-col py-space-sm gap-space-2xs px-space-xs" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary font-semibold"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-all bg-surface-container-high text-primary border-l-2 border-primary font-semibold" data-path="overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span class="font-body-md text-body-md">Overview</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="live-monitoring" href="#"><span class="material-symbols-outlined text-[18px]">videocam</span><span class="font-body-md text-body-md">Live Monitoring</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="vehicles" href="#"><span class="material-symbols-outlined text-[18px]">directions_car</span><span class="font-body-md text-body-md">Vehicles</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="anpr" href="#"><span class="material-symbols-outlined text-[18px]">badge</span><span class="font-body-md text-body-md">ANPR</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="watchlist" href="#"><span class="material-symbols-outlined text-[18px]">shield</span><span class="font-body-md text-body-md">Watchlist</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="alerts" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">notification_important</span><span class="font-body-md text-body-md">Alerts</span></div><span class="px-1.5 py-0.5 rounded bg-error-container text-error font-code-telemetry text-label-sm">3 CRIT</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="vehicle-history" href="#"><span class="material-symbols-outlined text-[18px]">history</span><span class="font-body-md text-body-md">Vehicle History</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="system-health" href="#"><span class="material-symbols-outlined text-[18px]">memory</span><span class="font-body-md text-body-md">System Health</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-body-md text-body-md">Settings</span></a></nav></div><div class="border-t border-outline-variant bg-surface-container-lowest p-space-sm flex flex-col gap-space-xs"><div class="p-space-xs rounded bg-surface-container-low border border-outline-variant/50 flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-code-telemetry text-label-sm text-outline uppercase">GPU HW</span><span class="font-code-telemetry text-label-sm text-primary font-medium">RTX 3050</span></div><div class="flex items-center justify-between"><span class="font-code-telemetry text-label-sm text-on-surface-variant">VRAM: 3.4 / 4.0 GB</span><span class="font-code-telemetry text-label-sm text-secondary">85%</span></div><div class="w-full bg-surface-container-highest rounded-full h-1 overflow-hidden"><div class="bg-primary h-full rounded-full" style="width:85%"></div></div></div><div class="flex items-center justify-between px-space-xs py-space-2xs text-label-sm font-code-telemetry"><div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse"></span><span class="text-secondary">Operational</span></div><div class="flex items-center gap-1 text-outline"><span class="material-symbols-outlined text-[12px]">network_check</span><span>24ms</span></div></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-14 bg-surface-container-low border-b border-outline-variant z-40 px-space-base flex items-center justify-between select-none"><div class="flex items-center gap-space-md"><img alt="SentinelVision Wordmark Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WfQi1ZmshoVmY8GLqIS1_9N2yTOSV6oZ8SR78SEfwPPqYjZciyH3vYDDjq_8gnxmZM9ttSKeyX6_k_Nl9OYIxyziu60TdtOaAoZ1F6HnVfhC0yE5mmUmUSZhWYM-5ZQAusYIuc9_C6N9lsxvLF5bpDlcbZcpy7aKfOAL0Pr-25qMIAhOcqcPBz6VoEnXYrnvHQVMDGJNP-9vXeK4kVkj3fQc21BSLY_lW8uD2fVdJajbMxelJLpaek"/><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm bg-surface-container px-space-sm py-space-2xs rounded border border-outline-variant"><span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-code-telemetry text-code-telemetry text-on-surface font-semibold">CAM-01 / cam01</span><span class="font-code-telemetry text-label-sm text-outline border-l border-outline-variant pl-space-xs">1920x1080 @ 30 FPS</span></div></div><div class="hidden xl:flex items-center gap-space-lg font-code-telemetry text-code-telemetry bg-surface-container-lowest px-space-md py-space-2xs rounded border border-outline-variant"><div class="flex items-center gap-1.5"><span class="text-outline">FEEDS:</span><span class="text-secondary font-semibold">4 ONLINE</span></div><span class="text-outline-variant">|</span><div class="flex items-center gap-1.5"><span class="text-outline">LATENCY:</span><span class="text-primary font-semibold">18ms</span></div><span class="text-outline-variant">|</span><div class="flex items-center gap-1.5"><span class="text-outline">PIPELINE:</span><span class="text-secondary font-semibold">STABLE</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs"><button class="p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Refresh Video Stream" type="button"><span class="material-symbols-outlined text-[20px]">refresh</span></button><button class="p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Toggle Multi-Grid Fullscreen" type="button"><span class="material-symbols-outlined text-[20px]">fullscreen</span></button><button class="relative p-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" title="Operational Alerts" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-error text-on-error font-code-telemetry text-[9px] font-bold">3</span></button></div><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-1.5 font-code-telemetry text-label-sm bg-surface-container-high/60 px-space-sm py-1 rounded border border-secondary/30"><span class="h-1.5 w-1.5 rounded-full bg-secondary"></span><span class="text-secondary font-semibold tracking-wider uppercase">SYS ONLINE</span></div><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm"><div class="flex flex-col text-right hidden sm:flex"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">K. VANCE</span><span class="font-code-telemetry text-label-sm text-outline leading-tight">TACTICAL DISPATCH</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center border border-primary-fixed"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-background flex-1"><div class="flex flex-col w-full gap-space-lg p-space-base xl:p-space-lg">
+<!-- Top Command & Session Telemetry Row -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-surface-container-low p-space-md rounded-lg shadow-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest bg-primary-container/20 px-space-xs py-0.5 rounded">TACTICAL FEED MATRIX // ALPHA-01</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
+<span class="font-code-telemetry text-label-sm text-secondary font-semibold">STREAM ENGAGED</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight flex items-center gap-space-sm">
+        Traffic Intelligence Overview
+      </h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Continuous optical parsing, dynamic trajectory estimation, and automated watchlist triangulation.</p>
+</div>
+<!-- Live Telemetry Clocks & Stream Latency -->
+<div class="flex flex-wrap items-center gap-space-md font-code-telemetry text-code-telemetry">
+<div class="flex items-center gap-space-sm bg-surface-container px-space-md py-space-xs rounded shadow-inner">
+<span class="material-symbols-outlined text-outline text-[16px]">schedule</span>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-label-sm text-outline uppercase leading-none">UTC ZULU</span>
+<span class="text-primary font-semibold leading-none mt-1" id="utc-clock">2025-05-18 14:32:08 UTC</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm bg-surface-container px-space-md py-space-xs rounded shadow-inner">
+<span class="material-symbols-outlined text-secondary text-[16px]">sensors</span>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-label-sm text-outline uppercase leading-none">NETWORK RTSP</span>
+<span class="text-secondary font-semibold leading-none mt-1">18ms // 0.0% DROP</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm bg-surface-container-high px-space-md py-space-xs rounded">
+<span class="font-label-sm text-label-sm text-outline uppercase">SESSION ID</span>
+<span class="text-on-surface font-semibold">#SEC-8820-TK</span>
+</div>
+</div>
+</div>
+<!-- 6 Metric Summary Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-space-sm">
+<!-- Card 1 -->
+<div class="flex flex-col justify-between bg-surface-container-low hover:bg-surface-container p-space-md rounded-lg shadow-sm transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">VEHICLES DETECTED</span>
+<span class="material-symbols-outlined text-primary text-[18px]">directions_car</span>
+</div>
+<div class="my-space-xs">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">14,892</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm">
+<span class="text-secondary font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +8.4%
+        </span>
+<span class="text-outline truncate">Session Total</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="flex flex-col justify-between bg-surface-container-low hover:bg-surface-container p-space-md rounded-lg shadow-sm transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">VEHICLES IN</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">south_east</span>
+</div>
+<div class="my-space-xs">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">8,421</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm">
+<span class="text-secondary font-semibold">Zone Alpha</span>
+<span class="text-outline">56.5% Flow</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="flex flex-col justify-between bg-surface-container-low hover:bg-surface-container p-space-md rounded-lg shadow-sm transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">VEHICLES OUT</span>
+<span class="material-symbols-outlined text-primary text-[18px]">north_east</span>
+</div>
+<div class="my-space-xs">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">6,471</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm">
+<span class="text-primary font-semibold">Zone Beta</span>
+<span class="text-outline">43.5% Flow</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="flex flex-col justify-between bg-error-container/15 hover:bg-error-container/25 p-space-md rounded-lg shadow-sm transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-error uppercase tracking-wider font-semibold">ACTIVE ALERTS</span>
+<span class="material-symbols-outlined text-error text-[18px]">crisis_alert</span>
+</div>
+<div class="my-space-xs flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl font-bold text-error tracking-tight">07</span>
+<span class="font-code-telemetry text-label-sm text-error/80 uppercase">Active Tripped</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm">
+<span class="text-error font-semibold">3 CRITICAL</span>
+<span class="text-on-surface-variant">4 HIGH</span>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="flex flex-col justify-between bg-surface-container-low hover:bg-surface-container p-space-md rounded-lg shadow-sm transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">PLATES DETECTED</span>
+<span class="material-symbols-outlined text-primary text-[18px]">document_scanner</span>
+</div>
+<div class="my-space-xs">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">11,204</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm">
+<span class="text-secondary font-semibold">OCR 96.2%</span>
+<span class="text-outline">Confidence</span>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="flex flex-col justify-between bg-surface-container-low hover:bg-surface-container p-space-md rounded-lg shadow-sm transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">ACTIVE CAMERAS</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">videocam</span>
+</div>
+<div class="my-space-xs flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">4 / 4</span>
+<span class="font-code-telemetry text-label-sm text-secondary uppercase font-semibold">ALL ONLINE</span>
+</div>
+<div class="flex items-center justify-between font-code-telemetry text-label-sm">
+<span class="text-secondary font-semibold">0 OFFLINE</span>
+<span class="text-outline">100% Uptime</span>
+</div>
+</div>
+</div>
+<!-- Center Layout (12-cols) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg">
+<!-- Left 8 cols: Live Monitoring + Analytics -->
+<div class="xl:col-span-8 flex flex-col gap-space-lg min-w-0">
+<!-- CCTV Monitoring Panel -->
+<div class="flex flex-col bg-surface-container-low rounded-lg overflow-hidden shadow-md">
+<!-- Feed Top Sub-Header -->
+<div class="flex flex-wrap items-center justify-between px-space-base py-space-sm bg-surface-container gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="flex h-2.5 w-2.5 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-error"></span>
+</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">CAM-01 — Perimeter North Gate</span>
+<span class="font-label-sm text-label-sm bg-surface-container-lowest px-space-xs py-0.5 rounded text-outline uppercase font-code-telemetry">H.264 RTSP</span>
+</div>
+<div class="flex items-center gap-space-md font-code-telemetry text-label-sm text-outline">
+<span class="text-on-surface">1920 × 1080 @ 30 FPS</span>
+<span>|</span>
+<span class="text-secondary font-medium">CONN: STABLE (18ms)</span>
+<span>|</span>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors" title="Zoom in" type="button">
+<span class="material-symbols-outlined text-[16px]">zoom_in</span>
+</button>
+<button class="p-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors" title="Snapshot" type="button">
+<span class="material-symbols-outlined text-[16px]">photo_camera</span>
+</button>
+<button class="p-1 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors" title="Full Feed" type="button">
+<span class="material-symbols-outlined text-[16px]">fullscreen</span>
+</button>
+</div>
+</div>
+</div>
+<!-- CCTV Visual Viewport -->
+<div class="relative w-full aspect-[16/9] bg-surface-container-lowest overflow-hidden select-none">
+<!-- Surveillance Background Photo -->
+<img class="w-full h-full object-cover opacity-60 mix-blend-luminosity" data-alt="High angle night surveillance camera view of a multi-lane highway gate checkpoint with blurred vehicle tail lights, street lamps cast in moody navy and dark charcoal tones, subtle asphalt sheen, tactical command atmosphere with high clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5ndNSNLYQD8H81ReOt7b4o0dyKZkmb5Dne7ZRROR9XM3A6pRLo1A2AV7KpM8ly9bs4aTRMhTcN-bUUDfTojTIPoGyQj-Zv9mNUdXU4CJIjC5DWLJOtbmAe13ieWf2faKCBv5E5hNFzEFWTxKenXlkQci6PyA45r3R7AYzPLAB0yG1jboU58sCG54uqOAUXsSGlpvChz1MbU_UzlfSVID21UdrxRRKcjHC6RgNWFJC6umBwoPazGY"/>
+<!-- Surveillance Crosshairs / Corner Grid Reticle -->
+<div class="absolute inset-0 pointer-events-none p-space-base flex flex-col justify-between">
+<div class="flex justify-between items-start text-outline/60 font-code-telemetry text-label-sm">
+<div class="flex flex-col">
+<span class="text-primary font-bold">[CAM-01 :: SENSOR CH-A]</span>
+<span>GEO: 34.0522° N, 118.2437° W</span>
+<span>AZIMUTH: 184° SSE // TILT: -14.2°</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-on-surface font-semibold bg-surface-container-lowest/80 px-2 py-0.5 rounded backdrop-blur">[2025-05-18 14:32:08.412 UTC]</span>
+<span class="text-secondary mt-0.5">FOV: OPTIMAL // IR: AUTO</span>
+</div>
+</div>
+<!-- Optical Center Reticle -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+<div class="w-24 h-24 border border-dashed border-primary rounded-full flex items-center justify-center">
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+</div>
+</div>
+<!-- Bottom Left & Right Optical Labels -->
+<div class="flex justify-between items-end text-outline/70 font-code-telemetry text-label-sm">
+<span class="bg-surface-container-lowest/80 px-2 py-0.5 rounded backdrop-blur">EXPOSURE: 1/120s // GAIN: +3.2dB</span>
+<span class="bg-surface-container-lowest/80 px-2 py-0.5 rounded backdrop-blur text-primary">AI PIPELINE: YOLOv8-DEFENSE // TRT-ACCEL</span>
+</div>
+</div>
+<!-- Zone Boundary Polygon Guides (SVG vector overlay) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" fill="none" preserveaspectratio="none" viewbox="0 0 1000 562">
+<!-- Zone Alpha Entry Polygon -->
+<polygon fill="rgba(78, 222, 163, 0.07)" points="120,480 380,240 520,240 280,520" stroke="rgba(78, 222, 163, 0.6)" stroke-dasharray="4 4" stroke-width="1.5"></polygon>
+<text fill="#4edea3" font-family="JetBrains Mono" font-size="12" font-weight="600" letter-spacing="1" x="210" y="470">ZONE ALPHA [INFLOW ENTRY]</text>
+<!-- Zone Beta Exit Polygon -->
+<polygon fill="rgba(137, 206, 255, 0.07)" points="560,240 710,240 920,530 720,530" stroke="rgba(137, 206, 255, 0.6)" stroke-dasharray="4 4" stroke-width="1.5"></polygon>
+<text fill="#89ceff" font-family="JetBrains Mono" font-size="12" font-weight="600" letter-spacing="1" x="730" y="470">ZONE BETA [OUTFLOW EXIT]</text>
+</svg>
+<!-- Bounding Box 1: Car #TRK-8821 -->
+<div class="absolute left-[28%] top-[42%] w-[18%] h-[26%] pointer-events-auto group cursor-pointer">
+<!-- Tactical L-brackets -->
+<div class="absolute -top-0.5 -left-0.5 w-3 h-3 border-t-2 border-l-2 border-secondary"></div>
+<div class="absolute -top-0.5 -right-0.5 w-3 h-3 border-t-2 border-r-2 border-secondary"></div>
+<div class="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-b-2 border-l-2 border-secondary"></div>
+<div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 border-b-2 border-r-2 border-secondary"></div>
+<!-- Bounding HUD Tag -->
+<div class="absolute -top-7 left-0 bg-surface-container-lowest/90 border border-secondary/60 backdrop-blur px-2 py-0.5 rounded shadow-sm whitespace-nowrap flex items-center gap-1.5 font-code-telemetry text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface font-semibold">#TRK-8821</span>
+<span class="text-secondary">SEDAN</span>
+<span class="text-outline">98.4%</span>
+<span class="text-primary font-bold">42 KM/H</span>
+</div>
+<div class="w-full h-full bg-secondary/5 group-hover:bg-secondary/15 transition-colors"></div>
+</div>
+<!-- Bounding Box 2: Truck #TRK-8824 -->
+<div class="absolute left-[52%] top-[34%] w-[24%] h-[38%] pointer-events-auto group cursor-pointer">
+<div class="absolute -top-0.5 -left-0.5 w-3 h-3 border-t-2 border-l-2 border-primary"></div>
+<div class="absolute -top-0.5 -right-0.5 w-3 h-3 border-t-2 border-r-2 border-primary"></div>
+<div class="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-b-2 border-l-2 border-primary"></div>
+<div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 border-b-2 border-r-2 border-primary"></div>
+<!-- Bounding HUD Tag -->
+<div class="absolute -top-7 left-0 bg-surface-container-lowest/90 border border-primary/60 backdrop-blur px-2 py-0.5 rounded shadow-sm whitespace-nowrap flex items-center gap-1.5 font-code-telemetry text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="text-on-surface font-semibold">#TRK-8824</span>
+<span class="text-primary font-bold">COMMERCIAL TRUCK</span>
+<span class="text-outline">94.1%</span>
+<span class="text-secondary font-bold">IN ZONE: ALPHA</span>
+</div>
+<div class="w-full h-full bg-primary/5 group-hover:bg-primary/15 transition-colors"></div>
+</div>
+<!-- Bounding Box 3: Motorcycle #TRK-8829 -->
+<div class="absolute left-[16%] top-[60%] w-[10%] h-[22%] pointer-events-auto group cursor-pointer">
+<div class="absolute -top-0.5 -left-0.5 w-2.5 h-2.5 border-t-2 border-l-2 border-tertiary"></div>
+<div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 border-t-2 border-r-2 border-tertiary"></div>
+<div class="absolute -bottom-0.5 -left-0.5 w-2.5 h-2.5 border-b-2 border-l-2 border-tertiary"></div>
+<div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border-b-2 border-r-2 border-tertiary"></div>
+<!-- Bounding HUD Tag -->
+<div class="absolute -top-7 left-0 bg-surface-container-lowest/90 border border-tertiary/60 backdrop-blur px-2 py-0.5 rounded shadow-sm whitespace-nowrap flex items-center gap-1.5 font-code-telemetry text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="text-on-surface font-semibold">#TRK-8829</span>
+<span class="text-tertiary">MOTORBIKE</span>
+<span class="text-outline">91.8%</span>
+</div>
+<div class="w-full h-full bg-tertiary/5 group-hover:bg-tertiary/15 transition-colors"></div>
+</div>
+</div>
+<!-- Vehicle Class Breakdown Quick Strip -->
+<div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-outline-variant/30 bg-surface-container p-space-sm font-code-telemetry">
+<div class="flex flex-col px-space-sm py-1">
+<div class="flex items-center justify-between text-label-sm">
+<span class="text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">directions_car</span> Cars
+              </span>
+<span class="text-primary font-bold">68.5%</span>
+</div>
+<span class="text-on-surface font-headline-sm text-headline-sm font-bold mt-0.5">10,210</span>
+</div>
+<div class="flex flex-col px-space-sm py-1">
+<div class="flex items-center justify-between text-label-sm">
+<span class="text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">local_shipping</span> Trucks
+              </span>
+<span class="text-secondary font-bold">14.4%</span>
+</div>
+<span class="text-on-surface font-headline-sm text-headline-sm font-bold mt-0.5">2,140</span>
+</div>
+<div class="flex flex-col px-space-sm py-1">
+<div class="flex items-center justify-between text-label-sm">
+<span class="text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">directions_bus</span> Buses
+              </span>
+<span class="text-primary-fixed-dim font-bold">9.5%</span>
+</div>
+<span class="text-on-surface font-headline-sm text-headline-sm font-bold mt-0.5">1,420</span>
+</div>
+<div class="flex flex-col px-space-sm py-1">
+<div class="flex items-center justify-between text-label-sm">
+<span class="text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">two_wheeler</span> Motorcycles
+              </span>
+<span class="text-tertiary font-bold">7.6%</span>
+</div>
+<span class="text-on-surface font-headline-sm text-headline-sm font-bold mt-0.5">1,122</span>
+</div>
+</div>
+</div>
+<!-- Traffic Flow Analytics Panel (Vector Chart) -->
+<div class="bg-surface-container-low p-space-base rounded-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">query_stats</span>
+              Hourly IN vs OUT Inflow Dynamics (24H Timeline)
+            </h2>
+<span class="font-body-sm text-body-sm text-outline">Synchronized rolling sensor telemetry aggregation across checkpoints</span>
+</div>
+<div class="flex items-center gap-space-md font-code-telemetry text-label-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 bg-secondary rounded-full"></span>
+<span class="text-on-surface">INFLOW (Zone Alpha)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 bg-primary rounded-full"></span>
+<span class="text-on-surface">OUTFLOW (Zone Beta)</span>
+</div>
+</div>
+</div>
+<!-- Inline SVG Multi-Stream Chart -->
+<div class="w-full h-48 bg-surface-container-lowest rounded-md p-space-sm relative overflow-hidden flex flex-col justify-between">
+<svg class="w-full h-full" fill="none" preserveaspectratio="none" viewbox="0 0 800 160">
+<!-- Subtle Grid lines -->
+<line stroke="#272a32" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="800" y1="40" y2="40"></line>
+<line stroke="#272a32" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="800" y1="80" y2="80"></line>
+<line stroke="#272a32" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="800" y1="120" y2="120"></line>
+<!-- INFLOW Line (Secondary Emerald Gradient) -->
+<defs>
+<lineargradient id="grad-in" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4edea3" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#4edea3" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="grad-out" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#89ceff" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#89ceff" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Area Fill INFLOW -->
+<path d="M0,130 Q80,110 160,85 T320,60 T480,30 T640,75 T800,45 L800,160 L0,160 Z" fill="url(#grad-in)"></path>
+<!-- Line Stroke INFLOW -->
+<path d="M0,130 Q80,110 160,85 T320,60 T480,30 T640,75 T800,45" stroke="#4edea3" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Area Fill OUTFLOW -->
+<path d="M0,145 Q80,135 160,110 T320,95 T480,65 T640,50 T800,80 L800,160 L0,160 Z" fill="url(#grad-out)"></path>
+<!-- Line Stroke OUTFLOW -->
+<path d="M0,145 Q80,135 160,110 T320,95 T480,65 T640,50 T800,80" stroke="#89ceff" stroke-dasharray="4 2" stroke-linecap="round" stroke-width="2"></path>
+<!-- Highlight Peak Dot -->
+<circle cx="480" cy="30" fill="#4edea3" r="4" stroke="#10131a" stroke-width="2"></circle>
+<circle cx="640" cy="50" fill="#89ceff" r="3.5" stroke="#10131a" stroke-width="2"></circle>
+</svg>
+<!-- 24h Axis Labels -->
+<div class="flex justify-between font-code-telemetry text-[10px] text-outline px-1">
+<span>00:00</span>
+<span>04:00</span>
+<span>08:00 (RUSH)</span>
+<span>12:00</span>
+<span class="text-secondary font-bold">14:00 (PEAK)</span>
+<span>18:00</span>
+<span>22:00</span>
+</div>
+</div>
+<!-- Proportional Class Flow Distribution Bar -->
+<div class="flex flex-col gap-1.5 mt-1">
+<div class="flex justify-between font-code-telemetry text-label-sm">
+<span class="text-outline uppercase">Fleet Composition Mix</span>
+<span class="text-on-surface">14,892 classified targets</span>
+</div>
+<div class="w-full h-2.5 bg-surface-container-highest rounded-full overflow-hidden flex">
+<div class="bg-primary" style="width: 68.5%" title="Cars: 68.5%"></div>
+<div class="bg-secondary" style="width: 14.4%" title="Trucks: 14.4%"></div>
+<div class="bg-surface-tint opacity-80" style="width: 9.5%" title="Buses: 9.5%"></div>
+<div class="bg-tertiary" style="width: 7.6%" title="Motorcycles: 7.6%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right 4 cols: Security Alerts Queue Panel -->
+<div class="xl:col-span-4 flex flex-col gap-space-md">
+<div class="bg-surface-container-low p-space-base rounded-lg shadow-sm flex flex-col h-full">
+<div class="flex items-center justify-between pb-space-sm border-b border-outline-variant/30">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-error text-[20px]">shield_with_heart</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Recent Security Alerts</h2>
+</div>
+<span class="font-code-telemetry text-label-sm bg-error-container text-error px-2 py-0.5 rounded font-bold">7 ACTIVE</span>
+</div>
+<!-- Alert Filter Tabs -->
+<div class="flex items-center gap-space-xs mt-space-sm font-code-telemetry text-label-sm">
+<button class="px-2.5 py-1 rounded bg-surface-container-high text-primary font-semibold" type="button">ALL (7)</button>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container text-outline hover:text-on-surface transition-colors" type="button">CRITICAL (3)</button>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container text-outline hover:text-on-surface transition-colors" type="button">UNACK (4)</button>
+</div>
+<!-- Alerts Stack -->
+<div class="flex flex-col gap-space-sm mt-space-md flex-1 overflow-y-auto pr-1">
+<!-- Alert 1: Critical Plate Match -->
+<div class="p-space-sm bg-error-container/10 border-l-2 border-error rounded flex flex-col gap-1.5 animate-pulse">
+<div class="flex items-center justify-between">
+<span class="px-1.5 py-0.2 bg-error text-on-error font-code-telemetry text-[10px] font-bold rounded uppercase">CRITICAL MATCH</span>
+<span class="font-code-telemetry text-label-sm text-outline">2m ago</span>
+</div>
+<div class="flex items-center justify-between mt-0.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-error text-[16px]">priority_high</span>
+<span class="font-code-telemetry text-body-md font-bold text-on-surface">PLATE: 7XYZ890</span>
+</div>
+<span class="font-code-telemetry text-[10px] text-error font-bold px-1.5 py-0.5 rounded bg-error-container/30">NEW BREACH</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Hotlist Hit #W-104: Stolen Luxury Sedan matching federal interdiction notice.</p>
+<div class="flex items-center justify-between pt-1 border-t border-error/20 font-code-telemetry text-[11px]">
+<span class="text-outline">CAM-01 [GATE NORTH]</span>
+<a class="text-error font-semibold hover:underline flex items-center gap-0.5" href="#">LOCK GATE <span class="material-symbols-outlined text-[12px]">lock</span></a>
+</div>
+</div>
+<!-- Alert 2: High Speed Anomaly -->
+<div class="p-space-sm bg-surface-container border-l-2 border-tertiary-container rounded flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="px-1.5 py-0.2 bg-tertiary-container text-on-tertiary-container font-code-telemetry text-[10px] font-bold rounded uppercase">HIGH SEVERITY</span>
+<span class="font-code-telemetry text-label-sm text-outline">14m ago</span>
+</div>
+<div class="flex items-center justify-between mt-0.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-tertiary text-[16px]">speed</span>
+<span class="font-code-telemetry text-body-md font-bold text-on-surface">PLATE: 4BCA123</span>
+</div>
+<span class="font-code-telemetry text-[10px] text-tertiary font-medium px-1.5 py-0.5 rounded bg-surface-container-high">DISPATCHED</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Speed Anomaly: 94 km/h recorded in tactical 40 km/h perimeter buffer.</p>
+<div class="flex items-center justify-between pt-1 border-t border-outline-variant/30 font-code-telemetry text-[11px]">
+<span class="text-outline">CAM-02 [SOUTH ENTRY]</span>
+<span class="text-tertiary">UNIT #4 RESPONDING</span>
+</div>
+</div>
+<!-- Alert 3: Medium Class Mismatch -->
+<div class="p-space-sm bg-surface-container border-l-2 border-primary rounded flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="px-1.5 py-0.2 bg-primary/20 text-primary font-code-telemetry text-[10px] font-bold rounded uppercase">CLASS MISMATCH</span>
+<span class="font-code-telemetry text-label-sm text-outline">28m ago</span>
+</div>
+<div class="flex items-center justify-between mt-0.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[16px]">fingerprint</span>
+<span class="font-code-telemetry text-body-md font-semibold text-on-surface">UNKNOWN PLATE // REG-MISMATCH</span>
+</div>
+<span class="font-code-telemetry text-[10px] text-primary font-medium px-1.5 py-0.5 rounded bg-surface-container-high">INVESTIGATING</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Registered as Mid-size SUV; Optical model detects Heavy Flatbed cargo payload.</p>
+<div class="flex items-center justify-between pt-1 border-t border-outline-variant/30 font-code-telemetry text-[11px]">
+<span class="text-outline">CAM-01 [GATE NORTH]</span>
+<span class="text-outline">TAGGED #TRK-8794</span>
+</div>
+</div>
+<!-- Alert 4: Low Loitering -->
+<div class="p-space-sm bg-surface-container border-l-2 border-outline rounded flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<span class="px-1.5 py-0.2 bg-surface-container-high text-on-surface-variant font-code-telemetry text-[10px] font-bold rounded uppercase">LOITERING ADVISORY</span>
+<span class="font-code-telemetry text-label-sm text-outline">42m ago</span>
+</div>
+<div class="flex items-center justify-between mt-0.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-[16px]">timer</span>
+<span class="font-code-telemetry text-body-md font-semibold text-on-surface">VEHICLE #TRK-8801</span>
+</div>
+<span class="font-code-telemetry text-[10px] text-outline font-medium px-1.5 py-0.5 rounded bg-surface-container-high">MONITORED</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Zone loiter timer threshold exceeded (&gt; 5.0m inside Restricted Standby Bay).</p>
+<div class="flex items-center justify-between pt-1 border-t border-outline-variant/30 font-code-telemetry text-[11px]">
+<span class="text-outline">CAM-03 [EAST DEPOT]</span>
+<span class="text-outline">DWELL: 07m 14s</span>
+</div>
+</div>
+</div>
+<!-- Quick Intercom / Dispatch Action -->
+<div class="mt-space-md pt-space-sm border-t border-outline-variant/30 flex items-center justify-between">
+<button class="w-full py-space-xs bg-surface-container-high hover:bg-surface-bright text-on-surface font-code-telemetry text-label-sm font-semibold rounded flex items-center justify-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">emergency_share</span>
+            DISPATCH INCIDENT LOG TO TACTICAL TEAMS
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Full Width: Recent Vehicles Telemetry Stream Table -->
+<div class="bg-surface-container-low rounded-lg shadow-sm overflow-hidden flex flex-col">
+<!-- Table Header & Controls -->
+<div class="flex flex-wrap items-center justify-between px-space-base py-space-sm bg-surface-container gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">table_chart</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Real-Time Vehicle Flow Stream</h3>
+<span class="font-code-telemetry text-label-sm text-outline px-2 py-0.5 rounded bg-surface-container-lowest">GET /api/vehicles</span>
+</div>
+<div class="flex items-center gap-space-sm font-code-telemetry text-label-sm">
+<div class="flex items-center gap-1 bg-surface-container-lowest px-2 py-1 rounded">
+<span class="text-outline">[FILTER]:</span>
+<span class="text-on-surface">ALL LANES</span>
+</div>
+<button class="flex items-center gap-1 bg-surface-container-high hover:bg-surface-bright px-2.5 py-1 rounded text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">download</span> Export CSV
+        </button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left font-code-telemetry border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest/70 text-outline uppercase text-[11px] tracking-wider border-b border-outline-variant/30">
+<th class="py-2.5 px-space-base font-semibold">VEHICLE ID</th>
+<th class="py-2.5 px-space-base font-semibold">CLASS</th>
+<th class="py-2.5 px-space-base font-semibold">CAMERA</th>
+<th class="py-2.5 px-space-base font-semibold">DIRECTION</th>
+<th class="py-2.5 px-space-base font-semibold">OCR LICENSE PLATE</th>
+<th class="py-2.5 px-space-base font-semibold">CONFIDENCE</th>
+<th class="py-2.5 px-space-base font-semibold">SPEED</th>
+<th class="py-2.5 px-space-base font-semibold">TIMESTAMP</th>
+<th class="py-2.5 px-space-base font-semibold text-right">ACTION</th>
+</tr>
+</thead>
+<tbody class="text-body-sm divide-y divide-outline-variant/20">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="py-2.5 px-space-base text-primary font-bold">VH-9824</td>
+<td class="py-2.5 px-space-base text-on-surface">Sedan (Civilian)</td>
+<td class="py-2.5 px-space-base text-on-surface-variant">CAM-01 [N-Gate]</td>
+<td class="py-2.5 px-space-base">
+<span class="px-2 py-0.5 rounded bg-secondary-container/20 text-secondary font-bold text-[10px] inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">south_east</span> IN
+              </span>
+</td>
+<td class="py-2.5 px-space-base font-bold text-on-surface tracking-wider">
+<span class="bg-surface-container-lowest px-2 py-0.5 rounded border border-outline-variant/40">7XYZ890</span>
+</td>
+<td class="py-2.5 px-space-base text-secondary font-semibold">98.4%</td>
+<td class="py-2.5 px-space-base text-on-surface">42 km/h</td>
+<td class="py-2.5 px-space-base text-outline">14:32:06.12 UTC</td>
+<td class="py-2.5 px-space-base text-right">
+<button class="p-1 rounded hover:bg-surface-container-high text-primary hover:text-primary-fixed transition-colors" title="Inspect Vehicle Telemetry" type="button">
+<span class="material-symbols-outlined text-[16px]">manage_search</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="py-2.5 px-space-base text-primary font-bold">VH-9825</td>
+<td class="py-2.5 px-space-base text-on-surface">Heavy Cargo Truck</td>
+<td class="py-2.5 px-space-base text-on-surface-variant">CAM-01 [N-Gate]</td>
+<td class="py-2.5 px-space-base">
+<span class="px-2 py-0.5 rounded bg-secondary-container/20 text-secondary font-bold text-[10px] inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">south_east</span> IN
+              </span>
+</td>
+<td class="py-2.5 px-space-base font-bold text-on-surface tracking-wider">
+<span class="bg-surface-container-lowest px-2 py-0.5 rounded border border-outline-variant/40">9KLM442</span>
+</td>
+<td class="py-2.5 px-space-base text-secondary font-semibold">94.1%</td>
+<td class="py-2.5 px-space-base text-on-surface">31 km/h</td>
+<td class="py-2.5 px-space-base text-outline">14:32:02.88 UTC</td>
+<td class="py-2.5 px-space-base text-right">
+<button class="p-1 rounded hover:bg-surface-container-high text-primary hover:text-primary-fixed transition-colors" title="Inspect Vehicle Telemetry" type="button">
+<span class="material-symbols-outlined text-[16px]">manage_search</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="py-2.5 px-space-base text-primary font-bold">VH-9826</td>
+<td class="py-2.5 px-space-base text-on-surface">Motorcycle</td>
+<td class="py-2.5 px-space-base text-on-surface-variant">CAM-02 [S-Exit]</td>
+<td class="py-2.5 px-space-base">
+<span class="px-2 py-0.5 rounded bg-primary-container/20 text-primary font-bold text-[10px] inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">north_east</span> OUT
+              </span>
+</td>
+<td class="py-2.5 px-space-base font-bold text-on-surface tracking-wider">
+<span class="bg-surface-container-lowest px-2 py-0.5 rounded border border-outline-variant/40">2MTC811</span>
+</td>
+<td class="py-2.5 px-space-base text-secondary font-semibold">91.8%</td>
+<td class="py-2.5 px-space-base text-on-surface">54 km/h</td>
+<td class="py-2.5 px-space-base text-outline">14:31:54.04 UTC</td>
+<td class="py-2.5 px-space-base text-right">
+<button class="p-1 rounded hover:bg-surface-container-high text-primary hover:text-primary-fixed transition-colors" title="Inspect Vehicle Telemetry" type="button">
+<span class="material-symbols-outlined text-[16px]">manage_search</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="py-2.5 px-space-base text-primary font-bold">VH-9827</td>
+<td class="py-2.5 px-space-base text-on-surface">Municipal Bus</td>
+<td class="py-2.5 px-space-base text-on-surface-variant">CAM-04 [Perimeter West]</td>
+<td class="py-2.5 px-space-base">
+<span class="px-2 py-0.5 rounded bg-primary-container/20 text-primary font-bold text-[10px] inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">north_east</span> OUT
+              </span>
+</td>
+<td class="py-2.5 px-space-base font-bold text-on-surface tracking-wider">
+<span class="bg-surface-container-lowest px-2 py-0.5 rounded border border-outline-variant/40">BUS-9020</span>
+</td>
+<td class="py-2.5 px-space-base text-secondary font-semibold">97.6%</td>
+<td class="py-2.5 px-space-base text-on-surface">38 km/h</td>
+<td class="py-2.5 px-space-base text-outline">14:31:48.33 UTC</td>
+<td class="py-2.5 px-space-base text-right">
+<button class="p-1 rounded hover:bg-surface-container-high text-primary hover:text-primary-fixed transition-colors" title="Inspect Vehicle Telemetry" type="button">
+<span class="material-symbols-outlined text-[16px]">manage_search</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="py-2.5 px-space-base text-primary font-bold">VH-9828</td>
+<td class="py-2.5 px-space-base text-on-surface">SUV (Fleet Patrol)</td>
+<td class="py-2.5 px-space-base text-on-surface-variant">CAM-03 [East Depot]</td>
+<td class="py-2.5 px-space-base">
+<span class="px-2 py-0.5 rounded bg-secondary-container/20 text-secondary font-bold text-[10px] inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">south_east</span> IN
+              </span>
+</td>
+<td class="py-2.5 px-space-base font-bold text-on-surface tracking-wider">
+<span class="bg-surface-container-lowest px-2 py-0.5 rounded border border-outline-variant/40">5FLEET1</span>
+</td>
+<td class="py-2.5 px-space-base text-secondary font-semibold">99.1%</td>
+<td class="py-2.5 px-space-base text-on-surface">26 km/h</td>
+<td class="py-2.5 px-space-base text-outline">14:31:39.19 UTC</td>
+<td class="py-2.5 px-space-base text-right">
+<button class="p-1 rounded hover:bg-surface-container-high text-primary hover:text-primary-fixed transition-colors" title="Inspect Vehicle Telemetry" type="button">
+<span class="material-symbols-outlined text-[16px]">manage_search</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Footnote Status Bar -->
+<div class="px-space-base py-space-xs bg-surface-container-lowest flex flex-wrap items-center justify-between text-outline font-code-telemetry text-label-sm border-t border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface">Connected to FastAPI <span class="text-primary">/api/vehicles</span> stream. Real-time WebSocket: Active (socket_id: #ws-9014-a)</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span>BUFFER: 256 FRAMES</span>
+<span>LATENCY: 12ms</span>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Dynamic Synchronous UTC Clock for Terminal Authenticity
+  function updateTelemetryZulu() {
+    const clock = document.getElementById('utc-clock');
+    if (!clock) return;
+    const now = new Date();
+    const iso = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+    clock.textContent = iso;
+  }
+  setInterval(updateTelemetryZulu, 1000);
+</script></main></div></body></html>
