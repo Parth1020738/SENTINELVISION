@@ -21,6 +21,7 @@ testdata/
 *.sqlite3
 
 # Temporary runtime/test files
+scratch/
 cam01_run.txt
 cam01_test.txt
 phase8_test_results.txt

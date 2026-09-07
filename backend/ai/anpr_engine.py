@@ -114,9 +114,60 @@ class ANPREngine:
         self.detector = plate_detector
         self.ocr = plate_ocr
         self.min_detection_confidence = min_detection_confidence
+        self._anpr_attempts = 0
+        self._ocr_attempts = 0
 
         # canonical_id -> _VehiclePlateState
         self._state: Dict[int, _VehiclePlateState] = {}
+
+    def _crop_vehicle_roi(
+        self,
+        frame: np.ndarray,
+        vehicle_bbox: Tuple[float, float, float, float],
+        margin_ratio: float = 0.10,
+    ) -> Tuple[Optional[np.ndarray], float, float, float]:
+        """Crop a vehicle ROI from the frame with bounded expansion and clamping.
+
+        Returns (roi_crop, rx1, ry1, scale_factor)
+        """
+        h, w = frame.shape[:2]
+        vx1, vy1, vx2, vy2 = vehicle_bbox
+        vw = max(0.0, vx2 - vx1)
+        vh = max(0.0, vy2 - vy1)
+
+        if vw < 15 or vh < 15:
+            return None, 0.0, 0.0, 1.0
+
+        # Expand box by margin_ratio
+        pad_w = vw * margin_ratio
+        pad_h = vh * margin_ratio
+
+        rx1 = max(0, int(round(vx1 - pad_w)))
+        ry1 = max(0, int(round(vy1 - pad_h)))
+        rx2 = min(w, int(round(vx2 + pad_w)))
+        ry2 = min(h, int(round(vy2 + pad_h)))
+
+        rw = rx2 - rx1
+        rh = ry2 - ry1
+
+        if rw <= 10 or rh <= 10:
+            return None, 0.0, 0.0, 1.0
+
+        crop = frame[ry1:ry2, rx1:rx2]
+        if crop is None or crop.size == 0:
+            return None, 0.0, 0.0, 1.0
+
+        # Scale ROI up if small so detector receives clear features
+        target_w = 640.0
+        if rw < target_w:
+            scale = target_w / float(rw)
+            target_h = int(round(rh * scale))
+            import cv2
+
+            crop_scaled = cv2.resize(crop, (int(target_w), target_h))
+            return crop_scaled, float(rx1), float(ry1), scale
+        else:
+            return crop, float(rx1), float(ry1), 1.0
 
     # ------------------------------------------------------------------
     def process_frame(
@@ -128,7 +179,7 @@ class ANPREngine:
     ) -> List[ANPRResult]:
         """Process one frame for ANPR.
 
-        For each vehicle: detect plate -> crop -> OCR -> normalize
+        For each vehicle: ROI crop -> plate detect -> crop -> OCR -> normalize
         -> validate -> update multi-frame aggregation.
 
         Returns
@@ -143,14 +194,35 @@ class ANPREngine:
         if frame is None or frame.size == 0:
             return []
 
-        # Detect all plates in the frame once
-        all_plates = self.detector.detect(frame)
-
         updated: List[ANPRResult] = []
+        all_plates_fallback: Optional[List[PlateDetection]] = None
 
         for vehicle in vehicles:
-            # 1. Match best plate to this vehicle
-            plate = self._match_plate_to_vehicle(all_plates, vehicle.bbox)
+            self._anpr_attempts += 1
+            # 1. Try vehicle ROI-based plate detection
+            roi_crop, rx1, ry1, scale = self._crop_vehicle_roi(frame, vehicle.bbox)
+            roi_plates: List[PlateDetection] = []
+            if roi_crop is not None and roi_crop.size > 0:
+                crop_h, crop_w = roi_crop.shape[:2]
+                roi_dets = self.detector.detect(roi_crop)
+                for d in roi_dets:
+                    # Filter out detections that fall outside the ROI crop bounds
+                    if d.x1 > crop_w or d.y1 > crop_h or d.x2 < 0 or d.y2 < 0:
+                        continue
+                    full_x1 = rx1 + (d.x1 / scale)
+                    full_y1 = ry1 + (d.y1 / scale)
+                    full_x2 = rx1 + (d.x2 / scale)
+                    full_y2 = ry1 + (d.y2 / scale)
+                    roi_plates.append(PlateDetection(full_x1, full_y1, full_x2, full_y2, d.confidence))
+
+            plate = self._match_plate_to_vehicle(roi_plates, vehicle.bbox) if roi_plates else None
+
+            # Fallback: full-frame detection if ROI detection yielded nothing (mock/backwards compatibility)
+            if plate is None:
+                if all_plates_fallback is None:
+                    all_plates_fallback = self.detector.detect(frame)
+                plate = self._match_plate_to_vehicle(all_plates_fallback, vehicle.bbox)
+
             if plate is None:
                 continue
 
@@ -163,6 +235,7 @@ class ANPREngine:
                 continue
 
             # 3. OCR
+            self._ocr_attempts += 1
             ocr_result = self.ocr.recognize(crop)
 
             # 4. Normalize

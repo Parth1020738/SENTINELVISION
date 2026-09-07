@@ -17,7 +17,6 @@ from backend.ai.vehicle_detector import (
     CLASS_NAMES,
     ALLOWED_CLASS_IDS,
     VehicleDetector,
-    DEFAULT_MODEL_PATH,
     DEFAULT_CONFIDENCE,
     DEFAULT_IMGSZ,
 )

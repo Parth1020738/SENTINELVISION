@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../api/client';
-import { useApi, formatTimestamp, formatRelativeTime, getStatusColor, getPriorityColor } from '../hooks';
+import { useApi, useEventStream, formatTimestamp, formatRelativeTime, getStatusColor, getPriorityColor } from '../hooks';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
@@ -10,6 +10,16 @@ export default function AlertsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const alerts = useApi(() => api.getAlerts(statusFilter ? { status: statusFilter } : undefined), [statusFilter], 10000);
   const [error, setError] = useState<string | null>(null);
+  const { subscribe } = useEventStream();
+
+  useEffect(() => {
+    const unsubscribe = subscribe((event) => {
+      if (['alert_created', 'alert_status_changed'].includes(event.event_type)) {
+        alerts.refresh();
+      }
+    });
+    return unsubscribe;
+  }, [subscribe, alerts]);
 
   const handleStatusUpdate = async (alertId: number, status: string) => {
     try {

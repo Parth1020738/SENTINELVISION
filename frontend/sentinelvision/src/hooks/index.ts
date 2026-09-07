@@ -1,6 +1,6 @@
-// SentinelVision React Hooks
 import { useState, useEffect, useCallback } from 'react';
 import { ApiError } from '../api/client';
+export { useEventStream } from './useEventStream';
 
 export type AsyncState<T> = 
   | { status: 'loading'; data: null; error: null }

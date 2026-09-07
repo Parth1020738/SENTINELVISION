@@ -248,7 +248,11 @@ def fetch_camera_catalogue(
         def fetcher(url: str, t: float) -> Any:
             import json
 
-            with urllib.request.urlopen(url, timeout=t) as response:  # noqa: S310
+            req = urllib.request.Request(
+                url,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) SentinelVision/1.0"},
+            )
+            with urllib.request.urlopen(req, timeout=t) as response:  # noqa: S310
                 return json.loads(response.read().decode("utf-8"))
 
     try:

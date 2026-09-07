@@ -3,6 +3,7 @@
 
 import {
   Camera,
+  CameraPlaybackResponse,
   PlateSearchResponse,
   CountsResponse,
   WatchlistListResponse,
@@ -61,6 +62,7 @@ export const api = {
   // Cameras
   getCameras: () => request<Camera[]>('/api/cameras'),
   getCamera: (cameraId: string) => request<Camera>(`/api/cameras/${cameraId}`),
+  getCameraPlayback: (cameraId: string) => request<CameraPlaybackResponse>(`/api/cameras/${cameraId}/playback`),
 
   // Vehicles
   getVehicleHistory: (canonicalVehicleId: number) => request<VehicleEvent[]>(`/api/vehicles/${canonicalVehicleId}/history`),

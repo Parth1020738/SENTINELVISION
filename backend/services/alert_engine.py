@@ -151,6 +151,31 @@ class AlertEngine:
             status="NEW",
         )
         alert.id = self.alerts.create_alert(alert)
+        try:
+            from backend.services.event_hub import event_hub
+            event_hub.publish_sync(
+                "alert_created",
+                camera_id=camera_id,
+                data={
+                    "alert_id": alert.id,
+                    "normalized_plate": normalized,
+                    "canonical_vehicle_id": canonical_vehicle_id,
+                    "reason": alert.reason,
+                    "category": alert.category,
+                    "priority": alert.priority,
+                    "status": alert.status,
+                },
+            )
+            event_hub.publish_sync(
+                "attention_changed",
+                camera_id=camera_id,
+                data={
+                    "attention_state": "CRITICAL",
+                    "attention_reason": f"Active critical alert: {alert.reason or normalized}",
+                },
+            )
+        except Exception:
+            pass
         return alert
 
     # ------------------------------------------------------------------

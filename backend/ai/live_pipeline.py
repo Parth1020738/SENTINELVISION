@@ -62,7 +62,7 @@ from backend.ai.track_continuity_manager import (
     TrackObservation,
 )
 from backend.ai.vehicle_class_stabilizer import VehicleClassStabilizer
-from backend.ai.vehicle_tracker import VehicleObservation, VehicleTracker
+from backend.ai.vehicle_tracker import VehicleTracker
 from backend.ai.zone_counter import CountingEvent, ZoneCounter, ZoneObservation
 from backend.db.database import DEFAULT_DB_PATH, Database
 from backend.db.models import Camera, PlateRead, VehicleEvent, ZoneCount

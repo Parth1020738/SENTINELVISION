@@ -480,5 +480,36 @@ class TestBestPlateRetained(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
+# Test 26: Phase 9.7 Vehicle ROI ANPR Improvements
+# ---------------------------------------------------------------------------
+class TestPhase97VehicleROIANPR(unittest.TestCase):
+    def test_crop_vehicle_roi_expansion_and_clamping(self):
+        engine, _, _ = make_engine()
+        frame = make_frame(w=1920, h=1080)
+        bbox = (500.0, 400.0, 700.0, 600.0)
+        roi_crop, rx1, ry1, scale = engine._crop_vehicle_roi(frame, bbox, margin_ratio=0.10)
+        self.assertIsNotNone(roi_crop)
+        self.assertEqual(rx1, 480.0)
+        self.assertEqual(ry1, 380.0)
+        self.assertGreater(scale, 0.0)
+
+    def test_too_small_roi_handled(self):
+        engine, _, _ = make_engine()
+        frame = make_frame(w=1920, h=1080)
+        bbox = (100.0, 100.0, 105.0, 105.0)
+        roi_crop, rx1, ry1, scale = engine._crop_vehicle_roi(frame, bbox)
+        self.assertIsNone(roi_crop)
+
+    def test_boundary_edge_clamping(self):
+        engine, _, _ = make_engine()
+        frame = make_frame(w=1920, h=1080)
+        bbox = (0.0, 0.0, 100.0, 100.0)
+        roi_crop, rx1, ry1, scale = engine._crop_vehicle_roi(frame, bbox)
+        self.assertIsNotNone(roi_crop)
+        self.assertEqual(rx1, 0.0)
+        self.assertEqual(ry1, 0.0)
+
+
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     unittest.main()

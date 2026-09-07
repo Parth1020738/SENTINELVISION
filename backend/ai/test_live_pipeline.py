@@ -21,7 +21,7 @@ import os
 import tempfile
 import unittest
 
-from backend.ai.anpr_engine import ANPRResult, VehicleInfo
+from backend.ai.anpr_engine import ANPRResult
 from backend.ai.live_pipeline import LivePipeline
 from backend.ai.track_continuity_manager import TrackContinuityManager
 from backend.ai.vehicle_class_stabilizer import VehicleClassStabilizer

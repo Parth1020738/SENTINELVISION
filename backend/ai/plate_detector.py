@@ -202,7 +202,7 @@ def download_plate_model(
 
 def build_real_plate_detector(
     model_path: Optional[Path] = None,
-    confidence: float = 0.2,
+    confidence: float = 0.10,
     imgsz: int = 960,
 ) -> "YoloPlateDetector":
     """Construct a real YOLO plate detector.

@@ -16,15 +16,19 @@ Security
 import os
 from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.api.deps import Repositories, get_repositories
+from backend.camera.camera_catalogue import NormalizedCamera, global_catalogue
+from backend.services.attention_engine import AttentionEngine
+from backend.services.event_hub import event_hub
 from backend.api.schemas import (
     AlertListResponse,
     AlertResponse,
     AlertStatusUpdate,
+    CameraPlaybackResponse,
     CameraResponse,
     CountsResponse,
     DirectionTotals,
@@ -47,7 +51,6 @@ from backend.db.models import (
     VehicleEvent,
     WatchlistEntry,
 )
-from backend.services.alert_engine import AlertEngine
 
 app = FastAPI(
     title="SentinelVision API",
@@ -129,19 +132,57 @@ def _alert_to_response(alert: Alert) -> AlertResponse:
     )
 
 
-def _camera_to_response(camera: Camera) -> CameraResponse:
+def _compute_attention_state(camera, repos: Repositories):
+    try:
+        res = AttentionEngine.evaluate(camera, repos=repos)
+        return res.attention_state, res.attention_reason
+    except Exception:
+        return "NORMAL", None
+
+
+def _camera_to_response(
+    camera, attention_state: str = "NORMAL", attention_reason: Optional[str] = None
+) -> CameraResponse:
+    if isinstance(camera, NormalizedCamera):
+        return CameraResponse(
+            camera_id=camera.camera_id,
+            name=camera.name,
+            location=camera.location,
+            latitude=camera.latitude,
+            longitude=camera.longitude,
+            codec=camera.codec,
+            width=camera.width,
+            height=camera.height,
+            resolution=camera.resolution,
+            live=camera.live,
+            status=camera.status,
+            ai_active=camera.ai_active,
+            attention_state=attention_state,
+            attention_reason=attention_reason,
+        )
+
+    res = getattr(camera, "resolution", None)
+    if not res and getattr(camera, "width", None) and getattr(camera, "height", None):
+        res = f"{camera.width}x{camera.height}"
+
+    cam_id = str(getattr(camera, "camera_id", ""))
     return CameraResponse(
-        camera_id=camera.camera_id,
-        name=camera.name,
-        location=camera.location,
-        latitude=camera.latitude,
-        longitude=camera.longitude,
-        codec=camera.codec,
-        width=camera.width,
-        height=camera.height,
-        live=camera.live,
-        created_at=camera.created_at,
-        updated_at=camera.updated_at,
+        camera_id=cam_id,
+        name=getattr(camera, "name", None),
+        location=getattr(camera, "location", None),
+        latitude=getattr(camera, "latitude", None),
+        longitude=getattr(camera, "longitude", None),
+        codec=getattr(camera, "codec", None),
+        width=getattr(camera, "width", None),
+        height=getattr(camera, "height", None),
+        resolution=res,
+        live=bool(getattr(camera, "live", False)),
+        status="online" if getattr(camera, "live", False) else "offline",
+        ai_active=(cam_id == "cam01"),
+        attention_state=attention_state,
+        attention_reason=attention_reason,
+        created_at=getattr(camera, "created_at", None),
+        updated_at=getattr(camera, "updated_at", None),
     )
 
 
@@ -202,8 +243,42 @@ def health(repos: Repositories = Depends(get_repositories)):
 @app.get("/api/cameras", response_model=List[CameraResponse])
 def list_cameras(repos: Repositories = Depends(get_repositories)):
     """All registered cameras (safe metadata only)."""
-    cameras = repos.cameras.list_cameras()
-    return [_camera_to_response(c) for c in cameras]
+    catalogue_cams = global_catalogue.get_cameras()
+    db_cams = repos.cameras.list_cameras()
+
+    cam_map = {}
+    for c in catalogue_cams:
+        cam_map[c.camera_id] = c
+
+    for db_c in db_cams:
+        if db_c.camera_id in cam_map:
+            cat_c = cam_map[db_c.camera_id]
+            if db_c.name and db_c.name != f"Camera {db_c.camera_id}":
+                cat_c.name = db_c.name
+            if db_c.location:
+                cat_c.location = db_c.location
+            if db_c.latitude is not None:
+                cat_c.latitude = db_c.latitude
+            if db_c.longitude is not None:
+                cat_c.longitude = db_c.longitude
+            if db_c.width:
+                cat_c.width = db_c.width
+            if db_c.height:
+                cat_c.height = db_c.height
+                cat_c.resolution = f"{db_c.width}x{db_c.height}"
+        else:
+            cam_map[db_c.camera_id] = db_c
+
+    responses = []
+    for cam_id, cam in cam_map.items():
+        att_state, att_reason = _compute_attention_state(cam, repos)
+        responses.append(
+            _camera_to_response(
+                cam, attention_state=att_state, attention_reason=att_reason
+            )
+        )
+
+    return responses
 
 
 @app.get("/api/cameras/{camera_id}", response_model=CameraResponse)
@@ -211,12 +286,44 @@ def get_camera(
     camera_id: str, repos: Repositories = Depends(get_repositories)
 ):
     """One camera by id; 404 if unknown."""
-    camera = repos.cameras.get_camera(camera_id)
-    if camera is None:
+    cameras = list_cameras(repos=repos)
+    for c in cameras:
+        if c.camera_id == camera_id:
+            return c
+
+    raise HTTPException(
+        status_code=404, detail=f"Camera '{camera_id}' not found"
+    )
+
+
+@app.get("/api/cameras/{camera_id}/playback", response_model=CameraPlaybackResponse)
+def get_camera_playback(
+    camera_id: str, repos: Repositories = Depends(get_repositories)
+):
+    """Return browser-safe camera playback metadata.
+
+    The returned payload MUST contain safe playback URLs only (e.g. HLS).
+    It NEVER exposes RTSP credentials, usernames, passwords, or
+    authenticated RTSP/WebRTC URLs.
+    """
+    cameras = list_cameras(repos=repos)
+    cam = next((c for c in cameras if c.camera_id == camera_id), None)
+
+    if cam is None:
         raise HTTPException(
             status_code=404, detail=f"Camera '{camera_id}' not found"
         )
-    return _camera_to_response(camera)
+
+    # Official HLS browser stream contract
+    playback_url = f"https://cctv.corp8.cloud/{camera_id}/index.m3u8"
+
+    return CameraPlaybackResponse(
+        camera_id=camera_id,
+        playback_type="hls",
+        playback_url=playback_url,
+        available=True,
+    )
+
 
 
 # ---------------------------------------------------------------------------
@@ -521,7 +628,48 @@ def update_alert_status(
     if not ok:
         raise HTTPException(status_code=404, detail="Alert not found")
     alert = repos.alerts.get_alert(alert_id)
+    if alert is not None:
+        try:
+            event_hub.publish_sync(
+                "alert_status_changed",
+                camera_id=alert.camera_id,
+                data={
+                    "alert_id": alert.id,
+                    "status": alert.status,
+                    "normalized_plate": alert.normalized_plate,
+                },
+            )
+            att_state, att_reason = _compute_attention_state(alert.camera_id, repos)
+            event_hub.publish_sync(
+                "attention_changed",
+                camera_id=alert.camera_id,
+                data={
+                    "attention_state": att_state,
+                    "attention_reason": att_reason,
+                },
+            )
+        except Exception:
+            pass
     return _alert_to_response(alert)
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.6: Real-time WebSocket endpoint
+# ---------------------------------------------------------------------------
+@app.websocket("/api/events/ws")
+async def websocket_events_endpoint(websocket: WebSocket):
+    """Real-time WebSocket event stream for dashboard clients."""
+    await websocket.accept()
+    event_hub.register(websocket)
+    try:
+        while True:
+            msg = await websocket.receive_text()
+            if msg == "ping":
+                await websocket.send_text("pong")
+    except WebSocketDisconnect:
+        event_hub.unregister(websocket)
+    except Exception:
+        event_hub.unregister(websocket)
 
 
 def run():  # pragma: no cover - manual convenience entry point

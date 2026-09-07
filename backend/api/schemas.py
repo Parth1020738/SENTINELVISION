@@ -28,9 +28,23 @@ class CameraResponse(BaseModel):
     codec: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
+    resolution: Optional[str] = None
     live: bool = False
+    status: str = "available"
+    ai_active: bool = False
+    attention_state: str = "NORMAL"
+    attention_reason: Optional[str] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
+
+
+class CameraPlaybackResponse(BaseModel):
+    """Safe browser playback metadata (no credentials, no authenticated RTSP)."""
+
+    camera_id: str
+    playback_type: str = "hls"
+    playback_url: str
+    available: bool = True
 
 
 # ---------------------------------------------------------------------------

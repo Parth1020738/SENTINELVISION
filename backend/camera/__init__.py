@@ -12,6 +12,11 @@ Public API
 - :func:`configure_rtsp_tcp` - force ``rtsp_transport;tcp`` for OpenCV.
 """
 
+from backend.camera.camera_catalogue import (
+    CameraCatalogue,
+    NormalizedCamera,
+    global_catalogue,
+)
 from backend.camera.camera_stream import CameraStream, configure_rtsp_tcp
 from backend.camera.rtsp_credentials import (
     ENV_RTSP_EMAIL,
@@ -25,6 +30,9 @@ from backend.camera.rtsp_credentials import (
 )
 
 __all__ = [
+    "CameraCatalogue",
+    "NormalizedCamera",
+    "global_catalogue",
     "CameraStream",
     "configure_rtsp_tcp",
     "ENV_RTSP_EMAIL",
@@ -36,3 +44,4 @@ __all__ = [
     "get_rtsp_credentials",
     "redact_url",
 ]
+

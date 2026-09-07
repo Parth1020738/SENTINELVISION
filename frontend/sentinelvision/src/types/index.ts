@@ -10,9 +10,21 @@ export interface Camera {
   codec?: string | null;
   width?: number | null;
   height?: number | null;
+  resolution?: string | null;
   live: boolean;
+  status?: string;
+  ai_active?: boolean;
+  attention_state?: 'NORMAL' | 'WATCH' | 'CRITICAL' | string;
+  attention_reason?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+}
+
+export interface CameraPlaybackResponse {
+  camera_id: string;
+  playback_type: string;
+  playback_url: string;
+  available: boolean;
 }
 
 export interface VehicleEvent {
@@ -145,3 +157,12 @@ export const ALERT_STATUSES = ['NEW', 'ACKNOWLEDGED', 'RESOLVED'] as const;
 export type WatchlistCategory = typeof WATCHLIST_CATEGORIES[number];
 export type WatchlistPriority = typeof WATCHLIST_PRIORITIES[number];
 export type AlertStatus = typeof ALERT_STATUSES[number];
+
+export interface RealtimeEvent {
+  event_type: 'alert_created' | 'alert_status_changed' | 'attention_changed' | 'zone_count_changed' | 'plate_read' | 'vehicle_event' | string;
+  timestamp: string;
+  camera_id?: string | null;
+  data: Record<string, any>;
+}
+
+export type ConnectionStatus = 'CONNECTED' | 'RECONNECTING' | 'DISCONNECTED';

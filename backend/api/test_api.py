@@ -37,6 +37,8 @@ class APITestCase(unittest.TestCase):
     """Shared fixture: temp database + TestClient with override."""
 
     def setUp(self):
+        from backend.camera.camera_catalogue import global_catalogue
+        global_catalogue.fetcher = lambda url, t: None
         self._tmpdir = tempfile.TemporaryDirectory()
         self.db = Database(os.path.join(self._tmpdir.name, "test.db"))
         self.db.initialize()
@@ -593,5 +595,24 @@ class TestAlertsAPI(APITestCase):
             text = self.client.get(url).text
             self.assertNotIn("secret123", text, url)
             self.assertNotIn("rtsp://", text, url)
+
+    def test_get_camera_playback_valid(self):
+        self.add_camera("cam01")
+        res = self.client.get("/api/cameras/cam01/playback")
+        self.assertEqual(res.status_code, 200)
+        body = res.json()
+        self.assertEqual(body["camera_id"], "cam01")
+        self.assertEqual(body["playback_type"], "hls")
+        self.assertEqual(body["playback_url"], "https://cctv.corp8.cloud/cam01/index.m3u8")
+        self.assertTrue(body["available"])
+        self.assertNotIn("rtsp://", res.text)
+        self.assertNotIn("secret123", res.text)
+
+    def test_get_camera_playback_unknown_404(self):
+        res = self.client.get("/api/cameras/unknown999/playback")
+        self.assertEqual(res.status_code, 404)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
