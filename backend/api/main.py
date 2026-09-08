@@ -636,6 +636,19 @@ def get_camera_playback(
     )
 
 
+@app.get("/api/debug/tcp")
+def debug_tcp_endpoint():
+    import socket
+    res = {"target": "103.250.160.189:8554", "reachable": False, "error": None}
+    try:
+        s = socket.create_connection(("103.250.160.189", 8554), timeout=5.0)
+        s.close()
+        res["reachable"] = True
+    except Exception as e:
+        res["error"] = str(e)
+    return res
+
+
 @app.get("/api/debug/ping")
 def debug_ping():
     res = {}
