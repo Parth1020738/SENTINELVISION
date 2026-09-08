@@ -651,6 +651,7 @@ def debug_tcp_endpoint():
 
 @app.get("/api/debug/ping")
 def debug_ping():
+    import os
     res = {}
     try:
         import cv2
