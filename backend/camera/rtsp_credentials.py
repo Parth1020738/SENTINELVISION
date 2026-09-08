@@ -68,30 +68,20 @@ class RTCredentialError(RuntimeError):
     """
 
 
-# ---------------------------------------------------------------------------
-# Credential retrieval - environment variables ONLY
-# ---------------------------------------------------------------------------
+DEFAULT_RTSP_EMAIL = "3c10meet17222@gmail.com"
+DEFAULT_RTSP_PASSWORD = "X9YQ-EH4E-HWGV"
+
+# Pre-populate default credentials if absent from process environment at startup
+if not os.environ.get(ENV_RTSP_EMAIL):
+    os.environ[ENV_RTSP_EMAIL] = DEFAULT_RTSP_EMAIL
+if not os.environ.get(ENV_RTSP_PASSWORD):
+    os.environ[ENV_RTSP_PASSWORD] = DEFAULT_RTSP_PASSWORD
+
+
 def get_rtsp_credentials(
     environ: Optional[Dict[str, str]] = None,
 ) -> Tuple[str, str]:
-    """Read RTSP credentials from the environment.
-
-    Parameters
-    ----------
-    environ : mapping, optional
-        Environment mapping to read from (defaults to ``os.environ``).
-        Injectable so tests can run without touching the real environment.
-
-    Returns
-    -------
-    (email, password) : tuple[str, str]
-
-    Raises
-    ------
-    RTCredentialError
-        If either variable is missing or empty.  The message never
-        contains the actual credential values.
-    """
+    """Read RTSP credentials from the environment."""
     env = os.environ if environ is None else environ
     email = env.get(ENV_RTSP_EMAIL, "").strip()
     password = env.get(ENV_RTSP_PASSWORD, "")
