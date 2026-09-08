@@ -143,6 +143,38 @@ export interface HealthResponse {
   timestamp?: string;
 }
 
+export interface CameraHealth {
+  camera_id: string;
+  name?: string | null;
+  location?: string | null;
+  status: 'ONLINE' | 'DEGRADED' | 'OFFLINE' | 'NOT_CHECKED' | string;
+  last_successful_frame_at?: string | null;
+  last_attempt_at?: string | null;
+  last_failure_at?: string | null;
+  consecutive_failures: number;
+  reconnect_count: number;
+  last_error?: string | null;
+  ai_active: boolean;
+  attention_state?: 'NORMAL' | 'WATCH' | 'CRITICAL' | string;
+  attention_reason?: string | null;
+}
+
+export interface HealthSummaryCounts {
+  total_configured: number;
+  online_count: number;
+  degraded_count: number;
+  offline_count: number;
+  not_checked_count: number;
+  ai_active_count: number;
+}
+
+export interface SystemHealthResponse {
+  status: string;
+  database: string;
+  summary: HealthSummaryCounts;
+  cameras: CameraHealth[];
+}
+
 export interface VehicleHistoryResponse {
   canonical_vehicle_id: number;
   event_count: number;

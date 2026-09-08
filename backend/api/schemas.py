@@ -243,3 +243,76 @@ class GlobalVehicleRouteResponse(BaseModel):
     total_observations: int
     mapped_points_count: int
     points: List[RoutePointResponse]
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.12: System Health Schemas
+# ---------------------------------------------------------------------------
+class CameraHealthResponse(BaseModel):
+    camera_id: str
+    name: Optional[str] = None
+    location: Optional[str] = None
+    status: str = "NOT_CHECKED"
+    last_successful_frame_at: Optional[str] = None
+    last_attempt_at: Optional[str] = None
+    last_failure_at: Optional[str] = None
+    consecutive_failures: int = 0
+    reconnect_count: int = 0
+    last_error: Optional[str] = None
+    ai_active: bool = False
+    attention_state: str = "NORMAL"
+    attention_reason: Optional[str] = None
+
+
+class HealthSummaryCounts(BaseModel):
+    total_configured: int = 0
+    online_count: int = 0
+    degraded_count: int = 0
+    offline_count: int = 0
+    not_checked_count: int = 0
+    ai_active_count: int = 0
+
+
+class SystemHealthResponse(BaseModel):
+    status: str = "ok"
+    database: str = "ok"
+    summary: HealthSummaryCounts
+    cameras: List[CameraHealthResponse]
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.14: Auth & Security Schemas
+# ---------------------------------------------------------------------------
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    role: str
+    username: str
+
+
+class UserResponse(BaseModel):
+    username: str
+    role: str
+
+
+class AuditLogResponse(BaseModel):
+    id: Optional[int] = None
+    actor: str
+    action: str
+    resource_type: str
+    resource_id: Optional[str] = None
+    result: str = "SUCCESS"
+    metadata_json: Optional[str] = None
+    timestamp: Optional[str] = None
+
+
+class AuditLogListResponse(BaseModel):
+    count: int
+    results: List[AuditLogResponse]
+
+

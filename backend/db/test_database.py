@@ -137,6 +137,8 @@ class TestDatabaseCreation(DatabaseTestBase):
             self.db.table_names(),
             [
                 "alerts",
+                "audit_logs",
+                "camera_health",
                 "cameras",
                 "cross_camera_observations",
                 "global_vehicles",

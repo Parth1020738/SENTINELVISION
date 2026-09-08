@@ -24,6 +24,7 @@ Security
 - Only redacted, credential-free descriptions may appear in logs.
 """
 
+import datetime
 import logging
 import os
 import time
@@ -41,6 +42,10 @@ from backend.camera.rtsp_credentials import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _now_iso() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 # ---------------------------------------------------------------------------
 # Contract constants
@@ -121,6 +126,12 @@ class CameraStream:
         self._frames_read = 0
         self.last_connect_error: Optional[str] = None
 
+        # Telemetry tracking for Phase 9.12 System Health
+        self.last_attempt_at: Optional[str] = None
+        self.last_successful_frame_at: Optional[str] = None
+        self.last_failure_at: Optional[str] = None
+        self.reconnect_count: int = 0
+
     # ------------------------------------------------------------------
     # URL construction (central, credential-safe)
     # ------------------------------------------------------------------
@@ -162,6 +173,7 @@ class CameraStream:
         attempt = 0
         while True:
             attempt += 1
+            self.last_attempt_at = _now_iso()
             # TCP must be configured BEFORE opening the capture.
             configure_rtsp_tcp()
             try:
@@ -169,6 +181,7 @@ class CameraStream:
             except RTCredentialError as exc:
                 # Message contains no secrets by design.
                 self.last_connect_error = str(exc)
+                self.last_failure_at = _now_iso()
                 logger.error("RTSP credential error: %s", exc)
                 raise
 
@@ -192,6 +205,7 @@ class CameraStream:
             except Exception:  # noqa: BLE001
                 pass
 
+            self.last_failure_at = _now_iso()
             self.last_connect_error = (
                 "capture could not be opened (possible 401/auth rejection)"
             )
@@ -233,6 +247,7 @@ class CameraStream:
         if not ok or frame is None:
             # Inter-frame gaps are normal on looping feeds - do not fail
             # immediately; only reconnect after sustained failure.
+            self.last_failure_at = _now_iso()
             self._consecutive_read_failures += 1
             if self._consecutive_read_failures >= self._read_failure_limit:
                 logger.warning(
@@ -245,13 +260,26 @@ class CameraStream:
 
         self._consecutive_read_failures = 0
         self._frames_read += 1
+        self.last_successful_frame_at = _now_iso()
         pts_ms = self._capture.get(cv2.CAP_PROP_POS_MSEC)
         return True, frame, float(pts_ms) if pts_ms is not None else None
 
     def reconnect(self) -> bool:
         """Release the current capture and reconnect with backoff."""
+        self.reconnect_count += 1
         self.release()
         return self.connect()
+
+    @property
+    def health_status(self) -> str:
+        """Determine deterministic camera stream runtime health status."""
+        if self.last_attempt_at is None and self.last_successful_frame_at is None:
+            return "NOT_CHECKED"
+        if self._capture is not None and self._consecutive_read_failures == 0 and self.reconnect_count == 0:
+            return "ONLINE"
+        if self._capture is not None and (self.reconnect_count > 0 or 1 <= self._consecutive_read_failures < self._read_failure_limit):
+            return "DEGRADED"
+        return "OFFLINE"
 
     # ------------------------------------------------------------------
     # Stream metadata

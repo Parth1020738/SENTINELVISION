@@ -20,7 +20,8 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request, WebSocket, 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.api.deps import Repositories, get_repositories
+from backend.api.deps import Repositories, get_repositories, get_current_user, require_role
+from backend.auth import authenticate_user, create_access_token, check_rate_limit, record_failed_login
 from backend.camera.camera_catalogue import NormalizedCamera, global_catalogue
 from backend.services.attention_engine import AttentionEngine
 from backend.services.event_hub import event_hub
@@ -28,6 +29,9 @@ from backend.api.schemas import (
     AlertListResponse,
     AlertResponse,
     AlertStatusUpdate,
+    AuditLogListResponse,
+    AuditLogResponse,
+    CameraHealthResponse,
     CameraPlaybackResponse,
     CameraResponse,
     CountsResponse,
@@ -37,9 +41,14 @@ from backend.api.schemas import (
     GlobalVehicleResponse,
     GlobalVehicleRouteResponse,
     GlobalVehicleTimelineResponse,
+    HealthSummaryCounts,
+    LoginRequest,
     PlateReadResponse,
     PlateSearchResponse,
     RoutePointResponse,
+    SystemHealthResponse,
+    TokenResponse,
+    UserResponse,
     VehicleEventResponse,
     WatchlistEntryCreate,
     WatchlistEntryResponse,
@@ -52,6 +61,7 @@ from backend.db.models import (
     WATCHLIST_CATEGORIES,
     WATCHLIST_PRIORITIES,
     Alert,
+    AuditLog,
     Camera,
     PlateRead,
     VehicleEvent,
@@ -88,6 +98,17 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Lightweight middleware injecting standard HTTP security headers."""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    return response
+
+
 # ---------------------------------------------------------------------------
 # Error handling — never leak internals to clients
 # ---------------------------------------------------------------------------
@@ -99,6 +120,91 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
         content={"detail": "Internal server error"},
     )
 
+
+# ---------------------------------------------------------------------------
+# Phase 9.14: Authentication & Audit Endpoints
+# ---------------------------------------------------------------------------
+@app.post("/api/auth/login", response_model=TokenResponse)
+def login(
+    payload: LoginRequest,
+    request: Request,
+    repos: Repositories = Depends(get_repositories),
+):
+    """Authenticate administrator or operator credentials and return a bearer token."""
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    if not check_rate_limit(client_ip, max_attempts=5, window_seconds=60):
+        repos.audit.add_audit_entry(
+            actor=payload.username or "unknown",
+            action="LOGIN_RATE_LIMITED",
+            resource_type="auth",
+            result="FAILURE",
+            metadata_json=f'{{"ip": "{client_ip}"}}',
+        )
+        raise HTTPException(
+            status_code=429, detail="Too many failed login attempts. Please wait 1 minute."
+        )
+
+    user = authenticate_user(payload.username, payload.password)
+    if not user:
+        record_failed_login(client_ip)
+        repos.audit.add_audit_entry(
+            actor=payload.username or "unknown",
+            action="LOGIN_FAILED",
+            resource_type="auth",
+            result="FAILURE",
+            metadata_json=f'{{"ip": "{client_ip}"}}',
+        )
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    token = create_access_token(user["username"], user["role"])
+    repos.audit.add_audit_entry(
+        actor=user["username"],
+        action="LOGIN_SUCCESS",
+        resource_type="auth",
+        result="SUCCESS",
+        metadata_json=f'{{"role": "{user["role"]}", "ip": "{client_ip}"}}',
+    )
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        role=user["role"],
+        username=user["username"],
+    )
+
+
+@app.get("/api/auth/me", response_model=UserResponse)
+def get_current_user_profile(user: dict = Depends(get_current_user)):
+    """Return profile info for the authenticated token."""
+    return UserResponse(username=user["username"], role=user["role"])
+
+
+@app.get("/api/audit", response_model=AuditLogListResponse)
+def list_audit_logs(
+    actor: Optional[str] = Query(None),
+    action: Optional[str] = Query(None),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    user: dict = Depends(require_role("ADMIN")),
+    repos: Repositories = Depends(get_repositories),
+):
+    """Retrieve security audit logs (ADMIN role required)."""
+    logs = repos.audit.list_audit_entries(actor=actor, action=action, limit=limit, offset=offset)
+    return AuditLogListResponse(
+        count=len(logs),
+        results=[
+            AuditLogResponse(
+                id=l.id,
+                actor=l.actor,
+                action=l.action,
+                resource_type=l.resource_type,
+                resource_id=l.resource_id,
+                result=l.result,
+                metadata_json=l.metadata_json,
+                timestamp=l.timestamp,
+            )
+            for l in logs
+        ],
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -263,7 +369,7 @@ def _plate_to_response(read: PlateRead) -> PlateReadResponse:
 
 
 # ---------------------------------------------------------------------------
-# Health
+# Health & Telemetry
 # ---------------------------------------------------------------------------
 @app.get("/health")
 def health(repos: Repositories = Depends(get_repositories)):
@@ -277,6 +383,104 @@ def health(repos: Repositories = Depends(get_repositories)):
     except Exception:
         database_ok = False
     return {"status": "ok", "database": "ok" if database_ok else "unavailable"}
+
+
+def _build_camera_health_responses(repos: Repositories) -> List[CameraHealthResponse]:
+    catalogue_cams = global_catalogue.get_cameras()
+    db_cams = repos.cameras.list_cameras()
+
+    cam_map = {}
+    for c in catalogue_cams:
+        cam_map[c.camera_id] = c
+
+    for db_c in db_cams:
+        if db_c.camera_id in cam_map:
+            cat_c = cam_map[db_c.camera_id]
+            if db_c.name and db_c.name != f"Camera {db_c.camera_id}":
+                cat_c.name = db_c.name
+            if db_c.location:
+                cat_c.location = db_c.location
+        else:
+            cam_map[db_c.camera_id] = db_c
+
+    db_health_list = repos.health.list_health()
+    health_map = {h.camera_id: h for h in db_health_list}
+
+    responses: List[CameraHealthResponse] = []
+    for cam_id in sorted(cam_map.keys()):
+        cam = cam_map[cam_id]
+        att_state, att_reason = _compute_attention_state(cam, repos)
+        is_ai_active = (cam_id == "cam01")
+
+        h = health_map.get(cam_id)
+        status = h.status if h else "NOT_CHECKED"
+
+        responses.append(
+            CameraHealthResponse(
+                camera_id=cam_id,
+                name=getattr(cam, "name", None),
+                location=getattr(cam, "location", None),
+                status=status,
+                last_successful_frame_at=h.last_successful_frame_at if h else None,
+                last_attempt_at=h.last_attempt_at if h else None,
+                last_failure_at=h.last_failure_at if h else None,
+                consecutive_failures=h.consecutive_failures if h else 0,
+                reconnect_count=h.reconnect_count if h else 0,
+                last_error=h.last_error if h else None,
+                ai_active=is_ai_active,
+                attention_state=att_state,
+                attention_reason=att_reason,
+            )
+        )
+    return responses
+
+
+@app.get("/api/system/health", response_model=SystemHealthResponse)
+def get_system_health(repos: Repositories = Depends(get_repositories)):
+    """Full system health summary and camera monitoring list."""
+    database_ok = True
+    try:
+        repos.db.table_names()
+    except Exception:
+        database_ok = False
+
+    cam_responses = _build_camera_health_responses(repos)
+
+    total = len(cam_responses)
+    online_count = sum(1 for c in cam_responses if c.status == "ONLINE")
+    degraded_count = sum(1 for c in cam_responses if c.status == "DEGRADED")
+    offline_count = sum(1 for c in cam_responses if c.status == "OFFLINE")
+    not_checked_count = sum(1 for c in cam_responses if c.status in ("NOT_CHECKED", "UNKNOWN"))
+    ai_active_count = sum(1 for c in cam_responses if c.ai_active)
+
+    summary = HealthSummaryCounts(
+        total_configured=total,
+        online_count=online_count,
+        degraded_count=degraded_count,
+        offline_count=offline_count,
+        not_checked_count=not_checked_count,
+        ai_active_count=ai_active_count,
+    )
+
+    sys_status = (
+        "ok"
+        if database_ok and offline_count == 0 and degraded_count == 0
+        else ("degraded" if database_ok else "unavailable")
+    )
+
+    return SystemHealthResponse(
+        status=sys_status,
+        database="ok" if database_ok else "unavailable",
+        summary=summary,
+        cameras=cam_responses,
+    )
+
+
+@app.get("/api/cameras/health", response_model=List[CameraHealthResponse])
+def get_cameras_health(repos: Repositories = Depends(get_repositories)):
+    """Camera health list endpoint."""
+    return _build_camera_health_responses(repos)
+
 
 
 # ---------------------------------------------------------------------------
@@ -534,6 +738,7 @@ def get_watchlist_entry(
 @app.post("/api/watchlist", response_model=WatchlistEntryResponse, status_code=201)
 def create_watchlist_entry(
     payload: WatchlistEntryCreate,
+    user: dict = Depends(require_role("ADMIN")),
     repos: Repositories = Depends(get_repositories),
 ):
     """Add a watched plate.  The plate is normalized before storage.
@@ -560,7 +765,19 @@ def create_watchlist_entry(
         if "already exists" in message:
             raise HTTPException(status_code=409, detail=message)
         raise HTTPException(status_code=400, detail=message)
+
     created = repos.watchlist.get_watchlist_entry(entry_id)
+
+    # Security Audit Log
+    repos.audit.add_audit_entry(
+        actor=user.get("username", "system"),
+        action="WATCHLIST_CREATE",
+        resource_type="watchlist",
+        resource_id=created.normalized_plate,
+        result="SUCCESS",
+        metadata_json=f'{{"category": "{created.category}", "priority": "{created.priority}"}}',
+    )
+
     return _watchlist_to_response(created)
 
 
@@ -568,6 +785,7 @@ def create_watchlist_entry(
 def patch_watchlist_entry(
     plate: str,
     payload: WatchlistEntryUpdate,
+    user: dict = Depends(require_role("ADMIN")),
     repos: Repositories = Depends(get_repositories),
 ):
     """Update selected fields of a watchlist entry."""
@@ -588,13 +806,25 @@ def patch_watchlist_entry(
         raise HTTPException(status_code=400, detail=str(exc))
     if not updated:
         raise HTTPException(status_code=404, detail="Watchlist entry not found")
+
     entry = repos.watchlist.get_watchlist_entry_by_plate(plate)
+
+    # Security Audit Log
+    repos.audit.add_audit_entry(
+        actor=user.get("username", "system"),
+        action="WATCHLIST_UPDATE",
+        resource_type="watchlist",
+        resource_id=entry.normalized_plate,
+        result="SUCCESS",
+    )
+
     return _watchlist_to_response(entry)
 
 
 @app.delete("/api/watchlist/{plate}")
 def delete_watchlist_entry(
     plate: str,
+    user: dict = Depends(require_role("ADMIN")),
     repos: Repositories = Depends(get_repositories),
 ):
     """Soft-disable a watchlist entry (active=False, no data loss)."""
@@ -604,9 +834,21 @@ def delete_watchlist_entry(
         raise HTTPException(status_code=400, detail=str(exc))
     if not ok:
         raise HTTPException(status_code=404, detail="Watchlist entry not found")
+
+    norm = normalize_plate_text(plate)
+
+    # Security Audit Log
+    repos.audit.add_audit_entry(
+        actor=user.get("username", "system"),
+        action="WATCHLIST_DELETE",
+        resource_type="watchlist",
+        resource_id=norm,
+        result="SUCCESS",
+    )
+
     return {
         "detail": "Watchlist entry deactivated",
-        "plate": normalize_plate_text(plate),
+        "plate": norm,
     }
 
 
@@ -664,6 +906,7 @@ def get_alert(
 def update_alert_status(
     alert_id: int,
     payload: AlertStatusUpdate,
+    user: dict = Depends(require_role("OPERATOR")),
     repos: Repositories = Depends(get_repositories),
 ):
     """Update the status of an alert (NEW / ACKNOWLEDGED / RESOLVED)."""
@@ -680,6 +923,16 @@ def update_alert_status(
         raise HTTPException(status_code=404, detail="Alert not found")
     alert = repos.alerts.get_alert(alert_id)
     if alert is not None:
+        # Security Audit Log
+        repos.audit.add_audit_entry(
+            actor=user.get("username", "system"),
+            action="ALERT_STATUS_UPDATE",
+            resource_type="alert",
+            resource_id=str(alert.id),
+            result="SUCCESS",
+            metadata_json=f'{{"status": "{alert.status}", "plate": "{alert.normalized_plate}"}}',
+        )
+
         try:
             event_hub.publish_sync(
                 "alert_status_changed",

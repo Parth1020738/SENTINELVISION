@@ -32,10 +32,13 @@ from typing import List, Optional
 from backend.db.database import Database, _to_utc_iso
 from backend.db.models import (
     ALERT_STATUSES,
+    CAMERA_HEALTH_STATUSES,
     WATCHLIST_CATEGORIES,
     WATCHLIST_PRIORITIES,
     Alert,
     Camera,
+    CameraHealth,
+    AuditLog,
     CrossCameraObservation,
     GlobalVehicle,
     PlateRead,
@@ -1114,6 +1117,261 @@ class GlobalVehicleRepository:
                 }
             )
         return points
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.12: Camera Health Repository
+# ---------------------------------------------------------------------------
+def _row_to_camera_health(row: sqlite3.Row) -> CameraHealth:
+    return CameraHealth(
+        id=int(row["id"]),
+        camera_id=row["camera_id"],
+        status=row["status"],
+        last_successful_frame_at=row["last_successful_frame_at"],
+        last_attempt_at=row["last_attempt_at"],
+        last_failure_at=row["last_failure_at"],
+        consecutive_failures=int(row["consecutive_failures"]),
+        reconnect_count=int(row["reconnect_count"]),
+        last_error=row["last_error"],
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
+class CameraHealthRepository:
+    """Persistence and updates for camera runtime health telemetry."""
+
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def upsert_health(self, health: CameraHealth) -> int:
+        """Insert or update a camera runtime health record."""
+        now = _to_utc_iso(None)
+        safe_error = redact_url(health.last_error) if health.last_error else health.last_error
+        with self.db.connection() as conn:
+            conn.execute(
+                """
+                INSERT INTO camera_health (
+                    camera_id, status, last_successful_frame_at,
+                    last_attempt_at, last_failure_at,
+                    consecutive_failures, reconnect_count, last_error,
+                    created_at, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (camera_id) DO UPDATE SET
+                    status                   = excluded.status,
+                    last_successful_frame_at = excluded.last_successful_frame_at,
+                    last_attempt_at          = excluded.last_attempt_at,
+                    last_failure_at          = excluded.last_failure_at,
+                    consecutive_failures     = excluded.consecutive_failures,
+                    reconnect_count          = excluded.reconnect_count,
+                    last_error               = excluded.last_error,
+                    updated_at               = excluded.updated_at
+                """,
+                (
+                    health.camera_id,
+                    health.status,
+                    health.last_successful_frame_at,
+                    health.last_attempt_at,
+                    health.last_failure_at,
+                    health.consecutive_failures,
+                    health.reconnect_count,
+                    safe_error,
+                    health.created_at or now,
+                    now,
+                ),
+            )
+            row = conn.execute(
+                "SELECT id FROM camera_health WHERE camera_id = ?",
+                (health.camera_id,),
+            ).fetchone()
+            return int(row["id"])
+
+    def record_success(self, camera_id: str, timestamp: Optional[str] = None) -> CameraHealth:
+        """Record a successful frame read observation for a camera."""
+        now = _to_utc_iso(timestamp)
+        existing = self.get_health(camera_id)
+        reconnects = existing.reconnect_count if existing else 0
+        status = "DEGRADED" if reconnects > 0 else "ONLINE"
+        health = CameraHealth(
+            camera_id=camera_id,
+            status=status,
+            last_successful_frame_at=now,
+            last_attempt_at=now,
+            last_failure_at=existing.last_failure_at if existing else None,
+            consecutive_failures=0,
+            reconnect_count=reconnects,
+            last_error=existing.last_error if existing else None,
+        )
+        self.upsert_health(health)
+        return self.get_health(camera_id)  # type: ignore
+
+    def record_failure(
+        self,
+        camera_id: str,
+        error_msg: Optional[str] = None,
+        timestamp: Optional[str] = None,
+        consecutive: Optional[int] = None,
+    ) -> CameraHealth:
+        """Record a stream connection/read failure observation for a camera."""
+        now = _to_utc_iso(timestamp)
+        existing = self.get_health(camera_id)
+        prev_consec = existing.consecutive_failures if existing else 0
+        new_consec = consecutive if consecutive is not None else (prev_consec + 1)
+        reconnects = existing.reconnect_count if existing else 0
+        last_success = existing.last_successful_frame_at if existing else None
+
+        if new_consec >= 60 or (existing and existing.status == "OFFLINE"):
+            status = "OFFLINE"
+        elif new_consec >= 1 or reconnects > 0:
+            status = "DEGRADED"
+        else:
+            status = "OFFLINE"
+
+        safe_err = redact_url(error_msg) if error_msg else (existing.last_error if existing else "Read/connect failure")
+
+        health = CameraHealth(
+            camera_id=camera_id,
+            status=status,
+            last_successful_frame_at=last_success,
+            last_attempt_at=now,
+            last_failure_at=now,
+            consecutive_failures=new_consec,
+            reconnect_count=reconnects,
+            last_error=safe_err,
+        )
+        self.upsert_health(health)
+        return self.get_health(camera_id)  # type: ignore
+
+    def record_reconnect(self, camera_id: str, timestamp: Optional[str] = None) -> CameraHealth:
+        """Record a stream reconnect attempt."""
+        now = _to_utc_iso(timestamp)
+        existing = self.get_health(camera_id)
+        reconnects = (existing.reconnect_count + 1) if existing else 1
+        last_success = existing.last_successful_frame_at if existing else None
+        last_err = existing.last_error if existing else "Stream reconnecting"
+
+        health = CameraHealth(
+            camera_id=camera_id,
+            status="DEGRADED",
+            last_successful_frame_at=last_success,
+            last_attempt_at=now,
+            last_failure_at=now,
+            consecutive_failures=0,
+            reconnect_count=reconnects,
+            last_error=last_err,
+        )
+        self.upsert_health(health)
+        return self.get_health(camera_id)  # type: ignore
+
+    def get_health(self, camera_id: str) -> Optional[CameraHealth]:
+        """Return the runtime health record for camera_id, or None."""
+        with self.db.connection() as conn:
+            row = conn.execute(
+                "SELECT * FROM camera_health WHERE camera_id = ?",
+                (camera_id,),
+            ).fetchone()
+        return _row_to_camera_health(row) if row else None
+
+    def list_health(self) -> List[CameraHealth]:
+        """Return all runtime health records ordered by camera_id."""
+        with self.db.connection() as conn:
+            rows = conn.execute(
+                "SELECT * FROM camera_health ORDER BY camera_id"
+            ).fetchall()
+        return [_row_to_camera_health(r) for r in rows]
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.14: Audit Logging Repository
+# ---------------------------------------------------------------------------
+def _row_to_audit_log(row: sqlite3.Row) -> AuditLog:
+    return AuditLog(
+        id=row["id"],
+        actor=row["actor"],
+        action=row["action"],
+        resource_type=row["resource_type"],
+        resource_id=row["resource_id"],
+        result=row["result"],
+        metadata_json=row["metadata_json"],
+        timestamp=row["timestamp"],
+    )
+
+
+class AuditRepository:
+    """Repository for managing security and administration audit logs."""
+
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def add_audit_entry(
+        self,
+        actor: str,
+        action: str,
+        resource_type: str,
+        resource_id: Optional[str] = None,
+        result: str = "SUCCESS",
+        metadata_json: Optional[str] = None,
+        timestamp: Optional[str] = None,
+    ) -> AuditLog:
+        """Create and persist a new audit log entry."""
+        iso_ts = _to_utc_iso(timestamp)
+        with self.db.connection() as conn:
+            cur = conn.execute(
+                """
+                INSERT INTO audit_logs (
+                    actor, action, resource_type, resource_id, result, metadata_json, timestamp
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    actor,
+                    action,
+                    resource_type,
+                    resource_id,
+                    result,
+                    metadata_json,
+                    iso_ts,
+                ),
+            )
+            audit_id = cur.lastrowid
+
+        return AuditLog(
+            id=audit_id,
+            actor=actor,
+            action=action,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            result=result,
+            metadata_json=metadata_json,
+            timestamp=iso_ts,
+        )
+
+    def list_audit_entries(
+        self,
+        actor: Optional[str] = None,
+        action: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> List[AuditLog]:
+        """List audit log entries ordered by timestamp DESC."""
+        query = "SELECT * FROM audit_logs WHERE 1=1"
+        params = []
+        if actor:
+            query += " AND actor = ?"
+            params.append(actor)
+        if action:
+            query += " AND action = ?"
+            params.append(action)
+
+        query += " ORDER BY timestamp DESC, id DESC LIMIT ? OFFSET ?"
+        params.extend([int(limit), int(offset)])
+
+        with self.db.connection() as conn:
+            rows = conn.execute(query, params).fetchall()
+        return [_row_to_audit_log(r) for r in rows]
+
+
 
 
 

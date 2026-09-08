@@ -14,6 +14,8 @@ import {
   Alert,
   VehicleEvent,
   HealthResponse,
+  CameraHealth,
+  SystemHealthResponse,
   GlobalVehicle,
   GlobalVehicleListResponse,
   GlobalVehicleTimelineResponse,
@@ -62,6 +64,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 export const api = {
   // Health
   getHealth: () => request<HealthResponse>('/health'),
+  getSystemHealth: () => request<SystemHealthResponse>('/api/system/health'),
+  getCamerasHealth: () => request<CameraHealth[]>('/api/cameras/health'),
 
   // Cameras
   getCameras: (selectedCameraId?: string) =>

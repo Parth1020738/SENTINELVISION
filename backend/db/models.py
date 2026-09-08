@@ -187,3 +187,45 @@ class CrossCameraObservation:
     plate_read_id: Optional[int] = None
     created_at: Optional[str] = None
     id: Optional[int] = field(default=None, repr=False)
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.12: System Health & Camera Monitoring
+# ---------------------------------------------------------------------------
+CAMERA_HEALTH_STATUSES = ("NOT_CHECKED", "ONLINE", "DEGRADED", "OFFLINE")
+
+
+@dataclass
+class CameraHealth:
+    """Runtime health observation record for a camera stream."""
+
+    camera_id: str
+    status: str = "NOT_CHECKED"
+    last_successful_frame_at: Optional[str] = None
+    last_attempt_at: Optional[str] = None
+    last_failure_at: Optional[str] = None
+    consecutive_failures: int = 0
+    reconnect_count: int = 0
+    last_error: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    id: Optional[int] = field(default=None, repr=False)
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.14: Audit Logging
+# ---------------------------------------------------------------------------
+@dataclass
+class AuditLog:
+    """Security and administrative audit trail record."""
+
+    actor: str
+    action: str
+    resource_type: str
+    resource_id: Optional[str] = None
+    result: str = "SUCCESS"
+    metadata_json: Optional[str] = None
+    timestamp: Optional[str] = None
+    id: Optional[int] = field(default=None, repr=False)
+
+
