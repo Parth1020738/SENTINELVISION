@@ -636,6 +636,31 @@ def get_camera_playback(
     )
 
 
+@app.get("/api/debug/ping")
+def debug_ping():
+    res = {}
+    try:
+        import cv2
+        res["opencv_version"] = cv2.__version__
+    except Exception as e:
+        res["opencv_error"] = str(e)
+
+    try:
+        import socket
+        res["socket"] = "available"
+    except Exception as e:
+        res["socket_error"] = str(e)
+
+    try:
+        from backend.camera.rtsp_credentials import build_authenticated_rtsp_url
+        url = build_authenticated_rtsp_url("cam01")
+        res["rtsp_url_constructed"] = True
+    except Exception as e:
+        res["rtsp_url_error"] = str(e)
+
+    return res
+
+
 @app.get("/api/debug/rtsp")
 def debug_rtsp_endpoint():
     """Unauthenticated debug endpoint returning stack traces for Render diagnostic."""
