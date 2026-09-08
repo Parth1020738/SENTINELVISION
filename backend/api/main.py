@@ -13,8 +13,11 @@ Security
   environment variable (comma-separated) for the local dashboard.
 """
 
+import logging
 import os
 from typing import List, Optional
+
+logger = logging.getLogger("sentinelvision.api")
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -652,7 +655,7 @@ def debug_tcp_endpoint():
 @app.get("/api/debug/ping")
 def debug_ping():
     import os
-    res = {"version": "v10.1-live-ready"}
+    res = {"version": "v10.2-live-ready"}
     try:
         import cv2
         res["opencv_version"] = cv2.__version__
@@ -771,7 +774,7 @@ def diagnose_camera_rtsp(
     user: dict = Depends(get_current_user),
 ):
     """Diagnostic endpoint for Render -> RTSP connectivity verification."""
-    import socket, time, cv2
+    import os, socket, time, cv2
     from backend.camera.rtsp_credentials import (
         ENV_RTSP_EMAIL,
         ENV_RTSP_PASSWORD,
