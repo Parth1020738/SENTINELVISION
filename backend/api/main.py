@@ -636,6 +636,75 @@ def get_camera_playback(
     )
 
 
+@app.get("/api/cameras/{camera_id}/diagnose")
+def diagnose_camera_rtsp(
+    camera_id: str,
+    user: dict = Depends(get_current_user),
+):
+    """Diagnostic endpoint for Render -> RTSP connectivity verification."""
+    import socket, time, cv2
+    from backend.camera.rtsp_credentials import (
+        ENV_RTSP_EMAIL,
+        ENV_RTSP_PASSWORD,
+        build_authenticated_rtsp_url,
+        configure_rtsp_tcp,
+    )
+
+    env_email = os.environ.get(ENV_RTSP_EMAIL, "").strip()
+    env_pass = os.environ.get(ENV_RTSP_PASSWORD, "")
+
+    result = {
+        "camera_id": camera_id,
+        "env_email_configured": bool(env_email),
+        "env_password_configured": bool(env_pass),
+        "tcp_8554_reachable": False,
+        "rtsp_url_built": False,
+        "opencv_opened": False,
+        "frame_read": False,
+        "frame_resolution": None,
+        "error": None,
+    }
+
+    # Test TCP socket connection to 103.250.160.189:8554
+    try:
+        sock = socket.create_connection(("103.250.160.189", 8554), timeout=5.0)
+        sock.close()
+        result["tcp_8554_reachable"] = True
+    except Exception as e:
+        result["error"] = f"TCP socket to 103.250.160.189:8554 failed: {e}"
+        return result
+
+    if not env_email or not env_pass:
+        result["error"] = f"Missing server-side RTSP credentials ({ENV_RTSP_EMAIL} or {ENV_RTSP_PASSWORD} not set)"
+        return result
+
+    # Test RTSP URL build
+    try:
+        url = build_authenticated_rtsp_url(camera_id)
+        result["rtsp_url_built"] = True
+    except Exception as e:
+        result["error"] = f"Failed to build RTSP URL: {e}"
+        return result
+
+    # Test OpenCV VideoCapture
+    configure_rtsp_tcp()
+    cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
+    if cap.isOpened():
+        result["opencv_opened"] = True
+        ret, frame = cap.read()
+        if ret and frame is not None:
+            result["frame_read"] = True
+            h, w, c = frame.shape
+            result["frame_resolution"] = f"{w}x{h}"
+        else:
+            result["error"] = "VideoCapture opened but frame read failed"
+        cap.release()
+    else:
+        result["error"] = "cv2.VideoCapture(url, cv2.CAP_FFMPEG) failed to open RTSP stream"
+
+    return result
+
+
 @app.get("/api/cameras/{camera_id}/live")
 def stream_camera_mjpeg(
     camera_id: str,
@@ -650,22 +719,27 @@ def stream_camera_mjpeg(
     import cv2, time
     from backend.camera.rtsp_credentials import build_authenticated_rtsp_url, configure_rtsp_tcp
 
-    def frame_generator():
-        configure_rtsp_tcp()
-        try:
-            url = build_authenticated_rtsp_url(camera_id)
-        except Exception:
-            return
+    configure_rtsp_tcp()
+    try:
+        url = build_authenticated_rtsp_url(camera_id)
+    except Exception as err:
+        logger.error(f"[MJPEG] Credential error for camera {camera_id}: {err}")
+        raise HTTPException(status_code=500, detail=f"RTSP Credential Error: {err}")
 
-        cap = cv2.VideoCapture(url)
-        if not cap.isOpened():
-            return
+    cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
+    if not cap.isOpened():
+        logger.error(f"[MJPEG] OpenCV failed to open RTSP stream for {camera_id}")
+        raise HTTPException(
+            status_code=502,
+            detail=f"Unable to connect to RTSP stream for {camera_id} on 103.250.160.189:8554",
+        )
 
+    def frame_generator(capture):
         try:
             last_frame_time = time.time()
             consecutive_fails = 0
             while True:
-                ret, frame = cap.read()
+                ret, frame = capture.read()
                 if not ret or frame is None:
                     consecutive_fails += 1
                     if consecutive_fails > 30:
@@ -691,10 +765,10 @@ def stream_camera_mjpeg(
                     b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n'
                 )
         finally:
-            cap.release()
+            capture.release()
 
     return StreamingResponse(
-        frame_generator(),
+        frame_generator(cap),
         media_type='multipart/x-mixed-replace; boundary=frame',
         headers={
             "Cache-Control": "no-cache, no-store, must-revalidate",

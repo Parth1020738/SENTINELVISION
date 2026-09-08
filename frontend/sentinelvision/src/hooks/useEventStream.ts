@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RealtimeEvent, ConnectionStatus } from '../types';
+import { API_BASE_URL } from '../api/client';
 
 export function useEventStream() {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('DISCONNECTED');
@@ -10,9 +11,16 @@ export function useEventStream() {
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getWsUrl = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host || '127.0.0.1:8000';
-    return `${protocol}//${host}/api/events/ws`;
+    let baseUrl = API_BASE_URL;
+    if (baseUrl.startsWith('http://')) {
+      baseUrl = baseUrl.replace('http://', 'ws://');
+    } else if (baseUrl.startsWith('https://')) {
+      baseUrl = baseUrl.replace('https://', 'wss://');
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      baseUrl = `${protocol}//${window.location.host}`;
+    }
+    return `${baseUrl}/api/events/ws`;
   }, []);
 
   const connect = useCallback(() => {
