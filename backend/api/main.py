@@ -665,6 +665,13 @@ def debug_ping():
         res["socket_error"] = str(e)
 
     try:
+        from backend.auth import verify_access_code
+        res["access_code_env_set"] = bool(os.environ.get("SENTINEL_ACCESS_CODE"))
+        res["access_code_verified_SENTINEL2026"] = verify_access_code("SENTINEL2026")
+    except Exception as e:
+        res["access_code_debug_error"] = str(e)
+
+    try:
         from backend.camera.rtsp_credentials import build_authenticated_rtsp_url
         url = build_authenticated_rtsp_url("cam01")
         res["rtsp_url_constructed"] = True
