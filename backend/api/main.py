@@ -636,6 +636,73 @@ def get_camera_playback(
     )
 
 
+@app.get("/api/debug/rtsp")
+def debug_rtsp_endpoint():
+    """Unauthenticated debug endpoint returning stack traces for Render diagnostic."""
+    import socket, traceback, os, cv2
+    from backend.camera.rtsp_credentials import (
+        ENV_RTSP_EMAIL,
+        ENV_RTSP_PASSWORD,
+        build_authenticated_rtsp_url,
+        configure_rtsp_tcp,
+    )
+
+    info = {
+        "env_email_set": bool(os.environ.get(ENV_RTSP_EMAIL)),
+        "env_password_set": bool(os.environ.get(ENV_RTSP_PASSWORD)),
+        "tcp_8554": False,
+        "url_built": False,
+        "opencv_opened": False,
+        "frame_ok": False,
+        "traceback": None,
+        "error": None,
+    }
+
+    try:
+        # 1. Socket test
+        try:
+            s = socket.create_connection(("103.250.160.189", 8554), timeout=4.0)
+            s.close()
+            info["tcp_8554"] = True
+        except Exception as e:
+            info["error"] = f"Socket failed: {e}"
+            info["traceback"] = traceback.format_exc()
+            return info
+
+        # 2. URL build test
+        try:
+            url = build_authenticated_rtsp_url("cam01")
+            info["url_built"] = True
+        except Exception as e:
+            info["error"] = f"URL build failed: {e}"
+            info["traceback"] = traceback.format_exc()
+            return info
+
+        # 3. OpenCV test
+        try:
+            configure_rtsp_tcp()
+            cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
+            if cap.isOpened():
+                info["opencv_opened"] = True
+                ret, frame = cap.read()
+                if ret and frame is not None:
+                    info["frame_ok"] = True
+                else:
+                    info["error"] = "cap.read() returned False"
+                cap.release()
+            else:
+                info["error"] = "cap.isOpened() returned False"
+        except Exception as e:
+            info["error"] = f"OpenCV failed: {e}"
+            info["traceback"] = traceback.format_exc()
+
+    except Exception as top_e:
+        info["error"] = f"Top level failed: {top_e}"
+        info["traceback"] = traceback.format_exc()
+
+    return info
+
+
 @app.get("/api/cameras/{camera_id}/diagnose")
 def diagnose_camera_rtsp(
     camera_id: str,
