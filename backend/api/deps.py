@@ -22,6 +22,7 @@ from backend.db.database import Database
 from backend.db.repositories import (
     AlertRepository,
     CameraRepository,
+    GlobalVehicleRepository,
     PlateRepository,
     VehicleRepository,
     WatchlistRepository,
@@ -34,7 +35,7 @@ _DB_PATH_ENV_VAR = "SENTINELVISION_DB_PATH"
 @dataclass
 class Repositories:
     """Bundle of the Phase 6B repositories plus Phase 7 watchlist/alert
-    repositories over one Database."""
+    repositories and Phase 9.10 global vehicle tracking over one Database."""
 
     db: Database
     cameras: CameraRepository
@@ -43,6 +44,7 @@ class Repositories:
     zones: ZoneRepository
     watchlist: WatchlistRepository
     alerts: AlertRepository
+    global_vehicles: GlobalVehicleRepository
 
     @classmethod
     def from_database(cls, db: Database) -> "Repositories":
@@ -54,6 +56,7 @@ class Repositories:
             zones=ZoneRepository(db),
             watchlist=WatchlistRepository(db),
             alerts=AlertRepository(db),
+            global_vehicles=GlobalVehicleRepository(db),
         )
 
 

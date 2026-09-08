@@ -31,9 +31,15 @@ from backend.api.schemas import (
     CameraPlaybackResponse,
     CameraResponse,
     CountsResponse,
+    CrossCameraObservationResponse,
     DirectionTotals,
+    GlobalVehicleListResponse,
+    GlobalVehicleResponse,
+    GlobalVehicleRouteResponse,
+    GlobalVehicleTimelineResponse,
     PlateReadResponse,
     PlateSearchResponse,
+    RoutePointResponse,
     VehicleEventResponse,
     WatchlistEntryCreate,
     WatchlistEntryResponse,
@@ -132,6 +138,33 @@ def _alert_to_response(alert: Alert) -> AlertResponse:
     )
 
 
+def _global_vehicle_to_response(gv) -> GlobalVehicleResponse:
+    return GlobalVehicleResponse(
+        id=int(gv.id),
+        global_vehicle_id=gv.global_vehicle_id,
+        normalized_plate=gv.normalized_plate,
+        vehicle_class=gv.vehicle_class,
+        first_seen_at=gv.first_seen_at,
+        last_seen_at=gv.last_seen_at,
+        created_at=gv.created_at,
+        updated_at=gv.updated_at,
+    )
+
+
+def _observation_to_response(obs) -> CrossCameraObservationResponse:
+    return CrossCameraObservationResponse(
+        id=int(obs.id),
+        global_vehicle_id=obs.global_vehicle_id,
+        camera_id=obs.camera_id,
+        canonical_vehicle_id=obs.canonical_vehicle_id,
+        normalized_plate=obs.normalized_plate,
+        vehicle_class=obs.vehicle_class,
+        timestamp=obs.timestamp,
+        plate_read_id=obs.plate_read_id,
+        created_at=obs.created_at,
+    )
+
+
 def _compute_attention_state(camera, repos: Repositories):
     try:
         res = AttentionEngine.evaluate(camera, repos=repos)
@@ -141,8 +174,18 @@ def _compute_attention_state(camera, repos: Repositories):
 
 
 def _camera_to_response(
-    camera, attention_state: str = "NORMAL", attention_reason: Optional[str] = None
+    camera,
+    attention_state: str = "NORMAL",
+    attention_reason: Optional[str] = None,
+    ai_active_override: Optional[bool] = None,
 ) -> CameraResponse:
+    cam_id = str(getattr(camera, "camera_id", ""))
+    is_ai_active = (
+        ai_active_override
+        if ai_active_override is not None
+        else (getattr(camera, "ai_active", False) if isinstance(camera, NormalizedCamera) else (cam_id == "cam01"))
+    )
+
     if isinstance(camera, NormalizedCamera):
         return CameraResponse(
             camera_id=camera.camera_id,
@@ -156,7 +199,7 @@ def _camera_to_response(
             resolution=camera.resolution,
             live=camera.live,
             status=camera.status,
-            ai_active=camera.ai_active,
+            ai_active=is_ai_active,
             attention_state=attention_state,
             attention_reason=attention_reason,
         )
@@ -165,7 +208,6 @@ def _camera_to_response(
     if not res and getattr(camera, "width", None) and getattr(camera, "height", None):
         res = f"{camera.width}x{camera.height}"
 
-    cam_id = str(getattr(camera, "camera_id", ""))
     return CameraResponse(
         camera_id=cam_id,
         name=getattr(camera, "name", None),
@@ -178,7 +220,7 @@ def _camera_to_response(
         resolution=res,
         live=bool(getattr(camera, "live", False)),
         status="online" if getattr(camera, "live", False) else "offline",
-        ai_active=(cam_id == "cam01"),
+        ai_active=is_ai_active,
         attention_state=attention_state,
         attention_reason=attention_reason,
         created_at=getattr(camera, "created_at", None),
@@ -241,7 +283,10 @@ def health(repos: Repositories = Depends(get_repositories)):
 # Cameras
 # ---------------------------------------------------------------------------
 @app.get("/api/cameras", response_model=List[CameraResponse])
-def list_cameras(repos: Repositories = Depends(get_repositories)):
+def list_cameras(
+    selected_camera_id: Optional[str] = Query(None),
+    repos: Repositories = Depends(get_repositories),
+):
     """All registered cameras (safe metadata only)."""
     catalogue_cams = global_catalogue.get_cameras()
     db_cams = repos.cameras.list_cameras()
@@ -269,12 +314,18 @@ def list_cameras(repos: Repositories = Depends(get_repositories)):
         else:
             cam_map[db_c.camera_id] = db_c
 
+    active_id = selected_camera_id if selected_camera_id else "cam01"
+
     responses = []
     for cam_id, cam in cam_map.items():
         att_state, att_reason = _compute_attention_state(cam, repos)
+        is_active = (cam_id == active_id)
         responses.append(
             _camera_to_response(
-                cam, attention_state=att_state, attention_reason=att_reason
+                cam,
+                attention_state=att_state,
+                attention_reason=att_reason,
+                ai_active_override=is_active,
             )
         )
 
@@ -651,6 +702,112 @@ def update_alert_status(
         except Exception:
             pass
     return _alert_to_response(alert)
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.10: Cross-Camera Vehicle Tracking Endpoints
+# ---------------------------------------------------------------------------
+@app.get("/api/vehicles", response_model=GlobalVehicleListResponse)
+def list_global_vehicles(
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    repos: Repositories = Depends(get_repositories),
+):
+    """List cross-camera global vehicles ordered by last_seen_at DESC."""
+    vehicles = repos.global_vehicles.list_global_vehicles(limit=limit, offset=offset)
+    return GlobalVehicleListResponse(
+        count=len(vehicles),
+        results=[_global_vehicle_to_response(v) for v in vehicles],
+    )
+
+
+@app.get("/api/vehicles/search", response_model=GlobalVehicleResponse)
+def search_global_vehicle_by_plate(
+    plate: str = Query(..., min_length=1),
+    repos: Repositories = Depends(get_repositories),
+):
+    """Search for a global vehicle identity by raw or normalized plate."""
+    gv = repos.global_vehicles.get_global_vehicle_by_plate(plate)
+    if gv is None:
+        raise HTTPException(status_code=404, detail="Global vehicle not found for plate")
+    return _global_vehicle_to_response(gv)
+
+
+@app.get("/api/vehicles/{global_vehicle_id}", response_model=GlobalVehicleResponse)
+def get_global_vehicle(
+    global_vehicle_id: str,
+    repos: Repositories = Depends(get_repositories),
+):
+    """Get details for one global vehicle by global_vehicle_id (e.g. GV-000001)."""
+    gv = repos.global_vehicles.get_global_vehicle(global_vehicle_id)
+    if gv is None:
+        # Fallback search by normalized plate if string passes plate format
+        gv = repos.global_vehicles.get_global_vehicle_by_plate(global_vehicle_id)
+    if gv is None:
+        raise HTTPException(status_code=404, detail="Global vehicle not found")
+    return _global_vehicle_to_response(gv)
+
+
+@app.get("/api/vehicles/{global_vehicle_id}/timeline", response_model=GlobalVehicleTimelineResponse)
+def get_global_vehicle_timeline(
+    global_vehicle_id: str,
+    repos: Repositories = Depends(get_repositories),
+):
+    """Get chronological cross-camera movement timeline for a global vehicle."""
+    gv = repos.global_vehicles.get_global_vehicle(global_vehicle_id)
+    if gv is None:
+        gv = repos.global_vehicles.get_global_vehicle_by_plate(global_vehicle_id)
+    if gv is None:
+        raise HTTPException(status_code=404, detail="Global vehicle not found")
+
+    timeline = repos.global_vehicles.get_timeline(gv.global_vehicle_id)
+    return GlobalVehicleTimelineResponse(
+        global_vehicle_id=gv.global_vehicle_id,
+        normalized_plate=gv.normalized_plate,
+        vehicle_class=gv.vehicle_class,
+        first_seen_at=gv.first_seen_at,
+        last_seen_at=gv.last_seen_at,
+        observation_count=len(timeline),
+        timeline=[_observation_to_response(obs) for obs in timeline],
+    )
+
+
+@app.get("/api/vehicles/{global_vehicle_id}/route", response_model=GlobalVehicleRouteResponse)
+def get_global_vehicle_route(
+    global_vehicle_id: str,
+    repos: Repositories = Depends(get_repositories),
+):
+    """Get geographical movement route for a global vehicle."""
+    gv = repos.global_vehicles.get_global_vehicle(global_vehicle_id)
+    if gv is None:
+        gv = repos.global_vehicles.get_global_vehicle_by_plate(global_vehicle_id)
+    if gv is None:
+        raise HTTPException(status_code=404, detail="Global vehicle not found")
+
+    route_points = repos.global_vehicles.get_route(gv.global_vehicle_id)
+    mapped_count = sum(1 for p in route_points if p["latitude"] is not None and p["longitude"] is not None)
+
+    return GlobalVehicleRouteResponse(
+        global_vehicle_id=gv.global_vehicle_id,
+        normalized_plate=gv.normalized_plate,
+        vehicle_class=gv.vehicle_class,
+        first_seen_at=gv.first_seen_at,
+        last_seen_at=gv.last_seen_at,
+        total_observations=len(route_points),
+        mapped_points_count=mapped_count,
+        points=[
+            RoutePointResponse(
+                camera_id=p["camera_id"],
+                timestamp=p["timestamp"],
+                latitude=p["latitude"],
+                longitude=p["longitude"],
+                vehicle_class=p["vehicle_class"],
+                canonical_vehicle_id=p["canonical_vehicle_id"],
+                normalized_plate=p["normalized_plate"],
+            )
+            for p in route_points
+        ],
+    )
 
 
 # ---------------------------------------------------------------------------

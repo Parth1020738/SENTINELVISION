@@ -14,6 +14,10 @@ import {
   Alert,
   VehicleEvent,
   HealthResponse,
+  GlobalVehicle,
+  GlobalVehicleListResponse,
+  GlobalVehicleTimelineResponse,
+  GlobalVehicleRouteResponse,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
@@ -60,12 +64,18 @@ export const api = {
   getHealth: () => request<HealthResponse>('/health'),
 
   // Cameras
-  getCameras: () => request<Camera[]>('/api/cameras'),
+  getCameras: (selectedCameraId?: string) =>
+    request<Camera[]>(selectedCameraId ? `/api/cameras?selected_camera_id=${encodeURIComponent(selectedCameraId)}` : '/api/cameras'),
   getCamera: (cameraId: string) => request<Camera>(`/api/cameras/${cameraId}`),
   getCameraPlayback: (cameraId: string) => request<CameraPlaybackResponse>(`/api/cameras/${cameraId}/playback`),
 
-  // Vehicles
+  // Vehicles & Global Tracking
   getVehicleHistory: (canonicalVehicleId: number) => request<VehicleEvent[]>(`/api/vehicles/${canonicalVehicleId}/history`),
+  getGlobalVehicles: (limit = 100, offset = 0) => request<GlobalVehicleListResponse>(`/api/vehicles?limit=${limit}&offset=${offset}`),
+  getGlobalVehicle: (globalVehicleId: string) => request<GlobalVehicle>(`/api/vehicles/${encodeURIComponent(globalVehicleId)}`),
+  getGlobalVehicleTimeline: (globalVehicleId: string) => request<GlobalVehicleTimelineResponse>(`/api/vehicles/${encodeURIComponent(globalVehicleId)}/timeline`),
+  getGlobalVehicleRoute: (globalVehicleId: string) => request<GlobalVehicleRouteResponse>(`/api/vehicles/${encodeURIComponent(globalVehicleId)}/route`),
+  searchGlobalVehicleByPlate: (plate: string) => request<GlobalVehicle>(`/api/vehicles/search?plate=${encodeURIComponent(plate)}`),
 
   // Plates
   searchPlates: (plate: string, match: 'exact' | 'partial' = 'partial') =>

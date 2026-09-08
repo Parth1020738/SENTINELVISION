@@ -49,7 +49,22 @@ class TestCameraCatalogue(unittest.TestCase):
 
         catalogue = CameraCatalogue(fetcher=failing_fetcher)
         cams = catalogue.refresh(force=True)
-        self.assertEqual(cams, [])
+        self.assertEqual(len(cams), 30)
+        self.assertEqual(cams[0].camera_id, "cam01")
+        self.assertEqual(cams[29].camera_id, "cam30")
+
+    def test_official_30_camera_grid_catalogue(self):
+        def failing_fetcher(url, t):
+            return None
+
+        catalogue = CameraCatalogue(fetcher=failing_fetcher)
+        cams = catalogue.refresh(force=True)
+        self.assertEqual(len(cams), 30)
+        cam_ids = [c.camera_id for c in cams]
+        self.assertIn("cam01", cam_ids)
+        self.assertIn("cam26", cam_ids)
+        self.assertIn("cam13", cam_ids)
+        self.assertIn("cam30", cam_ids)
 
     def test_no_credentials_exposed(self):
         payload = [

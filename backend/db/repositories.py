@@ -36,6 +36,8 @@ from backend.db.models import (
     WATCHLIST_PRIORITIES,
     Alert,
     Camera,
+    CrossCameraObservation,
+    GlobalVehicle,
     PlateRead,
     VehicleEvent,
     WatchlistEntry,
@@ -885,6 +887,234 @@ def record_plate_read(db: Database, read: PlateRead) -> Optional[int]:
 def record_zone_count(db: Database, count: ZoneCount) -> Optional[int]:
     """Module-level convenience: persist one zone count."""
     return ZoneRepository(db).insert_zone_count(count)
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.10: Global Vehicle Repository
+# ---------------------------------------------------------------------------
+def _row_to_global_vehicle(row: sqlite3.Row) -> GlobalVehicle:
+    return GlobalVehicle(
+        id=int(row["id"]),
+        global_vehicle_id=row["global_vehicle_id"],
+        normalized_plate=row["normalized_plate"],
+        vehicle_class=row["vehicle_class"],
+        first_seen_at=row["first_seen_at"],
+        last_seen_at=row["last_seen_at"],
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+    )
+
+
+def _row_to_cross_camera_observation(row: sqlite3.Row) -> CrossCameraObservation:
+    return CrossCameraObservation(
+        id=int(row["id"]),
+        global_vehicle_id=row["global_vehicle_id"],
+        camera_id=row["camera_id"],
+        canonical_vehicle_id=int(row["canonical_vehicle_id"]),
+        normalized_plate=row["normalized_plate"],
+        vehicle_class=row["vehicle_class"],
+        timestamp=row["timestamp"],
+        plate_read_id=int(row["plate_read_id"]) if row["plate_read_id"] is not None else None,
+        created_at=row["created_at"],
+    )
+
+
+class GlobalVehicleRepository:
+    """Manages cross-camera vehicle identities and movement observations."""
+
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def get_or_create_by_plate(
+        self,
+        plate: str,
+        vehicle_class: Optional[str] = None,
+        timestamp=None,
+    ) -> Optional[GlobalVehicle]:
+        """Look up an existing GlobalVehicle by plate or create a new one."""
+        normalized = normalize_plate_text(plate)
+        if not normalized:
+            return None
+
+        iso_ts = _to_utc_iso(timestamp)
+        now = _to_utc_iso(None)
+
+        with self.db.connection() as conn:
+            row = conn.execute(
+                "SELECT * FROM global_vehicles WHERE normalized_plate = ?",
+                (normalized,),
+            ).fetchone()
+
+            if row:
+                gv = _row_to_global_vehicle(row)
+                updated_class = vehicle_class or gv.vehicle_class
+                conn.execute(
+                    """
+                    UPDATE global_vehicles
+                    SET last_seen_at = ?, vehicle_class = ?, updated_at = ?
+                    WHERE id = ?
+                    """,
+                    (iso_ts, updated_class, now, gv.id),
+                )
+                gv.last_seen_at = iso_ts
+                gv.vehicle_class = updated_class
+                gv.updated_at = now
+                return gv
+
+            # Generate new GV identity
+            cur = conn.execute(
+                """
+                INSERT INTO global_vehicles (
+                    global_vehicle_id, normalized_plate, vehicle_class,
+                    first_seen_at, last_seen_at, created_at, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                ("TEMP", normalized, vehicle_class, iso_ts, iso_ts, now, now),
+            )
+            row_id = cur.lastrowid
+            gv_id = f"GV-{row_id:06d}"
+            conn.execute(
+                "UPDATE global_vehicles SET global_vehicle_id = ? WHERE id = ?",
+                (gv_id, row_id),
+            )
+
+        return GlobalVehicle(
+            id=row_id,
+            global_vehicle_id=gv_id,
+            normalized_plate=normalized,
+            vehicle_class=vehicle_class,
+            first_seen_at=iso_ts,
+            last_seen_at=iso_ts,
+            created_at=now,
+            updated_at=now,
+        )
+
+    def record_plate_observation(
+        self,
+        plate: str,
+        camera_id: str,
+        canonical_vehicle_id: int,
+        vehicle_class: Optional[str] = None,
+        timestamp=None,
+        plate_read_id: Optional[int] = None,
+    ) -> Optional[CrossCameraObservation]:
+        """Record a confirmed cross-camera appearance of a vehicle."""
+        normalized = normalize_plate_text(plate)
+        if not normalized:
+            return None
+
+        gv = self.get_or_create_by_plate(normalized, vehicle_class, timestamp)
+        if gv is None:
+            return None
+
+        iso_ts = _to_utc_iso(timestamp)
+        now = _to_utc_iso(None)
+
+        with self.db.connection() as conn:
+            cur = conn.execute(
+                """
+                INSERT INTO cross_camera_observations (
+                    global_vehicle_id, camera_id, canonical_vehicle_id,
+                    normalized_plate, vehicle_class, timestamp, plate_read_id, created_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    gv.global_vehicle_id,
+                    camera_id,
+                    canonical_vehicle_id,
+                    normalized,
+                    vehicle_class or gv.vehicle_class,
+                    iso_ts,
+                    plate_read_id,
+                    now,
+                ),
+            )
+            obs_id = cur.lastrowid
+
+        return CrossCameraObservation(
+            id=obs_id,
+            global_vehicle_id=gv.global_vehicle_id,
+            camera_id=camera_id,
+            canonical_vehicle_id=canonical_vehicle_id,
+            normalized_plate=normalized,
+            vehicle_class=vehicle_class or gv.vehicle_class,
+            timestamp=iso_ts,
+            plate_read_id=plate_read_id,
+            created_at=now,
+        )
+
+    def get_global_vehicle(self, global_vehicle_id: str) -> Optional[GlobalVehicle]:
+        """Return the GlobalVehicle for global_vehicle_id, or None."""
+        with self.db.connection() as conn:
+            row = conn.execute(
+                "SELECT * FROM global_vehicles WHERE global_vehicle_id = ?",
+                (global_vehicle_id,),
+            ).fetchone()
+        return _row_to_global_vehicle(row) if row else None
+
+    def get_global_vehicle_by_plate(self, plate: str) -> Optional[GlobalVehicle]:
+        """Look up GlobalVehicle by plate (raw or normalized)."""
+        normalized = normalize_plate_text(plate)
+        if not normalized:
+            return None
+        with self.db.connection() as conn:
+            row = conn.execute(
+                "SELECT * FROM global_vehicles WHERE normalized_plate = ?",
+                (normalized,),
+            ).fetchone()
+        return _row_to_global_vehicle(row) if row else None
+
+    def list_global_vehicles(
+        self, limit: int = 100, offset: int = 0
+    ) -> List[GlobalVehicle]:
+        """List global vehicles ordered by last_seen_at DESC."""
+        with self.db.connection() as conn:
+            rows = conn.execute(
+                "SELECT * FROM global_vehicles ORDER BY last_seen_at DESC LIMIT ? OFFSET ?",
+                (int(limit), int(offset)),
+            ).fetchall()
+        return [_row_to_global_vehicle(r) for r in rows]
+
+    def get_timeline(self, global_vehicle_id: str) -> List[CrossCameraObservation]:
+        """Return chronological cross-camera observations for a global vehicle."""
+        with self.db.connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM cross_camera_observations
+                WHERE global_vehicle_id = ?
+                ORDER BY timestamp ASC, id ASC
+                """,
+                (global_vehicle_id,),
+            ).fetchall()
+        return [_row_to_cross_camera_observation(r) for r in rows]
+
+    def get_route(self, global_vehicle_id: str) -> List[dict]:
+        """Return chronological GIS route points with resolved camera coordinates."""
+        timeline = self.get_timeline(global_vehicle_id)
+        if not timeline:
+            return []
+
+        cam_repo = CameraRepository(self.db)
+        points = []
+        for obs in timeline:
+            cam = cam_repo.get_camera(obs.camera_id)
+            lat = cam.latitude if (cam and cam.latitude is not None) else None
+            lon = cam.longitude if (cam and cam.longitude is not None) else None
+            points.append(
+                {
+                    "camera_id": obs.camera_id,
+                    "timestamp": obs.timestamp,
+                    "latitude": lat,
+                    "longitude": lon,
+                    "vehicle_class": obs.vehicle_class,
+                    "canonical_vehicle_id": obs.canonical_vehicle_id,
+                    "normalized_plate": obs.normalized_plate,
+                }
+            )
+        return points
+
 
 
 

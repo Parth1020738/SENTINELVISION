@@ -176,6 +176,34 @@ _SCHEMA_STATEMENTS = (
         FOREIGN KEY (plate_read_id)      REFERENCES plate_reads (id)
     )
     """,
+    # Phase 9.10: global vehicles & cross-camera observations
+    """
+    CREATE TABLE IF NOT EXISTS global_vehicles (
+        id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+        global_vehicle_id    TEXT    NOT NULL UNIQUE,
+        normalized_plate     TEXT    UNIQUE,
+        vehicle_class        TEXT,
+        first_seen_at        TEXT    NOT NULL,
+        last_seen_at         TEXT    NOT NULL,
+        created_at           TEXT    NOT NULL,
+        updated_at           TEXT    NOT NULL
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS cross_camera_observations (
+        id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+        global_vehicle_id    TEXT    NOT NULL,
+        camera_id            TEXT    NOT NULL,
+        canonical_vehicle_id INTEGER NOT NULL,
+        normalized_plate     TEXT,
+        vehicle_class        TEXT,
+        timestamp            TEXT    NOT NULL,
+        plate_read_id        INTEGER,
+        created_at           TEXT    NOT NULL,
+        FOREIGN KEY (global_vehicle_id) REFERENCES global_vehicles (global_vehicle_id),
+        FOREIGN KEY (camera_id)          REFERENCES cameras (camera_id)
+    )
+    """,
 )
 
 # Query-driven indexes (kept minimal).
@@ -221,6 +249,15 @@ _INDEX_STATEMENTS = (
     " ON alerts (status)",
     "CREATE INDEX IF NOT EXISTS idx_alerts_priority"
     " ON alerts (priority)",
+    # Phase 9.10: cross-camera indexes
+    "CREATE INDEX IF NOT EXISTS idx_global_vehicles_plate"
+    " ON global_vehicles (normalized_plate)",
+    "CREATE INDEX IF NOT EXISTS idx_cross_camera_obs_gv"
+    " ON cross_camera_observations (global_vehicle_id)",
+    "CREATE INDEX IF NOT EXISTS idx_cross_camera_obs_camera"
+    " ON cross_camera_observations (camera_id)",
+    "CREATE INDEX IF NOT EXISTS idx_cross_camera_obs_timestamp"
+    " ON cross_camera_observations (timestamp)",
 )
 
 # Reasonable duplicate protection.  The Phase 4 / Phase 5 modules keep

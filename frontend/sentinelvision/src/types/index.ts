@@ -166,3 +166,62 @@ export interface RealtimeEvent {
 }
 
 export type ConnectionStatus = 'CONNECTED' | 'RECONNECTING' | 'DISCONNECTED';
+
+export interface GlobalVehicle {
+  id: number;
+  global_vehicle_id: string;
+  normalized_plate?: string | null;
+  vehicle_class?: string | null;
+  first_seen_at?: string | null;
+  last_seen_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface GlobalVehicleListResponse {
+  count: number;
+  results: GlobalVehicle[];
+}
+
+export interface CrossCameraObservation {
+  id: number;
+  global_vehicle_id: string;
+  camera_id: string;
+  canonical_vehicle_id: number;
+  normalized_plate?: string | null;
+  vehicle_class?: string | null;
+  timestamp?: string | null;
+  plate_read_id?: number | null;
+  created_at?: string | null;
+}
+
+export interface GlobalVehicleTimelineResponse {
+  global_vehicle_id: string;
+  normalized_plate?: string | null;
+  vehicle_class?: string | null;
+  first_seen_at?: string | null;
+  last_seen_at?: string | null;
+  observation_count: number;
+  timeline: CrossCameraObservation[];
+}
+
+export interface RoutePoint {
+  camera_id: string;
+  timestamp?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  vehicle_class?: string | null;
+  canonical_vehicle_id: number;
+  normalized_plate?: string | null;
+}
+
+export interface GlobalVehicleRouteResponse {
+  global_vehicle_id: string;
+  normalized_plate?: string | null;
+  vehicle_class?: string | null;
+  first_seen_at?: string | null;
+  last_seen_at?: string | null;
+  total_observations: number;
+  mapped_points_count: number;
+  points: RoutePoint[];
+}

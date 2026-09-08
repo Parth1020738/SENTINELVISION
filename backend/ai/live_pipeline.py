@@ -66,7 +66,7 @@ from backend.ai.vehicle_tracker import VehicleTracker
 from backend.ai.zone_counter import CountingEvent, ZoneCounter, ZoneObservation
 from backend.db.database import DEFAULT_DB_PATH, Database
 from backend.db.models import Camera, PlateRead, VehicleEvent, ZoneCount
-from backend.db.repositories import EventRecorder
+from backend.db.repositories import EventRecorder, GlobalVehicleRepository
 from backend.services.alert_engine import AlertEngine
 
 logger = logging.getLogger(__name__)
@@ -189,6 +189,7 @@ class LivePipeline:
         self.alert_engine = (
             alert_engine if alert_engine is not None else AlertEngine(self.db)
         )
+        self.global_vehicle_repo = GlobalVehicleRepository(self.db)
         self.stream = stream
 # ---- runtime state -------------------------------------------------
         self.frames_processed = 0
@@ -604,6 +605,18 @@ class LivePipeline:
         if plate_read_id is None:
             return
         self.readable_plates += 1
+
+        try:
+            self.global_vehicle_repo.record_plate_observation(
+                plate=result.plate_text,
+                camera_id=self.camera_id,
+                canonical_vehicle_id=result.canonical_vehicle_id,
+                vehicle_class=result.vehicle_class,
+                timestamp=epoch,
+                plate_read_id=plate_read_id,
+            )
+        except Exception:  # noqa: BLE001
+            logger.warning("GlobalVehicle observation recording failed.")
 
         try:
             alert = self.alert_engine.process_plate_read(

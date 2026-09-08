@@ -178,3 +178,68 @@ class AlertStatusUpdate(BaseModel):
     """PATCH /api/alerts/{alert_id}/status body."""
 
     status: str
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.10: Cross-Camera Vehicle Tracking
+# ---------------------------------------------------------------------------
+class GlobalVehicleResponse(BaseModel):
+    id: int
+    global_vehicle_id: str
+    normalized_plate: Optional[str] = None
+    vehicle_class: Optional[str] = None
+    first_seen_at: Optional[str] = None
+    last_seen_at: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class GlobalVehicleListResponse(BaseModel):
+    count: int
+    results: List[GlobalVehicleResponse]
+
+
+class CrossCameraObservationResponse(BaseModel):
+    id: int
+    global_vehicle_id: str
+    camera_id: str
+    canonical_vehicle_id: int
+    normalized_plate: Optional[str] = None
+    vehicle_class: Optional[str] = None
+    timestamp: Optional[str] = None
+    plate_read_id: Optional[int] = None
+    created_at: Optional[str] = None
+
+
+class GlobalVehicleTimelineResponse(BaseModel):
+    global_vehicle_id: str
+    normalized_plate: Optional[str] = None
+    vehicle_class: Optional[str] = None
+    first_seen_at: Optional[str] = None
+    last_seen_at: Optional[str] = None
+    observation_count: int
+    timeline: List[CrossCameraObservationResponse]
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.11: GIS Route Schemas
+# ---------------------------------------------------------------------------
+class RoutePointResponse(BaseModel):
+    camera_id: str
+    timestamp: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    vehicle_class: Optional[str] = None
+    canonical_vehicle_id: int
+    normalized_plate: Optional[str] = None
+
+
+class GlobalVehicleRouteResponse(BaseModel):
+    global_vehicle_id: str
+    normalized_plate: Optional[str] = None
+    vehicle_class: Optional[str] = None
+    first_seen_at: Optional[str] = None
+    last_seen_at: Optional[str] = None
+    total_observations: int
+    mapped_points_count: int
+    points: List[RoutePointResponse]

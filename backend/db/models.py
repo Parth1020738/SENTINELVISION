@@ -155,3 +155,35 @@ class Alert:
     created_at: Optional[str] = None
     acknowledged_at: Optional[str] = None
     id: Optional[int] = field(default=None, repr=False)
+
+
+# ---------------------------------------------------------------------------
+# Phase 9.10: Cross-Camera Vehicle Tracking
+# ---------------------------------------------------------------------------
+@dataclass
+class GlobalVehicle:
+    """A cross-camera global vehicle identity, indexed by normalized plate."""
+
+    global_vehicle_id: str
+    normalized_plate: Optional[str] = None
+    vehicle_class: Optional[str] = None
+    first_seen_at: Optional[str] = None
+    last_seen_at: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    id: Optional[int] = field(default=None, repr=False)
+
+
+@dataclass
+class CrossCameraObservation:
+    """A confirmed appearance of a global vehicle on a specific camera stream."""
+
+    global_vehicle_id: str
+    camera_id: str
+    canonical_vehicle_id: int
+    normalized_plate: Optional[str] = None
+    vehicle_class: Optional[str] = None
+    timestamp: Optional[str] = None
+    plate_read_id: Optional[int] = None
+    created_at: Optional[str] = None
+    id: Optional[int] = field(default=None, repr=False)

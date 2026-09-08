@@ -7,13 +7,13 @@ import ErrorState from '../components/ErrorState';
 import LiveCameraPlayer from '../components/LiveCameraPlayer';
 
 export default function LiveMonitoringPage() {
-  const camerasApi = useApi(() => api.getCameras(), [], 10000);
   const [selectedCameraId, setSelectedCameraId] = useState<string>('cam01');
+  const camerasApi = useApi(() => api.getCameras(selectedCameraId), [selectedCameraId], 10000);
   const { connectionStatus, subscribe } = useEventStream();
 
   const cameras: Camera[] = camerasApi.data || [];
   
-  // Resolve selected camera, fallback to first if cam01 not found
+  // Resolve selected camera, fallback to first if selected camera not found
   const selectedCamera =
     cameras.find((c) => c.camera_id === selectedCameraId) ||
     cameras[0] ||
@@ -36,7 +36,7 @@ export default function LiveMonitoringPage() {
     <div className="p-6 flex flex-col gap-6 max-w-[1720px] mx-auto">
       <HeaderSection
         totalCameras={cameras.length}
-        aiActiveCount={cameras.filter((c) => c.ai_active).length}
+        aiActiveCount={cameras.filter((c) => c.ai_active || c.camera_id === currentCamId).length}
         isLoading={camerasApi.status === 'loading'}
         connectionStatus={connectionStatus}
       />
@@ -229,6 +229,7 @@ function CameraCard({
 }) {
   const isOnline = camera.live || camera.status === 'online' || camera.status === 'available';
   const attention = camera.attention_state || 'NORMAL';
+  const isAiActive = isSelected || camera.ai_active;
 
   let attentionBadgeClass = 'bg-surface-container-high text-on-surface-variant';
   if (attention === 'CRITICAL') {
@@ -238,13 +239,11 @@ function CameraCard({
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`card text-left p-3.5 flex flex-col justify-between gap-3 transition-all hover:border-primary/60 cursor-pointer ${
+    <div
+      className={`card text-left p-3.5 flex flex-col justify-between gap-3 transition-all ${
         isSelected
           ? 'ring-2 ring-primary border-primary bg-primary-container/10'
-          : 'border-outline-variant/40 bg-surface-container-low'
+          : 'border-outline-variant/40 bg-surface-container-low hover:border-primary/50'
       }`}
     >
       <div className="flex items-center justify-between gap-2">
@@ -255,7 +254,7 @@ function CameraCard({
           </span>
         </div>
         <span
-          className={`status-badge text-[10px] px-1.5 py-0.5 rounded ${
+          className={`status-badge text-[10px] px-1.5 py-0.5 rounded font-semibold ${
             isOnline ? 'bg-secondary/20 text-secondary' : 'bg-error/20 text-error'
           }`}
         >
@@ -278,12 +277,14 @@ function CameraCard({
       </div>
 
       <div className="flex items-center justify-between gap-1 text-[11px] pt-1 border-t border-outline-variant/30">
-        <span className="font-code-telemetry text-on-surface-variant">
-          {camera.resolution || (camera.width ? `${camera.width}x${camera.height}` : '720p')}
-        </span>
+        <div className="flex items-center gap-1 font-code-telemetry text-on-surface-variant text-[10px]">
+          <span>{camera.resolution || (camera.width ? `${camera.width}x${camera.height}` : '720p')}</span>
+          <span>•</span>
+          <span>{camera.codec || 'H264'}</span>
+        </div>
 
         <div className="flex items-center gap-1">
-          {camera.ai_active ? (
+          {isAiActive ? (
             <span className="bg-primary/20 text-primary font-code-telemetry text-[10px] px-1.5 py-0.5 rounded font-bold">
               AI ACTIVE
             </span>
@@ -298,7 +299,22 @@ function CameraCard({
           </span>
         </div>
       </div>
-    </button>
+
+      <button
+        type="button"
+        onClick={onClick}
+        className={`w-full py-1.5 px-3 rounded text-label-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+          isSelected
+            ? 'bg-primary text-on-primary shadow-sm'
+            : 'bg-surface-container-high text-on-surface hover:bg-primary/20 hover:text-primary'
+        }`}
+      >
+        <span className="material-symbols-outlined text-[16px]">
+          {isSelected ? 'visibility' : 'play_circle'}
+        </span>
+        <span>{isSelected ? 'WATCHING' : 'WATCH'}</span>
+      </button>
+    </div>
   );
 }
 

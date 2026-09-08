@@ -146,19 +146,24 @@ class TestHealth(APITestCase):
 # 3-6. Cameras
 # ---------------------------------------------------------------------------
 class TestCameras(APITestCase):
-    def test_empty_cameras(self):
-        res = self.client.get("/api/cameras")
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.json(), [])
-
-    def test_camera_listing(self):
-        self.add_camera("cam01")
-        self.add_camera("cam02")
+    def test_camera_listing_returns_30_cameras(self):
         res = self.client.get("/api/cameras")
         self.assertEqual(res.status_code, 200)
         body = res.json()
-        self.assertEqual(len(body), 2)
-        self.assertEqual([c["camera_id"] for c in body], ["cam01", "cam02"])
+        self.assertGreaterEqual(len(body), 30)
+        cam_ids = [c["camera_id"] for c in body]
+        self.assertIn("cam01", cam_ids)
+        self.assertIn("cam26", cam_ids)
+        self.assertIn("cam30", cam_ids)
+
+    def test_selected_camera_id_query_param(self):
+        res = self.client.get("/api/cameras?selected_camera_id=cam26")
+        self.assertEqual(res.status_code, 200)
+        body = res.json()
+        cam26 = next(c for c in body if c["camera_id"] == "cam26")
+        cam01 = next(c for c in body if c["camera_id"] == "cam01")
+        self.assertTrue(cam26["ai_active"])
+        self.assertFalse(cam01["ai_active"])
 
     def test_camera_lookup(self):
         self.add_camera("cam01")
@@ -166,13 +171,10 @@ class TestCameras(APITestCase):
         self.assertEqual(res.status_code, 200)
         body = res.json()
         self.assertEqual(body["camera_id"], "cam01")
-        self.assertEqual(body["codec"], "h264")
-        self.assertEqual(body["width"], 1920)
-        self.assertEqual(body["height"], 1080)
         self.assertTrue(body["live"])
 
     def test_missing_camera_404(self):
-        res = self.client.get("/api/cameras/nope")
+        res = self.client.get("/api/cameras/unknown_camera_id_999")
         self.assertEqual(res.status_code, 404)
         self.assertIn("detail", res.json())
 
@@ -191,6 +193,17 @@ class TestCameras(APITestCase):
         text = self.client.get("/api/cameras").text
         self.assertNotIn("user:secret123@", text)
         self.assertNotIn("secret123", text)
+
+    def test_playback_urls_for_30_cameras(self):
+        for cam_id in ["cam01", "cam26", "cam13", "cam30"]:
+            res = self.client.get(f"/api/cameras/{cam_id}/playback")
+            self.assertEqual(res.status_code, 200)
+            data = res.json()
+            self.assertEqual(data["camera_id"], cam_id)
+            self.assertEqual(data["playback_type"], "hls")
+            self.assertEqual(data["playback_url"], f"https://cctv.corp8.cloud/{cam_id}/index.m3u8")
+            self.assertNotIn("secret", str(data))
+            self.assertNotIn("rtsp", str(data))
 
 
 # ---------------------------------------------------------------------------

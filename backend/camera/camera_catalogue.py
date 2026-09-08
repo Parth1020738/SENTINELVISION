@@ -20,7 +20,7 @@ Security & Isolation Rules:
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from backend.camera.rtsp_credentials import (
     DEFAULT_CATALOGUE_URL,
@@ -88,12 +88,20 @@ class CameraCatalogue:
         )
 
         if raw_payload is None:
+            if not self._cached_cameras:
+                official = get_official_30_catalogue()
+                self._cached_cameras = {cam.camera_id: cam for cam in official}
+                self._last_fetch_time = now
             logger.info("Catalogue fetch returned None; using cached or fallback cameras.")
             return list(self._cached_cameras.values())
 
         normalized = self._parse_catalogue_payload(raw_payload)
         if normalized:
             self._cached_cameras = {cam.camera_id: cam for cam in normalized}
+            self._last_fetch_time = now
+        elif not self._cached_cameras:
+            official = get_official_30_catalogue()
+            self._cached_cameras = {cam.camera_id: cam for cam in official}
             self._last_fetch_time = now
 
         return list(self._cached_cameras.values())
@@ -213,6 +221,29 @@ class CameraCatalogue:
             return int(val)
         except (ValueError, TypeError):
             return None
+
+
+def get_official_30_catalogue() -> List[NormalizedCamera]:
+    """Return neutral fallback catalogue for cam01 through cam30 when remote JSON is unreachable."""
+    cams: List[NormalizedCamera] = []
+    for i in range(1, 31):
+        cam_id = f"cam{i:02d}"
+        cams.append(
+            NormalizedCamera(
+                camera_id=cam_id,
+                name=f"Camera {cam_id}",
+                location=None,
+                codec="H264",
+                width=1920,
+                height=1080,
+                resolution="1920x1080",
+                live=True,
+                status="online",
+                ai_active=(cam_id == "cam01"),
+                attention_state="NORMAL",
+            )
+        )
+    return cams
 
 
 # Global catalogue instance for backend API reuse

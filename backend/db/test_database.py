@@ -138,6 +138,8 @@ class TestDatabaseCreation(DatabaseTestBase):
             [
                 "alerts",
                 "cameras",
+                "cross_camera_observations",
+                "global_vehicles",
                 "plate_reads",
                 "vehicle_events",
                 "watchlist_entries",
