@@ -650,13 +650,10 @@ def diagnose_camera_rtsp(
         configure_rtsp_tcp,
     )
 
-    env_email = os.environ.get(ENV_RTSP_EMAIL, "").strip()
-    env_pass = os.environ.get(ENV_RTSP_PASSWORD, "")
-
     result = {
         "camera_id": camera_id,
-        "env_email_configured": bool(env_email),
-        "env_password_configured": bool(env_pass),
+        "env_email_configured": bool(os.environ.get(ENV_RTSP_EMAIL)),
+        "env_password_configured": bool(os.environ.get(ENV_RTSP_PASSWORD)),
         "tcp_8554_reachable": False,
         "rtsp_url_built": False,
         "opencv_opened": False,
@@ -665,42 +662,41 @@ def diagnose_camera_rtsp(
         "error": None,
     }
 
-    # Test TCP socket connection to 103.250.160.189:8554
     try:
-        sock = socket.create_connection(("103.250.160.189", 8554), timeout=5.0)
-        sock.close()
-        result["tcp_8554_reachable"] = True
-    except Exception as e:
-        result["error"] = f"TCP socket to 103.250.160.189:8554 failed: {e}"
-        return result
+        # 1. Test TCP socket connection to 103.250.160.189:8554
+        try:
+            sock = socket.create_connection(("103.250.160.189", 8554), timeout=5.0)
+            sock.close()
+            result["tcp_8554_reachable"] = True
+        except Exception as e:
+            result["error"] = f"TCP socket connection to 103.250.160.189:8554 failed: {e}"
+            return result
 
-    if not env_email or not env_pass:
-        result["error"] = f"Missing server-side RTSP credentials ({ENV_RTSP_EMAIL} or {ENV_RTSP_PASSWORD} not set)"
-        return result
+        # 2. Test RTSP URL build
+        try:
+            url = build_authenticated_rtsp_url(camera_id)
+            result["rtsp_url_built"] = True
+        except Exception as e:
+            result["error"] = f"Failed to build RTSP URL: {e}"
+            return result
 
-    # Test RTSP URL build
-    try:
-        url = build_authenticated_rtsp_url(camera_id)
-        result["rtsp_url_built"] = True
-    except Exception as e:
-        result["error"] = f"Failed to build RTSP URL: {e}"
-        return result
-
-    # Test OpenCV VideoCapture
-    configure_rtsp_tcp()
-    cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
-    if cap.isOpened():
-        result["opencv_opened"] = True
-        ret, frame = cap.read()
-        if ret and frame is not None:
-            result["frame_read"] = True
-            h, w, c = frame.shape
-            result["frame_resolution"] = f"{w}x{h}"
+        # 3. Test OpenCV VideoCapture
+        configure_rtsp_tcp()
+        cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
+        if cap.isOpened():
+            result["opencv_opened"] = True
+            ret, frame = cap.read()
+            if ret and frame is not None:
+                result["frame_read"] = True
+                h, w, c = frame.shape
+                result["frame_resolution"] = f"{w}x{h}"
+            else:
+                result["error"] = "VideoCapture opened but frame read failed"
+            cap.release()
         else:
-            result["error"] = "VideoCapture opened but frame read failed"
-        cap.release()
-    else:
-        result["error"] = "cv2.VideoCapture(url, cv2.CAP_FFMPEG) failed to open RTSP stream"
+            result["error"] = "cv2.VideoCapture(url, cv2.CAP_FFMPEG) failed to open RTSP stream"
+    except Exception as top_err:
+        result["error"] = f"Top level diagnostic exception: {top_err}"
 
     return result
 
