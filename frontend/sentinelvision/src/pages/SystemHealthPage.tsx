@@ -108,17 +108,17 @@ export default function SystemHealthPage() {
           </div>
         </div>
 
-        {systemHealth.status === 'loading' && <LoadingState message="Loading camera telemetry grid..." />}
-        {systemHealth.status === 'error' && <ErrorState message={systemHealth.error} onRetry={systemHealth.refresh} />}
+        {systemHealth.status === 'loading' && cameras.length === 0 && <LoadingState message="Loading camera telemetry grid..." />}
+        {systemHealth.status === 'error' && cameras.length === 0 && <ErrorState message={systemHealth.error} onRetry={systemHealth.refresh} />}
         
-        {systemHealth.status === 'success' && (
+        {cameras.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredCameras.map((cam) => (
               <CameraHealthCard key={cam.camera_id} camera={cam} onNavigate={(id) => navigate(`/live?camera=${id}`)} />
             ))}
             {filteredCameras.length === 0 && (
               <div className="col-span-full py-12 text-center text-on-surface-variant font-body-md">
-                No cameras match the selected status filter "{statusFilter}".
+                No cameras match the selected status filter &quot;{statusFilter}&quot;.
               </div>
             )}
           </div>

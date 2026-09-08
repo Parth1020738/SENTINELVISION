@@ -8,7 +8,7 @@ import LiveCameraPlayer from '../components/LiveCameraPlayer';
 
 export default function LiveMonitoringPage() {
   const [selectedCameraId, setSelectedCameraId] = useState<string>('cam01');
-  const camerasApi = useApi(() => api.getCameras(selectedCameraId), [selectedCameraId], 10000);
+  const camerasApi = useApi(() => api.getCameras(), [], 15000);
   const { connectionStatus, subscribe } = useEventStream();
 
   const cameras: Camera[] = camerasApi.data || [];
@@ -41,18 +41,18 @@ export default function LiveMonitoringPage() {
         connectionStatus={connectionStatus}
       />
 
-      {camerasApi.status === 'loading' && (
+      {camerasApi.status === 'loading' && cameras.length === 0 && (
         <LoadingState message="Discovering dynamic camera catalogue..." />
       )}
 
-      {camerasApi.status === 'error' && (
+      {camerasApi.status === 'error' && cameras.length === 0 && (
         <ErrorState
           message={camerasApi.error || 'Failed to fetch camera catalogue'}
           onRetry={camerasApi.refresh}
         />
       )}
 
-      {camerasApi.status === 'success' && (
+      {cameras.length > 0 && (
         <>
           {/* Camera Grid Section */}
           <CameraGridSection

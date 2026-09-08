@@ -306,6 +306,17 @@ class TestPhase914SecurityAndScalability(unittest.TestCase):
         self.assertIn("https://custom-sentinel-app.vercel.app", origins)
         os.environ.pop("SENTINEL_FRONTEND_ORIGIN", None)
 
+    def test_camera_playback_endpoint_security(self):
+        resp = self.client.get("/api/cameras/cam01/playback")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["camera_id"], "cam01")
+        self.assertEqual(data["playback_type"], "hls")
+        self.assertIn("playback_url", data)
+        self.assertNotIn("rtsp", data["playback_url"].lower())
+        self.assertNotIn("username", data)
+        self.assertNotIn("password", data)
+
 
 if __name__ == "__main__":
     unittest.main()

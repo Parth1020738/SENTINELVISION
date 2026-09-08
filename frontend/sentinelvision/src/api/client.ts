@@ -82,6 +82,10 @@ export const api = {
     request<Camera[]>(selectedCameraId ? `/api/cameras?selected_camera_id=${encodeURIComponent(selectedCameraId)}` : '/api/cameras'),
   getCamera: (cameraId: string) => request<Camera>(`/api/cameras/${cameraId}`),
   getCameraPlayback: (cameraId: string) => request<CameraPlaybackResponse>(`/api/cameras/${cameraId}/playback`),
+  getCameraLiveUrl: (cameraId: string) => {
+    const token = localStorage.getItem('sentinel_token');
+    return `${API_BASE_URL}/api/cameras/${encodeURIComponent(cameraId)}/live${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+  },
 
   // Vehicles & Global Tracking
   getVehicleHistory: (canonicalVehicleId: number) => request<VehicleEvent[]>(`/api/vehicles/${canonicalVehicleId}/history`),

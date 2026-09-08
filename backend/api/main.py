@@ -321,7 +321,8 @@ def _observation_to_response(obs) -> CrossCameraObservationResponse:
 
 def _compute_attention_state(camera, repos: Repositories):
     try:
-        res = AttentionEngine.evaluate(camera, repos=repos)
+        # Pass repos=None to prevent evaluate from executing individual N+1 DB vehicle history queries for all 30 cameras
+        res = AttentionEngine.evaluate(camera, repos=None)
         return res.attention_state, res.attention_reason
     except Exception:
         return "NORMAL", None
@@ -632,6 +633,74 @@ def get_camera_playback(
         playback_type="hls",
         playback_url=playback_url,
         available=True,
+    )
+
+
+@app.get("/api/cameras/{camera_id}/live")
+def stream_camera_mjpeg(
+    camera_id: str,
+    user: dict = Depends(get_current_user),
+):
+    """Server-side authenticated MJPEG live video relay.
+
+    Streams real camera frames over HTTP multipart/x-mixed-replace.
+    RTSP credentials remain server-side inside `rtsp_credentials.py`.
+    """
+    from fastapi.responses import StreamingResponse
+    import cv2, time
+    from backend.camera.rtsp_credentials import build_authenticated_rtsp_url, configure_rtsp_tcp
+
+    def frame_generator():
+        configure_rtsp_tcp()
+        try:
+            url = build_authenticated_rtsp_url(camera_id)
+        except Exception:
+            return
+
+        cap = cv2.VideoCapture(url)
+        if not cap.isOpened():
+            return
+
+        try:
+            last_frame_time = time.time()
+            consecutive_fails = 0
+            while True:
+                ret, frame = cap.read()
+                if not ret or frame is None:
+                    consecutive_fails += 1
+                    if consecutive_fails > 30:
+                        break
+                    time.sleep(0.05)
+                    continue
+
+                consecutive_fails = 0
+                now = time.time()
+                # Frame rate limiter (~15 fps for network/rendering efficiency)
+                if now - last_frame_time < 0.06:
+                    time.sleep(0.01)
+                    continue
+                last_frame_time = now
+
+                # Encode frame to JPEG
+                ok, jpeg = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+                if not ok:
+                    continue
+
+                yield (
+                    b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n'
+                )
+        finally:
+            cap.release()
+
+    return StreamingResponse(
+        frame_generator(),
+        media_type='multipart/x-mixed-replace; boundary=frame',
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
     )
 
 

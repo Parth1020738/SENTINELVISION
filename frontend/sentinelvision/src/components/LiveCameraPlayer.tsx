@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import Hls from 'hls.js';
 import { api } from '../api/client';
-import { CameraPlaybackResponse } from '../types';
 
 interface LiveCameraPlayerProps {
   cameraId: string;
@@ -18,11 +16,10 @@ export default function LiveCameraPlayer({
   resolution,
   aiActive = false,
 }: LiveCameraPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const hlsRef = useRef<Hls | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [playbackInfo, setPlaybackInfo] = useState<CameraPlaybackResponse | null>(null);
+  const [streamSrc, setStreamSrc] = useState<string>('');
   const [status, setStatus] = useState<PlayerConnectionStatus>('CONNECTING');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
@@ -35,7 +32,10 @@ export default function LiveCameraPlayer({
     let isSubscribed = true;
     setStatus('CONNECTING');
     setErrorMsg(null);
-    setPlaybackInfo(null);
+
+    // Form fresh stream URL with timestamp cache buster
+    const url = `${api.getCameraLiveUrl(cameraId)}&_t=${Date.now()}`;
+    setStreamSrc(url);
 
     // Clear any previous timeout
     if (timeoutRef.current) {
@@ -43,103 +43,13 @@ export default function LiveCameraPlayer({
       timeoutRef.current = null;
     }
 
-    // Set connection timeout (10s limit)
+    // Set connection timeout (12s limit)
     timeoutRef.current = setTimeout(() => {
       if (isSubscribed && status !== 'CONNECTED') {
         setStatus('ERROR');
-        setErrorMsg('Connection attempt timed out (10s). Stream source unresponsive.');
+        setErrorMsg('Connection attempt timed out (12s). Stream feed unresponsive.');
       }
-    }, 10000);
-
-    // Clean up previous stream instance cleanly
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-      hlsRef.current = null;
-    }
-
-    if (videoRef.current) {
-      videoRef.current.removeAttribute('src');
-      videoRef.current.load();
-    }
-
-    api
-      .getCameraPlayback(cameraId)
-      .then((data) => {
-        if (!isSubscribed) return;
-        setPlaybackInfo(data);
-
-        if (!data.available || !data.playback_url) {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setStatus('OFFLINE');
-          setErrorMsg('Stream is offline or unavailable for this government camera target.');
-          return;
-        }
-
-        const videoEl = videoRef.current;
-        if (!videoEl) return;
-
-        const hlsUrl = data.playback_url;
-
-        if (Hls.isSupported()) {
-          const hls = new Hls({
-            enableWorker: true,
-            lowLatencyMode: true,
-            backBufferLength: 30,
-            manifestLoadingTimeOut: 8000,
-            levelLoadingTimeOut: 8000,
-          });
-
-          hlsRef.current = hls;
-          hls.loadSource(hlsUrl);
-          hls.attachMedia(videoEl);
-
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            if (!isSubscribed) return;
-            videoEl.play().catch(() => {
-              // Autoplay policy restriction handled gracefully
-            });
-          });
-
-          hls.on(Hls.Events.ERROR, (_event, data) => {
-            if (!isSubscribed) return;
-            if (data.fatal) {
-              switch (data.type) {
-                case Hls.ErrorTypes.NETWORK_ERROR:
-                  setStatus('RECONNECTING');
-                  setErrorMsg('Network anomaly detected on stream feed. Retrying...');
-                  hls.startLoad();
-                  break;
-                case Hls.ErrorTypes.MEDIA_ERROR:
-                  setStatus('RECONNECTING');
-                  setErrorMsg('Media frame error encountered. Attempting recovery...');
-                  hls.recoverMediaError();
-                  break;
-                default:
-                  if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                  setStatus('ERROR');
-                  setErrorMsg('Failed to initialize HLS playback stream.');
-                  hls.destroy();
-                  break;
-              }
-            }
-          });
-        } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-          videoEl.src = hlsUrl;
-          videoEl.addEventListener('loadedmetadata', () => {
-            videoEl.play().catch(() => {});
-          });
-        } else {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setStatus('ERROR');
-          setErrorMsg('HLS playback is not supported by your browser environment.');
-        }
-      })
-      .catch((err) => {
-        if (!isSubscribed) return;
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        setStatus('ERROR');
-        setErrorMsg(err.message || `Failed to fetch playback metadata for ${cameraId}`);
-      });
+    }, 12000);
 
     return () => {
       isSubscribed = false;
@@ -147,10 +57,8 @@ export default function LiveCameraPlayer({
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
+      // Stop image stream download on unmount/camera change
+      setStreamSrc('');
     };
   }, [cameraId, retryCount]);
 
@@ -192,39 +100,36 @@ export default function LiveCameraPlayer({
 
         <div className="flex items-center gap-3">
           <span className="font-code-telemetry text-label-sm text-on-surface-variant">
-            {resolution || '1280x720'}
+            {resolution || '1920x1080'}
           </span>
           <span className="font-code-telemetry text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant">
-            Protocol: HLS (Safe)
+            Protocol: MJPEG Stream (Authenticated)
           </span>
         </div>
       </div>
 
-      {/* Video Viewport Area */}
+      {/* Video / Stream Viewport Area */}
       <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden group">
-        <video
-          ref={videoRef}
-          className={`w-full h-full object-contain ${isPlaying ? 'block' : 'hidden'}`}
-          controls
-          autoPlay
-          muted
-          playsInline
-          onPlay={() => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            setStatus('CONNECTED');
-            setErrorMsg(null);
-          }}
-          onPause={() => {
-            // Keep connected if paused by user
-          }}
-          onError={() => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            setStatus('ERROR');
-            setErrorMsg('HTML5 Video Playback Error');
-          }}
-        />
+        {streamSrc && (
+          <img
+            ref={imgRef}
+            src={streamSrc}
+            alt={`Live feed for ${cameraId}`}
+            className={`w-full h-full object-contain ${isPlaying ? 'block' : 'hidden'}`}
+            onLoad={() => {
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              setStatus('CONNECTED');
+              setErrorMsg(null);
+            }}
+            onError={() => {
+              if (timeoutRef.current) clearTimeout(timeoutRef.current);
+              setStatus('ERROR');
+              setErrorMsg('Unable to receive live video frames from server relay.');
+            }}
+          />
+        )}
 
-        {/* Overlay Badges when Video is Playing */}
+        {/* Overlay Badges when Stream is Connected & Playing */}
         {isPlaying && (
           <div className="absolute top-3 left-3 flex items-center gap-2 pointer-events-none z-10">
             <span className="bg-error text-white font-code-telemetry text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-md">
@@ -233,7 +138,7 @@ export default function LiveCameraPlayer({
             </span>
             {aiActive && (
               <span className="bg-primary/90 text-primary-container font-code-telemetry text-[11px] font-bold px-2 py-0.5 rounded shadow-md">
-                AI ACTIVE (Backend RTSP)
+                AI ACTIVE (RTSP Frame Relay)
               </span>
             )}
           </div>
@@ -246,15 +151,15 @@ export default function LiveCameraPlayer({
             <p className="font-code-telemetry text-label-md text-primary font-semibold">
               {status === 'RECONNECTING'
                 ? `Reconnecting stream for ${cameraId}...`
-                : `Connecting to stream for ${cameraId}...`}
+                : `Connecting to real stream for ${cameraId}...`}
             </p>
             <p className="font-body-xs text-on-surface-variant mt-1">
-              Establishing credential-free browser playback channel
+              Establishing authenticated server-side RTSP relay channel
             </p>
           </div>
         )}
 
-        {/* Error / Offline / Timeout State */}
+        {/* Error / Offline State */}
         {(status === 'OFFLINE' || status === 'ERROR') && (
           <div className="absolute inset-0 bg-surface-container-lowest flex flex-col items-center justify-center p-6 text-center z-20">
             <span className="material-symbols-outlined text-[48px] text-error mb-2">
@@ -283,11 +188,11 @@ export default function LiveCameraPlayer({
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[16px] text-primary">shield</span>
           <span>
-            Browser playback is completely isolated from RTSP credentials.
+            Browser playback is authenticated; RTSP credentials remain server-side.
           </span>
         </div>
         <span className="font-code-telemetry text-[11px] text-outline">
-          Target: {playbackInfo?.playback_url ? 'cctv.corp8.cloud' : 'N/A'}
+          Relay: /api/cameras/{cameraId}/live
         </span>
       </div>
     </div>

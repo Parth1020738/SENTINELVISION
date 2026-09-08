@@ -109,16 +109,21 @@ def reset_repositories() -> None:
 # Phase 9.14: Authentication & RBAC Dependencies
 # ---------------------------------------------------------------------------
 def get_current_user(request: Request) -> Optional[dict]:
-    """Resolve current user from Authorization header or session token.
+    """Resolve current user from Authorization header, query parameter, or session token.
 
     If auth is not required by environment (SENTINEL_AUTH_REQUIRED=false) and
-    no auth header is present, returns a default guest user (ADMIN role for dev compatibility).
-    If auth header is present, decodes token and enforces validity.
+    no auth token is present, returns a default guest user (ADMIN role for dev compatibility).
+    If auth token is present (via header or query param), decodes token and enforces validity.
     If auth is required and no valid token is present, raises 401.
     """
+    token: Optional[str] = None
     auth_header = request.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header[7:].strip()
+    elif "token" in request.query_params:
+        token = request.query_params.get("token", "").strip()
+
+    if token:
         user = decode_access_token(token)
         if user:
             return user

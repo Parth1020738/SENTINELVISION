@@ -18,14 +18,21 @@ export function useApi<T>(
   const [state, setState] = useState<AsyncState<T>>({ status: 'loading', data: null, error: null });
 
   const fetchData = useCallback(() => {
-    setState({ status: 'loading', data: null, error: null });
+    setState((prev) => {
+      // Keep existing data on background polling / refreshes to prevent UI flickering
+      if (prev.status === 'success' && prev.data !== null) {
+        return prev;
+      }
+      return { status: 'loading', data: null, error: null };
+    });
+
     fetcher()
       .then((data) => {
         setState({ status: 'success', data, error: null });
       })
       .catch((err) => {
         const message = err instanceof ApiError ? err.message : 'Failed to fetch data';
-        setState({ status: 'error', data: null, error: message });
+        setState((prev) => (prev.status === 'success' ? prev : { status: 'error', data: null, error: message }));
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
