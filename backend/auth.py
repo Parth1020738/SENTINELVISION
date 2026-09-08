@@ -43,6 +43,8 @@ ENV_OPERATOR_PASS = "SENTINEL_OPERATOR_PASSWORD"
 ENV_VIEWER_USER = "SENTINEL_VIEWER_USERNAME"
 ENV_VIEWER_PASS = "SENTINEL_VIEWER_PASSWORD"
 
+ENV_ACCESS_CODE = "SENTINEL_ACCESS_CODE"
+
 DEFAULT_ADMIN_USER = "admin"
 DEFAULT_ADMIN_PASS = "sentinel123!"
 
@@ -138,6 +140,20 @@ def authenticate_user(username: str, password: str, environ: Optional[Dict[str, 
             if hmac.compare_digest(acc["password"], password) or verify_password(password, acc["password"]):
                 return {"username": acc["username"], "role": acc["role"]}
     return None
+
+
+def verify_access_code(candidate_code: str, environ: Optional[Dict[str, str]] = None) -> bool:
+    """Verify candidate access code against SENTINEL_ACCESS_CODE env variable.
+
+    Returns False if candidate_code is empty or if SENTINEL_ACCESS_CODE is not configured.
+    """
+    if not candidate_code or not isinstance(candidate_code, str):
+        return False
+    env = os.environ if environ is None else environ
+    expected_code = env.get(ENV_ACCESS_CODE, "").strip()
+    if not expected_code:
+        return False
+    return hmac.compare_digest(candidate_code.strip(), expected_code)
 
 
 # ---------------------------------------------------------------------------

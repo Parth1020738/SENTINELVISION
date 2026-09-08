@@ -238,6 +238,75 @@ class TestPhase914SecurityAndScalability(unittest.TestCase):
         catalogue._last_fetch_time = 9999999999.0
         self.assertEqual(len(catalogue.get_cameras()), 1000)
 
+    # ---------------------------------------------------------------------------
+    # 9. Access-Code Gate & Security Integration Tests
+    # ---------------------------------------------------------------------------
+    def test_verify_access_code_success_and_failure(self):
+        os.environ["SENTINEL_ACCESS_CODE"] = "TEST-CODE-1234"
+
+        # Correct access code
+        resp = self.client.post("/api/auth/verify-access-code", json={"access_code": "TEST-CODE-1234"})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("access_token", data)
+        self.assertEqual(data["role"], "ADMIN")
+
+        # Wrong access code
+        resp_bad = self.client.post("/api/auth/verify-access-code", json={"access_code": "WRONG-CODE"})
+        self.assertEqual(resp_bad.status_code, 401)
+        self.assertIn("Invalid access code", resp_bad.json()["detail"])
+
+        os.environ.pop("SENTINEL_ACCESS_CODE", None)
+
+    def test_verify_access_code_unconfigured(self):
+        os.environ.pop("SENTINEL_ACCESS_CODE", None)
+        resp = self.client.post("/api/auth/verify-access-code", json={"access_code": "ANY-CODE"})
+        self.assertEqual(resp.status_code, 401)
+
+    def test_access_code_rate_limiting(self):
+        os.environ["SENTINEL_ACCESS_CODE"] = "TEST-CODE-9999"
+        for _ in range(5):
+            self.client.post("/api/auth/verify-access-code", json={"access_code": "WRONG"})
+
+        resp = self.client.post("/api/auth/verify-access-code", json={"access_code": "WRONG"})
+        self.assertEqual(resp.status_code, 429)
+        self.assertIn("Too many failed access code attempts", resp.json()["detail"])
+
+        os.environ.pop("SENTINEL_ACCESS_CODE", None)
+
+    def test_protected_endpoints_with_and_without_auth(self):
+        os.environ["SENTINEL_AUTH_REQUIRED"] = "true"
+        os.environ["SENTINEL_ACCESS_CODE"] = "TEST-GATE-KEY"
+
+        # 1. /health should always be accessible (public)
+        health_resp = self.client.get("/health")
+        self.assertEqual(health_resp.status_code, 200)
+
+        # 2. Protected endpoint without auth header -> 401
+        cameras_no_auth = self.client.get("/api/cameras")
+        self.assertEqual(cameras_no_auth.status_code, 401)
+
+        # 3. Authenticate with access code -> get bearer token
+        login_resp = self.client.post("/api/auth/verify-access-code", json={"access_code": "TEST-GATE-KEY"})
+        self.assertEqual(login_resp.status_code, 200)
+        token = login_resp.json()["access_token"]
+
+        # 4. Protected endpoint with valid bearer token -> 200 OK
+        cameras_with_auth = self.client.get("/api/cameras", headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(cameras_with_auth.status_code, 200)
+
+        os.environ.pop("SENTINEL_ACCESS_CODE", None)
+        os.environ.pop("SENTINEL_AUTH_REQUIRED", None)
+
+    def test_custom_cors_origin_support(self):
+        os.environ["SENTINEL_FRONTEND_ORIGIN"] = "https://custom-sentinel-app.vercel.app"
+        # Test CORS origins function
+        from backend.api.main import _cors_origins
+        origins = _cors_origins()
+        self.assertIn("https://custom-sentinel-app.vercel.app", origins)
+        os.environ.pop("SENTINEL_FRONTEND_ORIGIN", None)
+
 
 if __name__ == "__main__":
     unittest.main()
+

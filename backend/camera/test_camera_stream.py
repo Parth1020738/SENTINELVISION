@@ -310,7 +310,7 @@ class TestTCPConfiguration(unittest.TestCase):
     def test_configure_rtsp_tcp_sets_env(self):
         env = {}
         configure_rtsp_tcp(env)
-        self.assertEqual(env["OPENCV_FFMPEG_CAPTURE_OPTIONS"], "rtsp_transport;tcp")
+        self.assertEqual(env["OPENCV_FFMPEG_CAPTURE_OPTIONS"], "rtsp_transport;tcp|stimeout;5000000")
 
     def test_connect_sets_tcp_before_capture_open(self):
         seen = []
@@ -330,7 +330,7 @@ class TestTCPConfiguration(unittest.TestCase):
             },
         )
         self.assertTrue(stream.connect())
-        self.assertEqual(seen, ["rtsp_transport;tcp"])
+        self.assertEqual(seen, ["rtsp_transport;tcp|stimeout;5000000"])
 
 
 # ---------------------------------------------------------------------------

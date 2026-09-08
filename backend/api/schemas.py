@@ -288,6 +288,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class AccessCodeVerifyRequest(BaseModel):
+    access_code: str
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

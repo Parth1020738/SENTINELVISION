@@ -4,6 +4,7 @@ import { useApi, formatTimestamp } from '../hooks';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
+import InteractiveGisMap from '../components/InteractiveGisMap';
 import {
   GlobalVehicle,
   GlobalVehicleTimelineResponse,
@@ -25,6 +26,13 @@ export default function VehiclesPage() {
   const [localSearchId, setLocalSearchId] = useState('');
   const [localSearchTriggered, setLocalSearchTriggered] = useState(false);
   const [canonicalVehicleId, setCanonicalVehicleId] = useState<number | null>(null);
+
+  // Cameras metadata for GIS map
+  const camerasApi = useApi(
+    () => api.getCameras(),
+    [],
+    30000
+  );
 
   // Global vehicles directory list
   const globalVehiclesList = useApi(
@@ -365,6 +373,11 @@ export default function VehiclesPage() {
                               </div>
                             ) : (
                               <div className="flex flex-col gap-6">
+                                <InteractiveGisMap
+                                  cameras={camerasApi.data || []}
+                                  routePoints={globalRoute.data.points}
+                                  vehiclePlate={globalRoute.data.normalized_plate}
+                                />
                                 {/* SVG/Visual Node Sequence Map */}
                                 <div className="p-6 bg-surface-container-low rounded-lg border border-outline-variant/20">
                                   <div className="text-xs font-bold text-outline uppercase tracking-wider mb-4">

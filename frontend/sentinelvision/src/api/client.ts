@@ -35,10 +35,14 @@ class ApiError extends Error {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
+  const token = localStorage.getItem('sentinel_token');
+  const authHeader: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...authHeader,
       ...options.headers,
     },
   });
@@ -62,6 +66,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
+  // Access Gate
+  verifyAccessCode: (accessCode: string) =>
+    request<{ access_token: string; token_type: string; role: string; username: string }>('/api/auth/verify-access-code', {
+      method: 'POST',
+      body: JSON.stringify({ access_code: accessCode }),
+    }),
   // Health
   getHealth: () => request<HealthResponse>('/health'),
   getSystemHealth: () => request<SystemHealthResponse>('/api/system/health'),

@@ -56,12 +56,12 @@ DEFAULT_READ_FAILURE_LIMIT = 60  # consecutive failed reads before reconnect
 
 
 def configure_rtsp_tcp(environ: Optional[dict] = None) -> None:
-    """Force OpenCV/FFmpeg to use TCP for RTSP transport.
+    """Force OpenCV/FFmpeg to use TCP for RTSP transport with a 5s connection timeout.
 
     MUST be called before ``cv2.VideoCapture`` opens an RTSP URL.
     """
     env = os.environ if environ is None else environ
-    env["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
+    env["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|stimeout;5000000"
 
 
 def _fourcc_to_str(fourcc: int) -> str:

@@ -10,6 +10,8 @@ interface LiveCameraPlayerProps {
   aiActive?: boolean;
 }
 
+export type PlayerConnectionStatus = 'CONNECTING' | 'CONNECTED' | 'RECONNECTING' | 'OFFLINE' | 'ERROR';
+
 export default function LiveCameraPlayer({
   cameraId,
   cameraName,
@@ -18,10 +20,10 @@ export default function LiveCameraPlayer({
 }: LiveCameraPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [playbackInfo, setPlaybackInfo] = useState<CameraPlaybackResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [status, setStatus] = useState<PlayerConnectionStatus>('CONNECTING');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState<number>(0);
 
@@ -31,12 +33,25 @@ export default function LiveCameraPlayer({
 
   useEffect(() => {
     let isSubscribed = true;
-    setIsLoading(true);
-    setIsPlaying(false);
+    setStatus('CONNECTING');
     setErrorMsg(null);
     setPlaybackInfo(null);
 
-    // Clean up previous stream instance
+    // Clear any previous timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    // Set connection timeout (10s limit)
+    timeoutRef.current = setTimeout(() => {
+      if (isSubscribed && status !== 'CONNECTED') {
+        setStatus('ERROR');
+        setErrorMsg('Connection attempt timed out (10s). Stream source unresponsive.');
+      }
+    }, 10000);
+
+    // Clean up previous stream instance cleanly
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
@@ -54,8 +69,9 @@ export default function LiveCameraPlayer({
         setPlaybackInfo(data);
 
         if (!data.available || !data.playback_url) {
-          setErrorMsg('Stream unavailable for this camera target.');
-          setIsLoading(false);
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setStatus('OFFLINE');
+          setErrorMsg('Stream is offline or unavailable for this government camera target.');
           return;
         }
 
@@ -69,6 +85,8 @@ export default function LiveCameraPlayer({
             enableWorker: true,
             lowLatencyMode: true,
             backBufferLength: 30,
+            manifestLoadingTimeOut: 8000,
+            levelLoadingTimeOut: 8000,
           });
 
           hlsRef.current = hls;
@@ -78,7 +96,7 @@ export default function LiveCameraPlayer({
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
             if (!isSubscribed) return;
             videoEl.play().catch(() => {
-              // Autoplay policy restriction
+              // Autoplay policy restriction handled gracefully
             });
           });
 
@@ -87,47 +105,56 @@ export default function LiveCameraPlayer({
             if (data.fatal) {
               switch (data.type) {
                 case Hls.ErrorTypes.NETWORK_ERROR:
-                  setErrorMsg('Network error while connecting to live HLS stream.');
+                  setStatus('RECONNECTING');
+                  setErrorMsg('Network anomaly detected on stream feed. Retrying...');
                   hls.startLoad();
                   break;
                 case Hls.ErrorTypes.MEDIA_ERROR:
-                  setErrorMsg('Media error encountered. Attempting recovery...');
+                  setStatus('RECONNECTING');
+                  setErrorMsg('Media frame error encountered. Attempting recovery...');
                   hls.recoverMediaError();
                   break;
                 default:
+                  if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                  setStatus('ERROR');
                   setErrorMsg('Failed to initialize HLS playback stream.');
                   hls.destroy();
                   break;
               }
-              setIsPlaying(false);
-              setIsLoading(false);
             }
           });
         } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-          // Native Safari / iOS HLS support
           videoEl.src = hlsUrl;
           videoEl.addEventListener('loadedmetadata', () => {
             videoEl.play().catch(() => {});
           });
         } else {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setStatus('ERROR');
           setErrorMsg('HLS playback is not supported by your browser environment.');
-          setIsLoading(false);
         }
       })
       .catch((err) => {
         if (!isSubscribed) return;
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setStatus('ERROR');
         setErrorMsg(err.message || `Failed to fetch playback metadata for ${cameraId}`);
-        setIsLoading(false);
       });
 
     return () => {
       isSubscribed = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
     };
   }, [cameraId, retryCount]);
+
+  const isPlaying = status === 'CONNECTED';
 
   return (
     <div className="lg:col-span-2 card overflow-hidden flex flex-col bg-surface-container-lowest">
@@ -136,7 +163,13 @@ export default function LiveCameraPlayer({
         <div className="flex items-center gap-2">
           <span
             className={`w-2.5 h-2.5 rounded-full ${
-              isPlaying ? 'bg-secondary animate-pulse' : 'bg-outline'
+              status === 'CONNECTED'
+                ? 'bg-secondary animate-pulse'
+                : status === 'CONNECTING' || status === 'RECONNECTING'
+                ? 'bg-warning animate-pulse'
+                : status === 'OFFLINE'
+                ? 'bg-outline'
+                : 'bg-error'
             }`}
           />
           <span className="font-code-telemetry text-label-md text-on-surface font-bold">
@@ -144,14 +177,16 @@ export default function LiveCameraPlayer({
           </span>
           <span
             className={`status-badge text-[11px] px-2 py-0.5 rounded font-bold ${
-              isPlaying
+              status === 'CONNECTED'
                 ? 'bg-secondary/20 text-secondary border border-secondary/30'
-                : isLoading
-                ? 'bg-primary/20 text-primary'
-                : 'bg-surface-container-high text-on-surface-variant'
+                : status === 'CONNECTING' || status === 'RECONNECTING'
+                ? 'bg-warning/20 text-warning border border-warning/30'
+                : status === 'OFFLINE'
+                ? 'bg-surface-container-high text-on-surface-variant'
+                : 'bg-error/20 text-error border border-error/30'
             }`}
           >
-            {isPlaying ? 'LIVE STREAMING' : isLoading ? 'CONNECTING...' : 'OFFLINE'}
+            {status}
           </span>
         </div>
 
@@ -175,16 +210,16 @@ export default function LiveCameraPlayer({
           muted
           playsInline
           onPlay={() => {
-            setIsPlaying(true);
-            setIsLoading(false);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            setStatus('CONNECTED');
             setErrorMsg(null);
           }}
           onPause={() => {
-            setIsPlaying(false);
+            // Keep connected if paused by user
           }}
           onError={() => {
-            setIsPlaying(false);
-            setIsLoading(false);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            setStatus('ERROR');
             setErrorMsg('HTML5 Video Playback Error');
           }}
         />
@@ -204,12 +239,14 @@ export default function LiveCameraPlayer({
           </div>
         )}
 
-        {/* Loading Overlay */}
-        {isLoading && !errorMsg && (
+        {/* Loading State Overlay (CONNECTING or RECONNECTING) */}
+        {(status === 'CONNECTING' || status === 'RECONNECTING') && (
           <div className="absolute inset-0 bg-surface-container-lowest/90 flex flex-col items-center justify-center p-6 text-center z-20">
             <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mb-3" />
             <p className="font-code-telemetry text-label-md text-primary font-semibold">
-              Connecting to HLS stream for {cameraId}...
+              {status === 'RECONNECTING'
+                ? `Reconnecting stream for ${cameraId}...`
+                : `Connecting to stream for ${cameraId}...`}
             </p>
             <p className="font-body-xs text-on-surface-variant mt-1">
               Establishing credential-free browser playback channel
@@ -217,17 +254,17 @@ export default function LiveCameraPlayer({
           </div>
         )}
 
-        {/* Error / Fallback State */}
-        {errorMsg && (
+        {/* Error / Offline / Timeout State */}
+        {(status === 'OFFLINE' || status === 'ERROR') && (
           <div className="absolute inset-0 bg-surface-container-lowest flex flex-col items-center justify-center p-6 text-center z-20">
             <span className="material-symbols-outlined text-[48px] text-error mb-2">
-              videocam_off
+              {status === 'OFFLINE' ? 'videocam_off' : 'signal_disconnected'}
             </span>
             <h4 className="font-headline-sm text-on-surface font-bold mb-1">
-              Playback Unavailable
+              {status === 'OFFLINE' ? 'Camera Offline' : 'Stream Connection Error'}
             </h4>
             <p className="font-body-sm text-on-surface-variant max-w-md mb-4">
-              {errorMsg}
+              {errorMsg || 'Unable to establish video stream connection.'}
             </p>
             <button
               type="button"
@@ -256,3 +293,4 @@ export default function LiveCameraPlayer({
     </div>
   );
 }
+

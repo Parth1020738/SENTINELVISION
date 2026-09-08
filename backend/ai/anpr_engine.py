@@ -75,6 +75,10 @@ class ANPRResult:
     timestamp: Optional[float] = None
     bbox: Optional[Tuple[float, float, float, float]] = None
     observation_count: int = 0
+    status: str = "PLATE_READ"  # PLATE_READ, PLATE_DETECTED_UNREADABLE, LOW_CONFIDENCE, INVALID_PLATE
+    preprocessing_method: str = "bicubic_2x_clahe"
+    quality_score: float = 1.0
+    crop_dimensions: Optional[Tuple[int, int]] = None
 
 
 # ---------------------------------------------------------------------------
@@ -366,17 +370,54 @@ class ANPREngine:
         frame: np.ndarray,
         plate: PlateDetection,
     ) -> Optional[np.ndarray]:
-        """Crop a plate region from the frame, clamped to frame bounds."""
+        """Crop a plate region from the frame with adaptive CLAHE enhancement and upscaling."""
+        import cv2
+
         h, w = frame.shape[:2]
-        x1 = max(0, int(round(plate.x1)))
-        y1 = max(0, int(round(plate.y1)))
-        x2 = min(w, int(round(plate.x2)))
-        y2 = min(h, int(round(plate.y2)))
+        # Slight margin padding around plate detection to capture full borders
+        pw = max(0.0, plate.x2 - plate.x1)
+        ph = max(0.0, plate.y2 - plate.y1)
+        margin_x = pw * 0.05
+        margin_y = ph * 0.05
+
+        x1 = max(0, int(round(plate.x1 - margin_x)))
+        y1 = max(0, int(round(plate.y1 - margin_y)))
+        x2 = min(w, int(round(plate.x2 + margin_x)))
+        y2 = min(h, int(round(plate.y2 + margin_y)))
 
         if x2 <= x1 or y2 <= y1:
             return None
 
-        return frame[y1:y2, x1:x2].copy()
+        crop = frame[y1:y2, x1:x2].copy()
+        if crop is None or crop.size == 0:
+            return None
+
+        crop_h, crop_w = crop.shape[:2]
+        # For low-resolution government camera crops (< 120px wide), upscale with bicubic, CLAHE, denoise & sharpen
+        if crop_w < 120 or crop_h < 40:
+            scale = max(120.0 / float(crop_w), 40.0 / float(crop_h))
+            new_w = int(round(crop_w * scale))
+            new_h = int(round(crop_h * scale))
+            crop = cv2.resize(crop, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
+
+            # 1. Grayscale & CLAHE local contrast enhancement
+            if len(crop.shape) == 3:
+                gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+            else:
+                gray = crop.copy()
+            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))
+            enhanced_gray = clahe.apply(gray)
+
+            # 2. Mild Denoising
+            denoised = cv2.GaussianBlur(enhanced_gray, (3, 3), 0)
+
+            # 3. Controlled Sharpening
+            kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]], dtype=np.float32)
+            sharpened = cv2.filter2D(denoised, -1, kernel)
+
+            crop = cv2.cvtColor(sharpened, cv2.COLOR_GRAY2BGR)
+
+        return crop
 
     # ------------------------------------------------------------------
     # Multi-frame aggregation with confidence-weighted voting

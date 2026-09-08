@@ -21,11 +21,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.api.deps import Repositories, get_repositories, get_current_user, require_role
-from backend.auth import authenticate_user, create_access_token, check_rate_limit, record_failed_login
+from backend.auth import authenticate_user, create_access_token, check_rate_limit, record_failed_login, verify_access_code
 from backend.camera.camera_catalogue import NormalizedCamera, global_catalogue
 from backend.services.attention_engine import AttentionEngine
 from backend.services.event_hub import event_hub
 from backend.api.schemas import (
+    AccessCodeVerifyRequest,
     AlertListResponse,
     AlertResponse,
     AlertStatusUpdate,
@@ -85,7 +86,7 @@ _DEFAULT_CORS_ORIGINS = (
 
 
 def _cors_origins() -> List[str]:
-    raw = os.environ.get("SENTINELVISION_CORS_ORIGINS", _DEFAULT_CORS_ORIGINS)
+    raw = os.environ.get("SENTINEL_FRONTEND_ORIGIN") or os.environ.get("SENTINELVISION_CORS_ORIGINS", _DEFAULT_CORS_ORIGINS)
     return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
 
@@ -169,6 +170,53 @@ def login(
         token_type="bearer",
         role=user["role"],
         username=user["username"],
+    )
+
+
+@app.post("/api/auth/verify-access-code", response_model=TokenResponse)
+def verify_access_code_endpoint(
+    payload: AccessCodeVerifyRequest,
+    request: Request,
+    repos: Repositories = Depends(get_repositories),
+):
+    """Verify system access code and return a bearer session token."""
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    if not check_rate_limit(client_ip, max_attempts=5, window_seconds=60):
+        repos.audit.add_audit_entry(
+            actor="access_gate",
+            action="ACCESS_CODE_RATE_LIMITED",
+            resource_type="auth",
+            result="FAILURE",
+            metadata_json=f'{{"ip": "{client_ip}"}}',
+        )
+        raise HTTPException(
+            status_code=429, detail="Too many failed access code attempts. Please wait 1 minute."
+        )
+
+    if not verify_access_code(payload.access_code):
+        record_failed_login(client_ip)
+        repos.audit.add_audit_entry(
+            actor="access_gate",
+            action="ACCESS_CODE_FAILED",
+            resource_type="auth",
+            result="FAILURE",
+            metadata_json=f'{{"ip": "{client_ip}"}}',
+        )
+        raise HTTPException(status_code=401, detail="Invalid access code")
+
+    token = create_access_token("access_user", "ADMIN")
+    repos.audit.add_audit_entry(
+        actor="access_user",
+        action="ACCESS_CODE_SUCCESS",
+        resource_type="auth",
+        result="SUCCESS",
+        metadata_json=f'{{"ip": "{client_ip}"}}',
+    )
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        role="ADMIN",
+        username="access_user",
     )
 
 
@@ -490,6 +538,7 @@ def get_cameras_health(repos: Repositories = Depends(get_repositories)):
 def list_cameras(
     selected_camera_id: Optional[str] = Query(None),
     repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
 ):
     """All registered cameras (safe metadata only)."""
     catalogue_cams = global_catalogue.get_cameras()
@@ -519,19 +568,25 @@ def list_cameras(
             cam_map[db_c.camera_id] = db_c
 
     active_id = selected_camera_id if selected_camera_id else "cam01"
+    db_health_list = repos.health.list_health()
+    health_map = {h.camera_id: h.status for h in db_health_list}
 
     responses = []
     for cam_id, cam in cam_map.items():
         att_state, att_reason = _compute_attention_state(cam, repos)
         is_active = (cam_id == active_id)
-        responses.append(
-            _camera_to_response(
-                cam,
-                attention_state=att_state,
-                attention_reason=att_reason,
-                ai_active_override=is_active,
-            )
+        resp = _camera_to_response(
+            cam,
+            attention_state=att_state,
+            attention_reason=att_reason,
+            ai_active_override=is_active,
         )
+        # Runtime health status takes precedence over static catalogue status
+        runtime_status = health_map.get(cam_id)
+        if runtime_status is not None:
+            resp.status = runtime_status.lower()
+            resp.live = (runtime_status == "ONLINE")
+        responses.append(resp)
 
     return responses
 
