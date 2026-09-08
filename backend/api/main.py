@@ -671,6 +671,22 @@ def debug_ping():
     except Exception as e:
         res["rtsp_url_error"] = str(e)
 
+    try:
+        import os
+        from backend.camera.camera_stream import configure_rtsp_tcp
+        configure_rtsp_tcp()
+        url = build_authenticated_rtsp_url("cam01")
+        cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
+        res["cap_opened"] = cap.isOpened()
+        if cap.isOpened():
+            ret, frame = cap.read()
+            res["frame_read_ret"] = ret
+            if ret and frame is not None:
+                res["frame_shape"] = list(frame.shape)
+            cap.release()
+    except Exception as e:
+        res["cap_error"] = str(e)
+
     return res
 
 
