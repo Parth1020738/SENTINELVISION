@@ -652,7 +652,7 @@ def debug_tcp_endpoint():
 @app.get("/api/debug/ping")
 def debug_ping():
     import os
-    res = {}
+    res = {"version": "v10.1-live-ready"}
     try:
         import cv2
         res["opencv_version"] = cv2.__version__
