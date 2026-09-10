@@ -116,6 +116,24 @@ def get_current_user(request: Request) -> Optional[dict]:
     If auth token is present (via header or query param), decodes token and enforces validity.
     If auth is required and no valid token is present, raises 401.
     """
+    is_demo = os.environ.get("SENTINEL_DEMO_MODE", "false").strip().lower() in ("true", "1", "yes")
+    if is_demo:
+        method = getattr(request, "method", "GET")
+        path = request.url.path
+        if method == "GET":
+            allowed_prefixes = (
+                "/health",
+                "/api/cameras",
+                "/api/counts",
+                "/api/system/health",
+                "/api/vehicles",
+                "/api/plates/search",
+                "/api/alerts",
+                "/api/watchlist"
+            )
+            if any(path == p or path.startswith(p + "/") for p in allowed_prefixes):
+                return {"username": "demo_viewer", "role": "VIEWER"}
+
     token: Optional[str] = None
     auth_header = request.headers.get("Authorization")
     if auth_header and auth_header.startswith("Bearer "):

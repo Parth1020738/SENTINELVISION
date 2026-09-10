@@ -97,7 +97,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins(),
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -871,6 +871,7 @@ def stream_camera_mjpeg(
                 if not ret or frame is None:
                     consecutive_fails += 1
                     if consecutive_fails > 30:
+                        logger.warning(f"[MJPEG] Camera {camera_id} stream failed to read consecutive frames. Exiting generator.")
                         break
                     time.sleep(0.05)
                     continue
@@ -892,7 +893,12 @@ def stream_camera_mjpeg(
                     b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n'
                 )
+        except GeneratorExit:
+            logger.info(f"[MJPEG] Client disconnected from {camera_id} live stream.")
+        except Exception as e:
+            logger.error(f"[MJPEG] Error during stream generation for {camera_id}: {e}")
         finally:
+            logger.info(f"[MJPEG] Releasing capture for {camera_id} live stream.")
             capture.release()
 
     return StreamingResponse(
