@@ -709,8 +709,8 @@ def debug_rtsp_endpoint():
         ENV_RTSP_EMAIL,
         ENV_RTSP_PASSWORD,
         build_authenticated_rtsp_url,
-        configure_rtsp_tcp,
     )
+    from backend.camera.camera_stream import configure_rtsp_tcp
 
     info = {
         "env_email_set": bool(os.environ.get(ENV_RTSP_EMAIL)),
@@ -779,8 +779,8 @@ def diagnose_camera_rtsp(
         ENV_RTSP_EMAIL,
         ENV_RTSP_PASSWORD,
         build_authenticated_rtsp_url,
-        configure_rtsp_tcp,
     )
+    from backend.camera.camera_stream import configure_rtsp_tcp
 
     result = {
         "camera_id": camera_id,
@@ -845,7 +845,8 @@ def stream_camera_mjpeg(
     """
     from fastapi.responses import StreamingResponse
     import cv2, time
-    from backend.camera.rtsp_credentials import build_authenticated_rtsp_url, configure_rtsp_tcp
+    from backend.camera.rtsp_credentials import build_authenticated_rtsp_url
+    from backend.camera.camera_stream import configure_rtsp_tcp
 
     configure_rtsp_tcp()
     try:
