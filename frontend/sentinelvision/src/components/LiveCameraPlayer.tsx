@@ -17,7 +17,6 @@ export default function LiveCameraPlayer({
   aiActive = false,
 }: LiveCameraPlayerProps) {
   const imgRef = useRef<HTMLImageElement | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [streamSrc, setStreamSrc] = useState<string>('');
   const [status, setStatus] = useState<PlayerConnectionStatus>('CONNECTING');
@@ -29,34 +28,13 @@ export default function LiveCameraPlayer({
   };
 
   useEffect(() => {
-    let isSubscribed = true;
-    setStatus('CONNECTING');
-    setErrorMsg(null);
-
     // Form fresh stream URL with timestamp cache buster
     const url = `${api.getCameraLiveUrl(cameraId)}&_t=${Date.now()}`;
     setStreamSrc(url);
-
-    // Clear any previous timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-
-    // Set connection timeout (12s limit)
-    timeoutRef.current = setTimeout(() => {
-      if (isSubscribed && status !== 'CONNECTED') {
-        setStatus('ERROR');
-        setErrorMsg('Connection attempt timed out (12s). Stream feed unresponsive.');
-      }
-    }, 12000);
+    setStatus('CONNECTED');
+    setErrorMsg(null);
 
     return () => {
-      isSubscribed = false;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
       // Stop image stream download on unmount/camera change
       setStreamSrc('');
     };
@@ -116,13 +94,7 @@ export default function LiveCameraPlayer({
             src={streamSrc}
             alt={`Live feed for ${cameraId}`}
             className={`w-full h-full object-contain ${isPlaying ? 'block' : 'hidden'}`}
-            onLoad={() => {
-              if (timeoutRef.current) clearTimeout(timeoutRef.current);
-              setStatus('CONNECTED');
-              setErrorMsg(null);
-            }}
             onError={() => {
-              if (timeoutRef.current) clearTimeout(timeoutRef.current);
               setStatus('ERROR');
               setErrorMsg('Unable to receive live video frames from server relay.');
             }}
