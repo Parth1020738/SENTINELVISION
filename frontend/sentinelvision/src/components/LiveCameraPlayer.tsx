@@ -29,7 +29,9 @@ export default function LiveCameraPlayer({
 
   useEffect(() => {
     // Form fresh stream URL with timestamp cache buster
-    const url = `${api.getCameraLiveUrl(cameraId)}&_t=${Date.now()}`;
+    const baseUrl = api.getCameraLiveUrl(cameraId);
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    const url = `${baseUrl}${separator}_t=${Date.now()}`;
     setStreamSrc(url);
     setStatus('CONNECTED');
     setErrorMsg(null);
