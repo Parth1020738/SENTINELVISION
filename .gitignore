@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
+.pytest_cache/
 
 # Virtual Environment
 venv/
@@ -11,7 +12,7 @@ myenv/
 env/
 ENV/
 
-# Runtime / data
+# Runtime / Data
 data/
 testdata/
 
@@ -22,31 +23,30 @@ testdata/
 
 # Temporary runtime/test files
 scratch/
-cam01_run.txt
-cam01_test.txt
-phase8_test_results.txt
-run_cam01_test.py
-run_phase8_tests.py
+*.txt
+!.env.example
 
 # YOLO Models
 *.pt
 
-# Videos
+# Videos & Media
 videos/
 
-# IDE
+# IDE & Tooling
 .vscode/
 .idea/
+.gemini/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Node / Frontend
+# Node / Frontend Build Artifacts
 node_modules/
 dist/
 dist-ssr/
 .vite/
+*.tsbuildinfo
 
 # Project specific
 *.log

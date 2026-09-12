@@ -29,12 +29,12 @@ export default function LiveCameraPlayer({
 
   useEffect(() => {
     // Form fresh stream URL with timestamp cache buster
+    setStatus('CONNECTING');
+    setErrorMsg(null);
     const baseUrl = api.getCameraLiveUrl(cameraId);
     const separator = baseUrl.includes('?') ? '&' : '?';
     const url = `${baseUrl}${separator}_t=${Date.now()}`;
     setStreamSrc(url);
-    setStatus('CONNECTED');
-    setErrorMsg(null);
 
     return () => {
       // Stop image stream download on unmount/camera change
@@ -96,9 +96,13 @@ export default function LiveCameraPlayer({
             src={streamSrc}
             alt={`Live feed for ${cameraId}`}
             className={`w-full h-full object-contain ${isPlaying ? 'block' : 'hidden'}`}
+            onLoad={() => {
+              setStatus('CONNECTED');
+              setErrorMsg(null);
+            }}
             onError={() => {
               setStatus('ERROR');
-              setErrorMsg('Unable to receive live video frames from server relay.');
+              setErrorMsg(`Unable to receive live video frames from camera ${cameraId}.`);
             }}
           />
         )}
@@ -112,7 +116,7 @@ export default function LiveCameraPlayer({
             </span>
             {aiActive && (
               <span className="bg-primary/90 text-primary-container font-code-telemetry text-[11px] font-bold px-2 py-0.5 rounded shadow-md">
-                AI ACTIVE (RTSP Frame Relay)
+                AI ACTIVE (Production AI Pipeline)
               </span>
             )}
           </div>
@@ -120,16 +124,21 @@ export default function LiveCameraPlayer({
 
         {/* Loading State Overlay (CONNECTING or RECONNECTING) */}
         {(status === 'CONNECTING' || status === 'RECONNECTING') && (
-          <div className="absolute inset-0 bg-surface-container-lowest/90 flex flex-col items-center justify-center p-6 text-center z-20">
-            <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mb-3" />
-            <p className="font-code-telemetry text-label-md text-primary font-semibold">
-              {status === 'RECONNECTING'
-                ? `Reconnecting stream for ${cameraId}...`
-                : `Connecting to real stream for ${cameraId}...`}
-            </p>
-            <p className="font-body-xs text-on-surface-variant mt-1">
-              Establishing authenticated server-side RTSP relay channel
-            </p>
+          <div className="absolute inset-0 bg-surface-container-lowest/95 flex flex-col items-center justify-center p-6 text-center z-20 space-y-3">
+            <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="space-y-1">
+              <h4 className="font-code-telemetry text-label-lg text-primary font-bold tracking-wider">
+                CONNECTING TO CAMERA
+              </h4>
+              <p className="font-code-telemetry text-body-md text-on-surface font-semibold">
+                {cameraId} {cameraName ? `(${cameraName})` : ''}
+              </p>
+            </div>
+            <div className="font-code-telemetry text-body-xs text-on-surface-variant space-y-0.5 pt-1 border-t border-outline-variant/30">
+              <p className="text-secondary font-medium">Establishing secure stream...</p>
+              <p className="text-primary/90">Starting AI pipeline...</p>
+              <p className="text-on-surface-variant">Waiting for first frame...</p>
+            </div>
           </div>
         )}
 

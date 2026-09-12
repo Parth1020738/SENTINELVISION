@@ -1,5 +1,16 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Camera, RoutePoint } from '../types';
+
+// Fix Leaflet default icon path issues in Vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 interface InteractiveGisMapProps {
   cameras: Camera[];
@@ -7,6 +18,85 @@ interface InteractiveGisMapProps {
   routePoints?: RoutePoint[];
   vehiclePlate?: string | null;
   onSelectCamera?: (cameraId: string) => void;
+  onViewLiveCamera?: (cameraId: string) => void;
+}
+
+// Custom Marker Icons
+function createCustomIcon(status: string, isSelected: boolean, isAiActive: boolean) {
+  const isOnline = status === 'ONLINE' || status === 'online' || status === 'available';
+  const color = isSelected ? '#0284c7' : isAiActive ? '#06b6d4' : isOnline ? '#10b981' : '#f43f5e';
+  const ring = isSelected ? 'border-2 border-sky-400 animate-pulse' : '';
+
+  const html = `
+    <div class="relative flex items-center justify-center w-8 h-8 rounded-full bg-slate-900/90 shadow-md ${ring}" style="border: 2px solid ${color};">
+      <span class="material-symbols-outlined text-[18px]" style="color: ${color}; font-size: 16px;">videocam</span>
+    </div>
+  `;
+
+  return L.divIcon({
+    html,
+    className: 'custom-leaflet-marker',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16],
+    tooltipAnchor: [0, -20],
+  });
+}
+
+function createWayPointIcon(index: number, total: number) {
+  const isFirst = index === 0;
+  const isLast = index === total - 1;
+  const bg = isFirst ? '#10b981' : isLast ? '#ef4444' : '#0284c7';
+
+  const html = `
+    <div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] text-white shadow-lg border border-white" style="background-color: ${bg};">
+      ${index + 1}
+    </div>
+  `;
+
+  return L.divIcon({
+    html,
+    className: 'route-waypoint-marker',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+}
+
+// Auto-bounds controller
+function MapBoundsController({
+  cameras,
+  routePoints,
+}: {
+  cameras: Camera[];
+  routePoints: RoutePoint[];
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    const routeCoords: [number, number][] = routePoints
+      .filter((p) => p.latitude != null && p.longitude != null)
+      .map((p) => [p.latitude!, p.longitude!]);
+
+    if (routeCoords.length > 0) {
+      const bounds = L.latLngBounds(routeCoords);
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      return;
+    }
+
+    const camCoords: [number, number][] = cameras
+      .filter((c) => c.latitude != null && c.longitude != null)
+      .map((c) => [c.latitude!, c.longitude!]);
+
+    if (camCoords.length > 0) {
+      const bounds = L.latLngBounds(camCoords);
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+    } else {
+      // Gujarat default view centroid
+      map.setView([22.2587, 71.1924], 7);
+    }
+  }, [cameras, routePoints, map]);
+
+  return null;
 }
 
 export default function InteractiveGisMap({
@@ -15,216 +105,212 @@ export default function InteractiveGisMap({
   routePoints = [],
   vehiclePlate,
   onSelectCamera,
+  onViewLiveCamera,
 }: InteractiveGisMapProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // GIS map displays ONLY real government cameras (excluding demo/virtual feeds)
+  const realGovtCameras = cameras.filter(
+    (c) => !c.is_virtual && !c.camera_id.startsWith('v_cam')
+  );
 
   // Filter cameras that have valid coordinates
-  const validCameras = cameras.filter(
+  const validCameras = realGovtCameras.filter(
     (c) => c.latitude !== null && c.latitude !== undefined && c.longitude !== null && c.longitude !== undefined
   );
 
-  // Compute map bounding box
-  const lats = validCameras.map((c) => c.latitude as number);
-  const lngs = validCameras.map((c) => c.longitude as number);
+  const unmappedCameras = realGovtCameras.filter(
+    (c) => c.latitude === null || c.latitude === undefined || c.longitude === null || c.longitude === undefined
+  );
 
-  const minLat = lats.length > 0 ? Math.min(...lats) : 28.3;
-  const maxLat = lats.length > 0 ? Math.max(...lats) : 28.6;
-  const minLng = lngs.length > 0 ? Math.min(...lngs) : 76.8;
-  const maxLng = lngs.length > 0 ? Math.max(...lngs) : 77.2;
+  const totalCount = realGovtCameras.length;
+  const mappedCount = validCameras.length;
+  const unmappedCount = unmappedCameras.length;
 
-  const latSpan = maxLat - minLat || 0.1;
-  const lngSpan = maxLng - minLng || 0.1;
+  // Filter valid route points
+  const validRoute = routePoints.filter(
+    (p) => p.latitude !== null && p.latitude !== undefined && p.longitude !== null && p.longitude !== undefined
+  );
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set high-DPI scaling
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * 2;
-    canvas.height = rect.height * 2;
-    ctx.scale(2, 2);
-
-    const width = rect.width;
-    const height = rect.height;
-    const padding = 50;
-
-    // Projection helper: lat/lng -> canvas x/y
-    const project = (lat: number, lng: number) => {
-      const x = padding + ((lng - minLng) / lngSpan) * (width - 2 * padding);
-      const y = height - (padding + ((lat - minLat) / latSpan) * (height - 2 * padding));
-      return { x, y };
-    };
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Draw map background grid / tactical tiles
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, width, height);
-
-    // Draw grid lines
-    ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < width; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
-    for (let y = 0; y < height; y += 40) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    // Draw vehicle trajectory route if routePoints are provided
-    const validRoute = routePoints.filter(
-      (p) => p.latitude !== null && p.latitude !== undefined && p.longitude !== null && p.longitude !== undefined
-    );
-
-    if (validRoute.length > 1) {
-      ctx.beginPath();
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([6, 4]);
-
-      validRoute.forEach((pt, idx) => {
-        const { x, y } = project(pt.latitude!, pt.longitude!);
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-      ctx.setLineDash([]); // Reset line dash
-
-      // Draw directional route point numbers
-      validRoute.forEach((pt, idx) => {
-        const { x, y } = project(pt.latitude!, pt.longitude!);
-        ctx.fillStyle = idx === 0 ? '#10b981' : idx === validRoute.length - 1 ? '#ef4444' : '#0284c7';
-        ctx.beginPath();
-        ctx.arc(x, y, 7, 0, 2 * Math.PI);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 9px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(`${idx + 1}`, x, y);
-      });
-    }
-
-    // Draw camera markers
-    validCameras.forEach((cam) => {
-      const { x, y } = project(cam.latitude!, cam.longitude!);
-      const isSelected = cam.camera_id === selectedCameraId;
-      const isOnline = cam.live || cam.status === 'online' || cam.status === 'available';
-
-      // Pulse ring for selected camera
-      if (isSelected) {
-        ctx.beginPath();
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2;
-        ctx.arc(x, y, 14, 0, 2 * Math.PI);
-        ctx.stroke();
-      }
-
-      // Marker Circle
-      ctx.beginPath();
-      ctx.fillStyle = isSelected ? '#0284c7' : isOnline ? '#10b981' : '#f43f5e';
-      ctx.arc(x, y, isSelected ? 9 : 6, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Camera Label
-      ctx.fillStyle = isSelected ? '#38bdf8' : '#e2e8f0';
-      ctx.font = isSelected ? 'bold 11px monospace' : '10px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(cam.camera_id, x, y - (isSelected ? 14 : 10));
-    });
-  }, [cameras, selectedCameraId, routePoints, minLat, maxLat, minLng, maxLng, latSpan, lngSpan]);
-
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas || !onSelectCamera) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
-    const width = rect.width;
-    const height = rect.height;
-    const padding = 50;
-
-    const project = (lat: number, lng: number) => {
-      const x = padding + ((lng - minLng) / lngSpan) * (width - 2 * padding);
-      const y = height - (padding + ((lat - minLat) / latSpan) * (height - 2 * padding));
-      return { x, y };
-    };
-
-    // Find clicked camera marker
-    for (const cam of validCameras) {
-      const { x, y } = project(cam.latitude!, cam.longitude!);
-      const dist = Math.hypot(clickX - x, clickY - y);
-      if (dist <= 15) {
-        onSelectCamera(cam.camera_id);
-        break;
-      }
-    }
-  };
+  const polylinePositions: [number, number][] = validRoute.map((p) => [p.latitude!, p.longitude!]);
 
   return (
-    <div className="card overflow-hidden border border-outline-variant/30 flex flex-col bg-surface-container-lowest">
-      {/* Map Header */}
-      <div className="p-3 bg-surface-container-low border-b border-outline-variant/30 flex items-center justify-between">
+    <div className="card overflow-hidden border border-outline-variant/30 flex flex-col bg-surface-container-lowest relative">
+      {/* Map Header & Summary Statistics */}
+      <div className="p-3 bg-surface-container-low border-b border-outline-variant/30 flex flex-wrap items-center justify-between gap-3 z-[400]">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary text-[20px]">map</span>
           <span className="font-headline-sm text-on-surface font-bold text-sm">
-            Interactive GIS Tactical Command Map
+            Gujarat CCTV Command Map (GIS)
           </span>
         </div>
-        <div className="flex items-center gap-3 text-xs font-code-telemetry text-on-surface-variant">
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            Online ({cameras.filter((c) => c.live || c.status === 'online').length})
+
+        {/* Dynamic Header Metrics */}
+        <div className="flex flex-wrap items-center gap-3 text-xs font-code-telemetry">
+          <span className="bg-surface-container px-2.5 py-1 rounded border border-outline-variant/40 text-on-surface">
+            Cameras: <strong className="text-primary">{totalCount}</strong>
           </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-rose-500" />
-            Offline ({cameras.filter((c) => !c.live && c.status !== 'online').length})
+          <span className="bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded border border-emerald-500/30">
+            Mapped: <strong>{mappedCount}</strong>
+          </span>
+          <span className="bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded border border-amber-500/30">
+            Location unavailable: <strong>{unmappedCount}</strong>
           </span>
           {vehiclePlate && (
-            <span className="bg-primary/20 text-primary font-bold px-2 py-0.5 rounded">
+            <span className="bg-primary/20 text-primary font-bold px-2 py-1 rounded">
               Route: {vehiclePlate}
             </span>
           )}
         </div>
       </div>
 
-      {/* Interactive Map Canvas */}
-      <div className="relative aspect-[21/9] w-full bg-slate-950 flex items-center justify-center">
-        <canvas
-          ref={canvasRef}
-          onClick={handleClick}
-          className="w-full h-full cursor-pointer block"
-        />
+      {/* Map View Container */}
+      <div className="h-[480px] w-full relative z-[1]">
+        <MapContainer
+          center={[22.2587, 71.1924]}
+          zoom={7}
+          scrollWheelZoom={true}
+          className="h-full w-full bg-slate-900"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-        {/* Floating Controls Overlay */}
-        <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur border border-slate-700/60 p-2 rounded-md text-[11px] font-code-telemetry text-slate-300 flex items-center gap-4">
-          <span>Map Provider: OpenStreetMap / GIS Vector Layer</span>
-          <span>Coverage: Haryana State Police Surveillance Grid</span>
-          <span>Mapped Nodes: {validCameras.length} / {cameras.length}</span>
-        </div>
+          <MapBoundsController cameras={validCameras} routePoints={validRoute} />
+
+          {/* Vehicle Route Polyline */}
+          {polylinePositions.length > 1 && (
+            <Polyline
+              positions={polylinePositions}
+              pathOptions={{
+                color: '#0284c7',
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '8, 6',
+              }}
+            />
+          )}
+
+          {/* Waypoint Markers for Route */}
+          {validRoute.map((pt, idx) => (
+            <Marker
+              key={`route-pt-${idx}`}
+              position={[pt.latitude!, pt.longitude!]}
+              icon={createWayPointIcon(idx, validRoute.length)}
+            >
+              <Popup>
+                <div className="p-1 font-body-xs space-y-1">
+                  <div className="font-bold text-sky-600">Waypoint #{idx + 1}</div>
+                  <div>Camera: <strong>{pt.camera_id}</strong></div>
+                  <div>Timestamp: {pt.timestamp || 'N/A'}</div>
+                  {pt.normalized_plate && <div>Plate: <strong>{pt.normalized_plate}</strong></div>}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
+          {/* Camera Markers with Permanent Label Tooltip */}
+          {validCameras.map((cam) => {
+            const isSelected = cam.camera_id === selectedCameraId;
+            const isOnline = cam.live || cam.status === 'ONLINE' || cam.status === 'online' || cam.status === 'available';
+            const labelText = `${cam.camera_id.toUpperCase()} - ${cam.name || cam.location || `Camera ${cam.camera_id}`}`;
+
+            return (
+              <Marker
+                key={cam.camera_id}
+                position={[cam.latitude!, cam.longitude!]}
+                icon={createCustomIcon(cam.status || 'online', isSelected, !!cam.ai_active)}
+                eventHandlers={{
+                  click: () => onSelectCamera?.(cam.camera_id),
+                }}
+              >
+                {/* Visible Permanent Label */}
+                <Tooltip permanent direction="top" className="custom-gis-tooltip">
+                  <span className="font-code-telemetry font-bold text-[11px] uppercase tracking-wide px-1">
+                    {labelText}
+                  </span>
+                </Tooltip>
+
+                {/* Detailed Interactive Popup */}
+                <Popup>
+                  <div className="p-2 space-y-2 text-slate-800 font-sans min-w-[220px]">
+                    <div className="flex items-center justify-between border-b pb-1">
+                      <span className="font-bold text-sm text-slate-900">{cam.camera_id.toUpperCase()}</span>
+                      <span className="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-mono">
+                        {cam.district || 'Gujarat Grid'}
+                      </span>
+                    </div>
+                    <div className="font-semibold text-xs text-sky-800">
+                      {cam.name || `Camera ${cam.camera_id}`}
+                    </div>
+                    <div className="text-xs space-y-1 text-slate-700">
+                      <div>Location: <strong>{cam.location || cam.name || 'Gujarat Road Network'}</strong></div>
+                      <div>Coordinate: <strong>{cam.coordinate_source || 'Verified camera location'}</strong></div>
+                      <div>Status: <strong className={isOnline ? 'text-emerald-700 uppercase' : 'text-rose-700 uppercase'}>{isOnline ? 'ONLINE' : 'OFFLINE'}</strong></div>
+                      <div>AI: <strong className={cam.ai_active ? 'text-sky-700 uppercase' : 'text-slate-500 uppercase'}>{cam.ai_active ? 'ACTIVE' : 'INACTIVE'}</strong></div>
+                    </div>
+
+                    <div className="pt-2 flex flex-col gap-1">
+                      {onViewLiveCamera && (
+                        <button
+                          type="button"
+                          onClick={() => onViewLiveCamera(cam.camera_id)}
+                          className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-1.5 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">videocam</span>
+                          View Live
+                        </button>
+                      )}
+                      {onSelectCamera && (
+                        <button
+                          type="button"
+                          onClick={() => onSelectCamera(cam.camera_id)}
+                          className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-1 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer border border-slate-300"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">info</span>
+                          Camera Details
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
       </div>
 
-      {/* Map Footer */}
-      <div className="p-2.5 bg-surface-container-low border-t border-outline-variant/30 flex items-center justify-between text-body-xs text-on-surface-variant">
-        <span>Click any camera node marker to select and inspect live telemetry.</span>
-        <span className="font-code-telemetry text-[10px] text-outline">
-          Bounding Box: [{minLat.toFixed(2)}°N, {minLng.toFixed(2)}°E] - [{maxLat.toFixed(2)}°N, {maxLng.toFixed(2)}°E]
-        </span>
+      {/* Unresolved / Location Unavailable Camera List Section */}
+      {unmappedCameras.length > 0 && (
+        <div className="p-3 bg-surface-container-low border-t border-outline-variant/30 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-amber-400 text-[18px]">location_off</span>
+            <span className="font-label-sm text-amber-400 font-bold uppercase tracking-wider">
+              Location Unavailable ({unmappedCameras.length})
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto pr-1">
+            {unmappedCameras.map((cam) => (
+              <div
+                key={cam.camera_id}
+                onClick={() => onSelectCamera?.(cam.camera_id)}
+                className="flex items-center gap-2 bg-surface-container px-2.5 py-1.5 rounded border border-outline-variant/40 hover:border-amber-400/50 transition-colors cursor-pointer text-xs"
+              >
+                <span className="font-code-telemetry text-amber-300 font-bold">
+                  {cam.camera_id.toUpperCase()}
+                </span>
+                <span className="text-on-surface-variant font-medium">
+                  {cam.location || cam.name || 'Unmapped Location'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Map Footer Info */}
+      <div className="p-2 bg-surface-container-low border-t border-outline-variant/30 flex items-center justify-between text-xs text-on-surface-variant font-code-telemetry">
+        <span>Leaflet + OpenStreetMap GIS Engine</span>
+        <span>Zero fake coordinates policy active</span>
       </div>
     </div>
   );

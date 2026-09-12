@@ -25,6 +25,8 @@ class CameraResponse(BaseModel):
     location: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    coordinate_source: Optional[str] = None
+    coordinate_approximate: Optional[bool] = None
     codec: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
@@ -34,6 +36,11 @@ class CameraResponse(BaseModel):
     ai_active: bool = False
     attention_state: str = "NORMAL"
     attention_reason: Optional[str] = None
+    anpr_capable: bool = True
+    department: Optional[str] = None
+    district: Optional[str] = None
+    tags: Optional[List[str]] = None
+    is_virtual: Optional[bool] = False
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -319,4 +326,24 @@ class AuditLogListResponse(BaseModel):
     count: int
     results: List[AuditLogResponse]
 
+
+# ---------------------------------------------------------------------------
+# Phase N: Ingestion Workers Telemetry Schemas
+# ---------------------------------------------------------------------------
+class IngestionWorkerStatusResponse(BaseModel):
+    camera_id: str
+    running: bool
+    status: str
+    frames_processed: int = 0
+    detections: int = 0
+    readable_plates: int = 0
+    alerts: int = 0
+    last_error: Optional[str] = None
+    source_type: str = "rtsp"
+
+
+class IngestionManagerStatusResponse(BaseModel):
+    max_workers: int
+    active_workers_count: int
+    workers: List[IngestionWorkerStatusResponse]
 

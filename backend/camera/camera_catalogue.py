@@ -39,6 +39,8 @@ class NormalizedCamera:
     location: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    coordinate_source: Optional[str] = None
+    coordinate_approximate: Optional[bool] = None
     codec: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
@@ -48,6 +50,11 @@ class NormalizedCamera:
     ai_active: bool = False
     attention_state: str = "NORMAL"
     attention_reason: Optional[str] = None
+    anpr_capable: bool = True
+    department: Optional[str] = None
+    district: Optional[str] = None
+    tags: Optional[List[str]] = None
+    is_virtual: bool = False
 
 
 class CameraCatalogue:
@@ -184,6 +191,13 @@ class CameraCatalogue:
             # Enforce AI active logic: cam01 is active AI pipeline, others inactive
             ai_active = (cam_id == "cam01")
 
+            dept = entry.get("department") or entry.get("dept")
+            dist = entry.get("district") or entry.get("city")
+            tags = entry.get("tags") if isinstance(entry.get("tags"), list) else None
+            anpr = entry.get("anpr_capable", True)
+            if isinstance(anpr, str):
+                anpr = anpr.lower() in ("true", "1", "yes")
+
             result.append(
                 NormalizedCamera(
                     camera_id=cam_id,
@@ -199,6 +213,10 @@ class CameraCatalogue:
                     status=str(status_str),
                     ai_active=ai_active,
                     attention_state="NORMAL",
+                    anpr_capable=bool(anpr),
+                    department=str(dept) if dept else None,
+                    district=str(dist) if dist else None,
+                    tags=tags,
                 )
             )
 
@@ -223,6 +241,79 @@ class CameraCatalogue:
             return None
 
 
+import os
+
+VIRTUAL_CAMERA_MAP: Dict[str, Dict[str, Any]] = {
+    "v_cam01": {
+        "name": "v_cam01 (ANPR & License Plate OCR Demo)",
+        "location": "Virtual Demo Stream - 4K ANPR Feed",
+        "video_path": os.path.join("videos", "Automatic Number Plate Recognition (ANPR) _ Real-Time License Plate Detection & Recognition part 1_2160p.mp4"),
+        "latitude": None,
+        "longitude": None,
+        "district": "Demo Zone",
+        "tags": ["DEMO", "VIRTUAL", "ANPR", "OCR"],
+    },
+    "v_cam02": {
+        "name": "v_cam02 (Highway Tracking & Zone Count)",
+        "location": "Virtual Demo Stream - Highway Junction",
+        "video_path": os.path.join("videos", "Crazy Tata Punch Crash on Highway Caught On Dashcam Video 😳 - Bad Drivers of India (720p, h264).mp4"),
+        "latitude": None,
+        "longitude": None,
+        "district": "Demo Zone",
+        "tags": ["DEMO", "VIRTUAL", "TRACKING", "ZONE_COUNTER"],
+    },
+    "v_cam03": {
+        "name": "v_cam03 (Low-Quality CCTV Reference)",
+        "location": "Virtual Demo Stream - Standard CCTV",
+        "video_path": os.path.join("videos", "License Plate Detection Test - Dev Drone Bhowmik (1080p, h264).mp4"),
+        "latitude": None,
+        "longitude": None,
+        "district": "Demo Zone",
+        "tags": ["DEMO", "VIRTUAL", "LOW_QUALITY_CCTV"],
+    },
+    "v_cam04": {
+        "name": "v_cam04 (Urban Multi-Class Traffic Flow)",
+        "location": "Virtual Demo Stream - Urban Intersection",
+        "video_path": os.path.join("videos", "Traffic in Gujarat is rather orderly... by Indian standards! - WildFilmsIndia (1080p, h264).mp4"),
+        "latitude": None,
+        "longitude": None,
+        "district": "Demo Zone",
+        "tags": ["DEMO", "VIRTUAL", "MULTI_CLASS", "URBAN_TRAFFIC"],
+    },
+    "v_cam05": {
+        "name": "v_cam05 (Cross-Camera Gate A - HR19R6697)",
+        "location": "Virtual Demo Stream - Entry Gate A",
+        "video_path": os.path.join("testdata", "phase_n_same_vehicle", "camera_a.mp4"),
+        "latitude": None,
+        "longitude": None,
+        "district": "Demo Zone",
+        "tags": ["DEMO", "VIRTUAL", "CROSS_CAMERA", "GATE_A"],
+    },
+    "v_cam06": {
+        "name": "v_cam06 (Cross-Camera Gate B - HR19R6697)",
+        "location": "Virtual Demo Stream - Exit Gate B",
+        "video_path": os.path.join("testdata", "phase_n_same_vehicle", "camera_b.mp4"),
+        "latitude": None,
+        "longitude": None,
+        "district": "Demo Zone",
+        "tags": ["DEMO", "VIRTUAL", "CROSS_CAMERA", "GATE_B"],
+    },
+}
+
+
+def get_virtual_video_path(camera_id: str) -> Optional[str]:
+    """Resolve physical video path for a virtual camera ID if file exists."""
+    if not camera_id or not str(camera_id).startswith("v_cam"):
+        return None
+
+    if camera_id in VIRTUAL_CAMERA_MAP:
+        path = VIRTUAL_CAMERA_MAP[camera_id]["video_path"]
+        if os.path.exists(path):
+            return path
+
+    return None
+
+
 def get_official_30_catalogue() -> List[NormalizedCamera]:
     """Return neutral fallback catalogue for cam01 through cam30 when remote JSON is unreachable."""
     cams: List[NormalizedCamera] = []
@@ -241,9 +332,47 @@ def get_official_30_catalogue() -> List[NormalizedCamera]:
                 status="online",
                 ai_active=(cam_id == "cam01"),
                 attention_state="NORMAL",
+                is_virtual=False,
             )
         )
     return cams
+
+
+def get_virtual_30_catalogue() -> List[NormalizedCamera]:
+    """Return dynamic virtual demo catalogue ONLY for video files that actually exist on disk."""
+    cams: List[NormalizedCamera] = []
+
+    for v_id, info in VIRTUAL_CAMERA_MAP.items():
+        vpath = info["video_path"]
+        if os.path.exists(vpath):
+            cams.append(
+                NormalizedCamera(
+                    camera_id=v_id,
+                    name=info["name"],
+                    location=info["location"],
+                    latitude=None,
+                    longitude=None,
+                    coordinate_source=None,
+                    coordinate_approximate=False,
+                    codec="H264",
+                    width=1920,
+                    height=1080,
+                    resolution="1920x1080",
+                    live=True,
+                    status="DEMO",
+                    ai_active=False,
+                    attention_state="NORMAL",
+                    anpr_capable=True,
+                    department="DEMO",
+                    district=info.get("district", "Demo Zone"),
+                    tags=info.get("tags", ["DEMO", "VIRTUAL"]),
+                    is_virtual=True,
+                )
+            )
+    return cams
+
+
+get_virtual_catalogue = get_virtual_30_catalogue
 
 
 # Global catalogue instance for backend API reuse

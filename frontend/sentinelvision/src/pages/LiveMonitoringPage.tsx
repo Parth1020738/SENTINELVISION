@@ -8,7 +8,7 @@ import LiveCameraPlayer from '../components/LiveCameraPlayer';
 
 export default function LiveMonitoringPage() {
   const [selectedCameraId, setSelectedCameraId] = useState<string>('cam01');
-  const camerasApi = useApi(() => api.getCameras(), [], 15000);
+  const camerasApi = useApi(() => api.getCameras(selectedCameraId), [selectedCameraId], 15000);
   const { connectionStatus, subscribe } = useEventStream();
 
   const cameras: Camera[] = camerasApi.data || [];
@@ -150,8 +150,19 @@ function CameraGridSection({
   onSelectCamera: (id: string) => void;
 }) {
   const [filterQuery, setFilterQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'real' | 'virtual'>('all');
 
-  const filtered = cameras.filter(
+  const realCount = cameras.filter((c) => !c.is_virtual && !c.camera_id.startsWith('v_cam')).length;
+  const virtualCount = cameras.filter((c) => c.is_virtual || c.camera_id.startsWith('v_cam')).length;
+
+  const categoryFiltered = cameras.filter((c) => {
+    const isVirt = c.is_virtual || c.camera_id.startsWith('v_cam');
+    if (activeCategory === 'real') return !isVirt;
+    if (activeCategory === 'virtual') return isVirt;
+    return true;
+  });
+
+  const filtered = categoryFiltered.filter(
     (c) =>
       c.camera_id.toLowerCase().includes(filterQuery.toLowerCase()) ||
       (c.name && c.name.toLowerCase().includes(filterQuery.toLowerCase())) ||
@@ -173,12 +184,43 @@ function CameraGridSection({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="font-headline-sm text-on-surface font-bold">Catalogue Grid</span>
-          <span className="font-code-telemetry text-label-sm text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-full">
-            {sortedFiltered.length} {sortedFiltered.length === 1 ? 'Camera' : 'Cameras'}
-          </span>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-low p-3.5 rounded-lg border border-outline-variant/30">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveCategory('all')}
+            className={`px-3 py-1.5 rounded-md font-label-sm font-bold transition-colors cursor-pointer ${
+              activeCategory === 'all'
+                ? 'bg-primary text-on-primary shadow-sm'
+                : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'
+            }`}
+          >
+            ALL CAMERAS ({cameras.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('real')}
+            className={`px-3 py-1.5 rounded-md font-label-sm font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeCategory === 'real'
+                ? 'bg-secondary text-on-secondary shadow-sm'
+                : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">videocam</span>
+            REAL GOVERNMENT ({realCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory('virtual')}
+            className={`px-3 py-1.5 rounded-md font-label-sm font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeCategory === 'virtual'
+                ? 'bg-amber-600 text-white shadow-sm'
+                : 'bg-surface-container-high text-amber-400 hover:bg-surface-container-highest'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">smart_display</span>
+            DEMO / VIRTUAL ({virtualCount})
+          </button>
         </div>
 
         <div className="relative max-w-xs w-full">
@@ -187,7 +229,7 @@ function CameraGridSection({
           </span>
           <input
             type="text"
-            placeholder="Search cameras by ID or location..."
+            placeholder="Search cameras by ID or name..."
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
             className="w-full bg-surface-container border border-outline-variant/50 rounded-md pl-9 pr-3 py-1.5 font-body-sm text-on-surface focus:outline-none focus:border-primary"
@@ -230,6 +272,7 @@ function CameraCard({
   const isOnline = camera.live || camera.status === 'online' || camera.status === 'available';
   const attention = camera.attention_state || 'NORMAL';
   const isAiActive = isSelected || camera.ai_active;
+  const isVirtual = camera.is_virtual || camera.camera_id.startsWith('v_cam');
 
   let attentionBadgeClass = 'bg-surface-container-high text-on-surface-variant';
   if (attention === 'CRITICAL') {
@@ -242,24 +285,37 @@ function CameraCard({
     <div
       className={`card text-left p-3.5 flex flex-col justify-between gap-3 transition-all ${
         isSelected
-          ? 'ring-2 ring-primary border-primary bg-primary-container/10'
+          ? isVirtual
+            ? 'ring-2 ring-amber-500 border-amber-500 bg-amber-500/10'
+            : 'ring-2 ring-primary border-primary bg-primary-container/10'
+          : isVirtual
+          ? 'border-amber-500/30 bg-surface-container-low hover:border-amber-500/60'
           : 'border-outline-variant/40 bg-surface-container-low hover:border-primary/50'
       }`}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 truncate">
-          <span className="material-symbols-outlined text-[18px] text-primary">videocam</span>
+          <span className={`material-symbols-outlined text-[18px] ${isVirtual ? 'text-amber-400' : 'text-primary'}`}>
+            {isVirtual ? 'smart_display' : 'videocam'}
+          </span>
           <span className="font-code-telemetry text-label-md text-on-surface font-bold truncate">
             {camera.camera_id}
           </span>
         </div>
-        <span
-          className={`status-badge text-[10px] px-1.5 py-0.5 rounded font-semibold ${
-            isOnline ? 'bg-secondary/20 text-secondary' : 'bg-error/20 text-error'
-          }`}
-        >
-          {isOnline ? 'ONLINE' : 'OFFLINE'}
-        </span>
+
+        {isVirtual ? (
+          <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] px-1.5 py-0.5 rounded font-bold tracking-wider">
+            DEMO
+          </span>
+        ) : (
+          <span
+            className={`status-badge text-[10px] px-1.5 py-0.5 rounded font-semibold ${
+              isOnline ? 'bg-secondary/20 text-secondary' : 'bg-error/20 text-error'
+            }`}
+          >
+            {isOnline ? 'LIVE' : 'OFFLINE'}
+          </span>
+        )}
       </div>
 
       <div className="space-y-1">
@@ -329,14 +385,31 @@ function SelectedCameraInspector({
 
   const isOnline = camera.live || camera.status === 'online' || camera.status === 'available';
 
+  const isVirtual = camera.is_virtual || camera.camera_id.startsWith('v_cam');
+
   return (
     <div className="flex flex-col gap-4">
+      {isVirtual && (
+        <div className="bg-amber-500/15 border border-amber-500/40 rounded-lg p-3.5 flex items-center gap-3">
+          <span className="material-symbols-outlined text-[24px] text-amber-400">smart_display</span>
+          <div>
+            <div className="font-label-sm text-amber-300 font-bold uppercase tracking-wider flex items-center gap-2">
+              DEMO / VIRTUAL CAMERA SOURCE
+              <span className="bg-amber-500 text-black text-[10px] px-1.5 py-0.2 rounded font-extrabold">DEMO MODE</span>
+            </div>
+            <p className="font-body-xs text-amber-200/80">
+              Running through production AI pipeline (YOLO11m + ByteTrack + ANPREngine + EventHub) using recorded evaluation video.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <h2 className="font-headline-sm text-on-surface font-bold">
           Selected Camera Inspector
         </h2>
-        <span className="font-code-telemetry text-label-sm text-primary font-semibold">
-          ID: {camera.camera_id}
+        <span className={`font-code-telemetry text-label-sm font-semibold ${isVirtual ? 'text-amber-400' : 'text-primary'}`}>
+          ID: {camera.camera_id} {isVirtual ? '(VIRTUAL)' : '(LIVE GOVERNMENT)'}
         </span>
       </div>
 
@@ -393,7 +466,7 @@ function SelectedCameraInspector({
                     camera.ai_active ? 'text-primary' : 'text-on-surface-variant'
                   }`}
                 >
-                  {camera.ai_active ? 'ACTIVE (cam01)' : 'INACTIVE'}
+                  {camera.ai_active ? `ACTIVE (${camera.camera_id})` : 'INACTIVE'}
                 </span>
               </div>
               <div className="flex justify-between items-center">

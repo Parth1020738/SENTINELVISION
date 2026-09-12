@@ -46,6 +46,8 @@ from backend.api.schemas import (
     GlobalVehicleRouteResponse,
     GlobalVehicleTimelineResponse,
     HealthSummaryCounts,
+    IngestionManagerStatusResponse,
+    IngestionWorkerStatusResponse,
     LoginRequest,
     PlateReadResponse,
     PlateSearchResponse,
@@ -344,6 +346,8 @@ def _camera_to_response(
         else (getattr(camera, "ai_active", False) if isinstance(camera, NormalizedCamera) else (cam_id == "cam01"))
     )
 
+    is_virt = bool(getattr(camera, "is_virtual", False) or cam_id.startswith("v_cam"))
+
     if isinstance(camera, NormalizedCamera):
         return CameraResponse(
             camera_id=camera.camera_id,
@@ -351,6 +355,8 @@ def _camera_to_response(
             location=camera.location,
             latitude=camera.latitude,
             longitude=camera.longitude,
+            coordinate_source=getattr(camera, "coordinate_source", None),
+            coordinate_approximate=getattr(camera, "coordinate_approximate", None),
             codec=camera.codec,
             width=camera.width,
             height=camera.height,
@@ -360,6 +366,11 @@ def _camera_to_response(
             ai_active=is_ai_active,
             attention_state=attention_state,
             attention_reason=attention_reason,
+            anpr_capable=getattr(camera, "anpr_capable", True),
+            department=getattr(camera, "department", None),
+            district=getattr(camera, "district", None),
+            tags=getattr(camera, "tags", None),
+            is_virtual=is_virt,
         )
 
     res = getattr(camera, "resolution", None)
@@ -372,6 +383,8 @@ def _camera_to_response(
         location=getattr(camera, "location", None),
         latitude=getattr(camera, "latitude", None),
         longitude=getattr(camera, "longitude", None),
+        coordinate_source=getattr(camera, "coordinate_source", None),
+        coordinate_approximate=getattr(camera, "coordinate_approximate", None),
         codec=getattr(camera, "codec", None),
         width=getattr(camera, "width", None),
         height=getattr(camera, "height", None),
@@ -381,6 +394,11 @@ def _camera_to_response(
         ai_active=is_ai_active,
         attention_state=attention_state,
         attention_reason=attention_reason,
+        anpr_capable=getattr(camera, "anpr_capable", True),
+        department=getattr(camera, "department", None),
+        district=getattr(camera, "district", None),
+        tags=getattr(camera, "tags", None),
+        is_virtual=is_virt,
         created_at=getattr(camera, "created_at", None),
         updated_at=getattr(camera, "updated_at", None),
     )
@@ -458,11 +476,15 @@ def _build_camera_health_responses(repos: Repositories) -> List[CameraHealthResp
     db_health_list = repos.health.list_health()
     health_map = {h.camera_id: h for h in db_health_list}
 
+    from backend.ai.multi_ingestion import global_ingestion_manager
+    active_worker_ids = {s.camera_id for s in global_ingestion_manager.get_worker_statuses() if s.running}
+    has_active_workers = len(active_worker_ids) > 0
+
     responses: List[CameraHealthResponse] = []
     for cam_id in sorted(cam_map.keys()):
         cam = cam_map[cam_id]
         att_state, att_reason = _compute_attention_state(cam, repos)
-        is_ai_active = (cam_id == "cam01")
+        is_ai_active = (cam_id in active_worker_ids) if has_active_workers else (cam_id == "cam01")
 
         h = health_map.get(cam_id)
         status = h.status if h else "NOT_CHECKED"
@@ -497,13 +519,18 @@ def get_system_health(repos: Repositories = Depends(get_repositories)):
         database_ok = False
 
     cam_responses = _build_camera_health_responses(repos)
+    govt_responses = [c for c in cam_responses if not c.camera_id.startswith("v_cam")]
 
-    total = len(cam_responses)
-    online_count = sum(1 for c in cam_responses if c.status == "ONLINE")
-    degraded_count = sum(1 for c in cam_responses if c.status == "DEGRADED")
-    offline_count = sum(1 for c in cam_responses if c.status == "OFFLINE")
-    not_checked_count = sum(1 for c in cam_responses if c.status in ("NOT_CHECKED", "UNKNOWN"))
-    ai_active_count = sum(1 for c in cam_responses if c.ai_active)
+    total = len(govt_responses) if govt_responses else 30
+    online_count = sum(1 for c in govt_responses if c.status == "ONLINE")
+    degraded_count = sum(1 for c in govt_responses if c.status == "DEGRADED")
+    offline_count = sum(1 for c in govt_responses if c.status == "OFFLINE")
+    not_checked_count = sum(1 for c in govt_responses if c.status in ("NOT_CHECKED", "UNKNOWN"))
+
+    # AI Active count directly reflects runtime workers managed by global_ingestion_manager or default active stream
+    from backend.ai.multi_ingestion import global_ingestion_manager
+    active_worker_count = global_ingestion_manager.get_active_worker_count()
+    ai_active_count = active_worker_count if active_worker_count > 0 else sum(1 for c in cam_responses if c.ai_active)
 
     summary = HealthSummaryCounts(
         total_configured=total,
@@ -528,6 +555,31 @@ def get_system_health(repos: Repositories = Depends(get_repositories)):
     )
 
 
+@app.get("/api/system/ingestion", response_model=IngestionManagerStatusResponse)
+def get_ingestion_status():
+    """Return telemetry for all active multi-camera background ingestion workers."""
+    from backend.ai.multi_ingestion import global_ingestion_manager
+    statuses = global_ingestion_manager.get_worker_statuses()
+    return IngestionManagerStatusResponse(
+        max_workers=global_ingestion_manager.max_workers,
+        active_workers_count=global_ingestion_manager.get_active_worker_count(),
+        workers=[
+            IngestionWorkerStatusResponse(
+                camera_id=s.camera_id,
+                running=s.running,
+                status=s.status,
+                frames_processed=s.frames_processed,
+                detections=s.detections,
+                readable_plates=s.readable_plates,
+                alerts=s.alerts,
+                last_error=s.last_error,
+                source_type=s.source_type,
+            )
+            for s in statuses
+        ],
+    )
+
+
 @app.get("/api/cameras/health", response_model=List[CameraHealthResponse])
 def get_cameras_health(repos: Repositories = Depends(get_repositories)):
     """Camera health list endpoint."""
@@ -544,13 +596,17 @@ def list_cameras(
     repos: Repositories = Depends(get_repositories),
     user: dict = Depends(get_current_user),
 ):
-    """All registered cameras (safe metadata only)."""
     catalogue_cams = global_catalogue.get_cameras()
     db_cams = repos.cameras.list_cameras()
+
+    from backend.camera.camera_catalogue import get_virtual_30_catalogue, get_virtual_video_path
+    virtual_cams = get_virtual_30_catalogue()
 
     cam_map = {}
     for c in catalogue_cams:
         cam_map[c.camera_id] = c
+    for vc in virtual_cams:
+        cam_map[vc.camera_id] = vc
 
     for db_c in db_cams:
         if db_c.camera_id in cam_map:
@@ -563,6 +619,10 @@ def list_cameras(
                 cat_c.latitude = db_c.latitude
             if db_c.longitude is not None:
                 cat_c.longitude = db_c.longitude
+            if getattr(db_c, "coordinate_source", None):
+                cat_c.coordinate_source = db_c.coordinate_source
+            if getattr(db_c, "coordinate_approximate", None) is not None:
+                cat_c.coordinate_approximate = db_c.coordinate_approximate
             if db_c.width:
                 cat_c.width = db_c.width
             if db_c.height:
@@ -571,14 +631,35 @@ def list_cameras(
         else:
             cam_map[db_c.camera_id] = db_c
 
-    active_id = selected_camera_id if selected_camera_id else "cam01"
+    has_explicit_selection = bool(selected_camera_id and isinstance(selected_camera_id, str))
+    active_id = str(selected_camera_id) if has_explicit_selection else "cam01"
+
+    # Auto-manage active ingestion worker for the selected camera when explicitly requested
+    from backend.ai.multi_ingestion import global_ingestion_manager, CameraWorkerConfig
+    if has_explicit_selection:
+        if active_id.startswith("v_cam"):
+            vpath = get_virtual_video_path(active_id)
+            if vpath and os.path.exists(vpath):
+                v_config = CameraWorkerConfig(
+                    camera_id=active_id,
+                    source_type="video",
+                    video_path=vpath,
+                )
+                global_ingestion_manager.start_camera_worker(v_config)
+        elif active_id.startswith("cam"):
+            rtsp_config = CameraWorkerConfig(camera_id=active_id, source_type="rtsp")
+            global_ingestion_manager.start_camera_worker(rtsp_config)
+
+    active_statuses = global_ingestion_manager.get_worker_statuses()
+    active_worker_ids = {s.camera_id for s in active_statuses if s.running}
+
     db_health_list = repos.health.list_health()
     health_map = {h.camera_id: h.status for h in db_health_list}
 
     responses = []
     for cam_id, cam in cam_map.items():
         att_state, att_reason = _compute_attention_state(cam, repos)
-        is_active = (cam_id == active_id)
+        is_active = (cam_id in active_worker_ids)
         resp = _camera_to_response(
             cam,
             attention_state=att_state,
@@ -840,77 +921,142 @@ def stream_camera_mjpeg(
 ):
     """Server-side authenticated MJPEG live video relay.
 
-    Streams real camera frames over HTTP multipart/x-mixed-replace.
-    RTSP credentials remain server-side inside `rtsp_credentials.py`.
+    Supports both Real RTSP cameras (cam01..cam30) and Virtual Demo cameras (v_cam01..v_cam30).
+    Streams frames over HTTP multipart/x-mixed-replace.
     """
     from fastapi.responses import StreamingResponse
     import cv2, time
-    from backend.camera.rtsp_credentials import build_authenticated_rtsp_url
-    from backend.camera.camera_stream import configure_rtsp_tcp
+    from backend.camera.camera_catalogue import get_virtual_video_path
 
-    configure_rtsp_tcp()
-    try:
-        url = build_authenticated_rtsp_url(camera_id)
-    except Exception as err:
-        logger.error(f"[MJPEG] Credential error for camera {camera_id}: {err}")
-        raise HTTPException(status_code=500, detail=f"RTSP Credential Error: {err}")
+    is_virtual = camera_id.startswith("v_cam")
 
-    cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
-    if not cap.isOpened():
-        logger.error(f"[MJPEG] OpenCV failed to open RTSP stream for {camera_id}")
-        raise HTTPException(
-            status_code=502,
-            detail=f"Unable to connect to RTSP stream for {camera_id} on 103.250.160.189:8554",
+    if is_virtual:
+        video_path = get_virtual_video_path(camera_id)
+        if not video_path or not os.path.exists(video_path):
+            logger.error(f"[MJPEG] Virtual video file not found for {camera_id}: {video_path}")
+            raise HTTPException(status_code=404, detail=f"Virtual video file not found for {camera_id}")
+
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            logger.error(f"[MJPEG] OpenCV failed to open video file for {camera_id}: {video_path}")
+            raise HTTPException(status_code=500, detail=f"Failed to open video file for {camera_id}")
+
+        fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
+        frame_interval = 1.0 / min(max(fps, 10.0), 30.0)
+
+        def virtual_frame_generator(capture):
+            try:
+                last_frame_time = time.time()
+                while True:
+                    ret, frame = capture.read()
+                    if not ret or frame is None:
+                        # Video EOF loop: rewind to frame 0
+                        capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                        ret, frame = capture.read()
+                        if not ret or frame is None:
+                            break
+
+                    now = time.time()
+                    elapsed = now - last_frame_time
+                    if elapsed < frame_interval:
+                        time.sleep(frame_interval - elapsed)
+                    last_frame_time = time.time()
+
+                    # Resize high resolution frames (>1920 wide) for smooth browser rendering
+                    if frame.shape[1] > 1920:
+                        scale = 1920.0 / frame.shape[1]
+                        frame = cv2.resize(frame, (1920, int(frame.shape[0] * scale)))
+
+                    ok, jpeg = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
+                    if not ok:
+                        continue
+
+                    yield (
+                        b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n'
+                    )
+            except GeneratorExit:
+                logger.info(f"[MJPEG] Client disconnected from virtual camera {camera_id} stream.")
+            except Exception as e:
+                logger.error(f"[MJPEG] Error during virtual stream generation for {camera_id}: {e}")
+            finally:
+                logger.info(f"[MJPEG] Releasing capture for virtual camera {camera_id} stream.")
+                capture.release()
+
+        return StreamingResponse(
+            virtual_frame_generator(cap),
+            media_type='multipart/x-mixed-replace; boundary=frame',
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            },
         )
+    else:
+        from backend.camera.rtsp_credentials import build_authenticated_rtsp_url
+        from backend.camera.camera_stream import configure_rtsp_tcp
 
-    def frame_generator(capture):
+        configure_rtsp_tcp()
         try:
-            last_frame_time = time.time()
-            consecutive_fails = 0
-            while True:
-                ret, frame = capture.read()
-                if not ret or frame is None:
-                    consecutive_fails += 1
-                    if consecutive_fails > 30:
-                        logger.warning(f"[MJPEG] Camera {camera_id} stream failed to read consecutive frames. Exiting generator.")
-                        break
-                    time.sleep(0.05)
-                    continue
+            url = build_authenticated_rtsp_url(camera_id)
+        except Exception as err:
+            logger.error(f"[MJPEG] Credential error for camera {camera_id}: {err}")
+            raise HTTPException(status_code=500, detail=f"RTSP Credential Error: {err}")
 
+        cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
+        if not cap.isOpened():
+            logger.error(f"[MJPEG] OpenCV failed to open RTSP stream for {camera_id}")
+            raise HTTPException(
+                status_code=502,
+                detail=f"Unable to connect to RTSP stream for {camera_id} on 103.250.160.189:8554",
+            )
+
+        def rtsp_frame_generator(capture):
+            try:
+                last_frame_time = time.time()
                 consecutive_fails = 0
-                now = time.time()
-                # Frame rate limiter (~15 fps for network/rendering efficiency)
-                if now - last_frame_time < 0.06:
-                    time.sleep(0.01)
-                    continue
-                last_frame_time = now
+                while True:
+                    ret, frame = capture.read()
+                    if not ret or frame is None:
+                        consecutive_fails += 1
+                        if consecutive_fails > 30:
+                            logger.warning(f"[MJPEG] Camera {camera_id} stream failed to read consecutive frames. Exiting generator.")
+                            break
+                        time.sleep(0.05)
+                        continue
 
-                # Encode frame to JPEG
-                ok, jpeg = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
-                if not ok:
-                    continue
+                    consecutive_fails = 0
+                    now = time.time()
+                    if now - last_frame_time < 0.06:
+                        time.sleep(0.01)
+                        continue
+                    last_frame_time = now
 
-                yield (
-                    b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n'
-                )
-        except GeneratorExit:
-            logger.info(f"[MJPEG] Client disconnected from {camera_id} live stream.")
-        except Exception as e:
-            logger.error(f"[MJPEG] Error during stream generation for {camera_id}: {e}")
-        finally:
-            logger.info(f"[MJPEG] Releasing capture for {camera_id} live stream.")
-            capture.release()
+                    ok, jpeg = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+                    if not ok:
+                        continue
 
-    return StreamingResponse(
-        frame_generator(cap),
-        media_type='multipart/x-mixed-replace; boundary=frame',
-        headers={
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "Expires": "0",
-        },
-    )
+                    yield (
+                        b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n'
+                    )
+            except GeneratorExit:
+                logger.info(f"[MJPEG] Client disconnected from {camera_id} live stream.")
+            except Exception as e:
+                logger.error(f"[MJPEG] Error during stream generation for {camera_id}: {e}")
+            finally:
+                logger.info(f"[MJPEG] Releasing capture for {camera_id} live stream.")
+                capture.release()
+
+        return StreamingResponse(
+            rtsp_frame_generator(cap),
+            media_type='multipart/x-mixed-replace; boundary=frame',
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            },
+        )
 
 
 
@@ -1319,6 +1465,61 @@ def search_global_vehicle_by_plate(
     return _global_vehicle_to_response(gv)
 
 
+# ---------------------------------------------------------------------------
+# Phase O: CSV & PDF Evidence Export Endpoints
+# ---------------------------------------------------------------------------
+@app.get("/api/vehicles/export.csv")
+def export_vehicles_csv(
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    """Export cross-camera vehicle intelligence data as CSV. Protected endpoint."""
+    import csv
+    import io
+    from fastapi.responses import Response
+
+    vehicles = repos.global_vehicles.list_global_vehicles(limit=1000)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Global Vehicle ID",
+        "Normalized Plate",
+        "Vehicle Class",
+        "First Seen At",
+        "Last Seen At",
+        "Observation Count",
+        "Cameras Visited",
+    ])
+
+    for v in vehicles:
+        timeline = repos.global_vehicles.get_timeline(v.global_vehicle_id)
+        cameras = sorted(list(set(obs.camera_id for obs in timeline)))
+        writer.writerow([
+            v.global_vehicle_id,
+            v.normalized_plate or "N/A",
+            v.vehicle_class or "N/A",
+            v.first_seen_at or "N/A",
+            v.last_seen_at or "N/A",
+            len(timeline),
+            ", ".join(cameras) if cameras else "N/A",
+        ])
+
+    repos.audit.add_audit_entry(
+        actor=user.get("username", "system"),
+        action="EXPORT_VEHICLES_CSV",
+        resource_type="vehicle_export",
+        result="SUCCESS",
+    )
+
+    csv_data = output.getvalue()
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="sentinelvision_vehicle_evidence.csv"'},
+    )
+
+
 @app.get("/api/vehicles/{global_vehicle_id}", response_model=GlobalVehicleResponse)
 def get_global_vehicle(
     global_vehicle_id: str,
@@ -1393,6 +1594,173 @@ def get_global_vehicle_route(
             )
             for p in route_points
         ],
+    )
+
+
+@app.get("/api/vehicles/{global_vehicle_id}/export.pdf")
+def export_vehicle_pdf(
+    global_vehicle_id: str,
+    repos: Repositories = Depends(get_repositories),
+    user: dict = Depends(get_current_user),
+):
+    """Export PDF investigation report for a specific Global Vehicle identity. Protected endpoint."""
+    import io
+    from fastapi.responses import Response
+    gv = repos.global_vehicles.get_global_vehicle(global_vehicle_id)
+    if gv is None:
+        gv = repos.global_vehicles.get_global_vehicle_by_plate(global_vehicle_id)
+    if gv is None:
+        raise HTTPException(status_code=404, detail="Global vehicle not found")
+
+    timeline = repos.global_vehicles.get_timeline(gv.global_vehicle_id)
+    route_points = repos.global_vehicles.get_route(gv.global_vehicle_id)
+
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib import colors
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            rightMargin=36,
+            leftMargin=36,
+            topMargin=36,
+            bottomMargin=36,
+        )
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            "ReportTitle",
+            parent=styles["Heading1"],
+            fontSize=18,
+            leading=22,
+            textColor=colors.HexColor("#0f172a"),
+            fontName="Helvetica-Bold",
+        )
+        subtitle_style = ParagraphStyle(
+            "ReportSubtitle",
+            parent=styles["Normal"],
+            fontSize=10,
+            leading=14,
+            textColor=colors.HexColor("#475569"),
+            fontName="Helvetica",
+        )
+        section_style = ParagraphStyle(
+            "SectionHeader",
+            parent=styles["Heading2"],
+            fontSize=12,
+            leading=15,
+            textColor=colors.HexColor("#0284c7"),
+            fontName="Helvetica-Bold",
+            spaceBefore=10,
+            spaceAfter=4,
+        )
+        cell_style = ParagraphStyle(
+            "CellText",
+            parent=styles["Normal"],
+            fontSize=9,
+            leading=11,
+            textColor=colors.HexColor("#1e293b"),
+            fontName="Helvetica",
+        )
+        cell_header = ParagraphStyle(
+            "CellHeader",
+            parent=styles["Normal"],
+            fontSize=9,
+            leading=11,
+            textColor=colors.white,
+            fontName="Helvetica-Bold",
+        )
+
+        story = []
+        story.append(Paragraph("SENTINELVISION — VEHICLE INVESTIGATION REPORT", title_style))
+        import datetime
+        now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        story.append(Paragraph(f"Generated: {now_str} | Operator: {user.get('username', 'operator')}", subtitle_style))
+        story.append(Spacer(1, 10))
+
+        story.append(Paragraph("Target Vehicle Identity", section_style))
+        summary_data = [
+            [Paragraph("Field", cell_header), Paragraph("Value", cell_header)],
+            [Paragraph("Global Vehicle ID", cell_style), Paragraph(gv.global_vehicle_id, cell_style)],
+            [Paragraph("Normalized Plate", cell_style), Paragraph(gv.primary_plate or "N/A", cell_style)],
+            [Paragraph("Vehicle Class", cell_style), Paragraph(gv.primary_class or "N/A", cell_style)],
+            [Paragraph("Total Observations", cell_style), Paragraph(str(len(timeline)), cell_style)],
+        ]
+        t_summary = Table(summary_data, colWidths=[150, 390])
+        t_summary.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        story.append(t_summary)
+        story.append(Spacer(1, 10))
+
+        story.append(Paragraph("Chronological Observation Timeline", section_style))
+        obs_rows = [[
+            Paragraph("Timestamp", cell_header),
+            Paragraph("Camera ID", cell_header),
+            Paragraph("Event", cell_header),
+            Paragraph("Plate Read", cell_header),
+        ]]
+
+        for obs in timeline:
+            obs_rows.append([
+                Paragraph(str(getattr(obs, "timestamp", "") or ""), cell_style),
+                Paragraph(str(getattr(obs, "camera_id", "") or ""), cell_style),
+                Paragraph(str(getattr(obs, "vehicle_class", "") or "OBSERVATION"), cell_style),
+                Paragraph(str(getattr(obs, "normalized_plate", "") or "-"), cell_style),
+            ])
+
+        if len(obs_rows) == 1:
+            obs_rows.append([Paragraph("No observations recorded", cell_style), Paragraph("-", cell_style), Paragraph("-", cell_style), Paragraph("-", cell_style)])
+
+        t_obs = Table(obs_rows, colWidths=[140, 100, 150, 150])
+        t_obs.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0284c7")),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        story.append(t_obs)
+
+        doc.build(story)
+        pdf_bytes = buffer.getvalue()
+
+    except ImportError:
+        from fpdf import FPDF
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(0, 10, f"SentinelVision Vehicle Report: {gv.global_vehicle_id}", new_x="LMARGIN", new_y="NEXT")
+        pdf.set_font("Helvetica", "", 12)
+        pdf.cell(0, 8, f"Canonical Plate: {getattr(gv, 'normalized_plate', None) or getattr(gv, 'primary_plate', None) or 'UNASSIGNED'} | Class: {getattr(gv, 'vehicle_class', None) or getattr(gv, 'primary_class', None) or 'UNKNOWN'}", new_x="LMARGIN", new_y="NEXT")
+        pdf.ln(5)
+        for item in timeline:
+            ts = getattr(item, "timestamp", "") or (item.get("timestamp") if isinstance(item, dict) else "")
+            cam = getattr(item, "camera_id", "") or (item.get("camera_id") if isinstance(item, dict) else "")
+            cls_evt = getattr(item, "vehicle_class", "") or (item.get("event_type") if isinstance(item, dict) else "")
+            plt = getattr(item, "normalized_plate", "") or (item.get("plate_text") if isinstance(item, dict) else "")
+            line = f"{ts} | {cam} | {cls_evt} | {plt or '-'}"
+            pdf.cell(0, 7, line, new_x="LMARGIN", new_y="NEXT")
+        pdf_bytes = pdf.output()
+
+    repos.audit.add_audit_entry(
+        actor=user.get("username", "system"),
+        action="EXPORT_VEHICLE_PDF",
+        resource_type="vehicle_pdf",
+        resource_id=gv.global_vehicle_id,
+        result="SUCCESS",
+    )
+
+    return Response(
+        content=bytes(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="sentinelvision_report_{gv.global_vehicle_id}.pdf"'},
     )
 
 

@@ -7,6 +7,8 @@ export interface Camera {
   location?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  coordinate_source?: string | null;
+  coordinate_approximate?: boolean | null;
   codec?: string | null;
   width?: number | null;
   height?: number | null;
@@ -16,6 +18,11 @@ export interface Camera {
   ai_active?: boolean;
   attention_state?: 'NORMAL' | 'WATCH' | 'CRITICAL' | string;
   attention_reason?: string | null;
+  anpr_capable?: boolean;
+  department?: string | null;
+  district?: string | null;
+  tags?: string[] | null;
+  is_virtual?: boolean;
   created_at?: string | null;
   updated_at?: string | null;
 }

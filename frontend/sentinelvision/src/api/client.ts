@@ -143,6 +143,35 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     }),
+  // Export
+  exportVehiclesCsv: async () => {
+    const token = localStorage.getItem('sentinel_token');
+    const response = await fetch(`${API_BASE_URL}/api/vehicles/export.csv`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) throw new Error('Failed to export CSV evidence');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sentinelvision_vehicle_evidence.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  },
+  exportVehiclePdf: async (globalVehicleId: string) => {
+    const token = localStorage.getItem('sentinel_token');
+    const response = await fetch(`${API_BASE_URL}/api/vehicles/${encodeURIComponent(globalVehicleId)}/export.pdf`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) throw new Error('Failed to export PDF investigation report');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sentinelvision_report_${globalVehicleId}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  },
 };
 
 export { ApiError };

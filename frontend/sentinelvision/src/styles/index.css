@@ -152,4 +152,18 @@
   .select-field {
     @apply w-full px-3 py-2 bg-surface-container-lowest text-on-surface rounded border border-outline-variant/40 focus:outline-none focus:border-primary transition-colors cursor-pointer;
   }
+
+  /* Custom Leaflet GIS Tooltip */
+  .custom-gis-tooltip {
+    background-color: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid rgba(56, 189, 248, 0.4) !important;
+    color: #f8fafc !important;
+    border-radius: 4px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+    padding: 2px 6px !important;
+    white-space: nowrap !important;
+  }
+  .leaflet-tooltip-top:before {
+    border-top-color: rgba(15, 23, 42, 0.95) !important;
+  }
 }

@@ -29,6 +29,8 @@ class Camera:
     location: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    coordinate_source: Optional[str] = None
+    coordinate_approximate: Optional[bool] = None
     codec: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None

@@ -16,6 +16,8 @@ from backend.db.models import CameraHealth
 
 @pytest.fixture
 def test_repositories(tmp_path):
+    from backend.ai.multi_ingestion import global_ingestion_manager
+    global_ingestion_manager.stop_all()
     reset_repositories()
     db_file = str(tmp_path / "test_api_health.db")
     db = Database(db_file)

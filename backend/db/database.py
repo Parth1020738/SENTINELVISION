@@ -76,21 +76,23 @@ def _to_utc_iso(timestamp: TimestampValue) -> str:
 _SCHEMA_STATEMENTS = (
     """
     CREATE TABLE IF NOT EXISTS cameras (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        camera_id   TEXT    NOT NULL UNIQUE,
-        name        TEXT,
-        location    TEXT,
-        latitude    REAL,
-        longitude   REAL,
-        codec       TEXT,
-        width       INTEGER,
-        height      INTEGER,
-        rtsp_url    TEXT,
-        webrtc_url  TEXT,
-        hls_url     TEXT,
-        live        INTEGER NOT NULL DEFAULT 0,
-        created_at  TEXT    NOT NULL,
-        updated_at  TEXT    NOT NULL
+        id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+        camera_id              TEXT    NOT NULL UNIQUE,
+        name                   TEXT,
+        location               TEXT,
+        latitude               REAL,
+        longitude              REAL,
+        coordinate_source      TEXT,
+        coordinate_approximate INTEGER,
+        codec                  TEXT,
+        width                  INTEGER,
+        height                 INTEGER,
+        rtsp_url               TEXT,
+        webrtc_url             TEXT,
+        hls_url                TEXT,
+        live                   INTEGER NOT NULL DEFAULT 0,
+        created_at             TEXT    NOT NULL,
+        updated_at             TEXT    NOT NULL
     )
     """,
     """

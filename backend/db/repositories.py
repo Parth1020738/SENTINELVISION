@@ -27,6 +27,7 @@ re-inserts are harmless without changing AI behavior.
 """
 
 import sqlite3
+from dataclasses import dataclass
 from typing import List, Optional
 
 from backend.db.database import Database, _to_utc_iso
@@ -57,6 +58,8 @@ def _row_to_camera(row: sqlite3.Row) -> Camera:
         location=row["location"],
         latitude=row["latitude"],
         longitude=row["longitude"],
+        coordinate_source=row["coordinate_source"] if "coordinate_source" in row.keys() else None,
+        coordinate_approximate=bool(row["coordinate_approximate"]) if ("coordinate_approximate" in row.keys() and row["coordinate_approximate"] is not None) else None,
         codec=row["codec"],
         width=row["width"],
         height=row["height"],
@@ -87,44 +90,83 @@ class CameraRepository:
         RTSP URLs are stripped of credentials before persistence.
         Returns the database row id.
         """
+        return self.upsert_camera_raw(
+            camera_id=camera.camera_id,
+            name=camera.name,
+            location=camera.location,
+            latitude=camera.latitude,
+            longitude=camera.longitude,
+            coordinate_source=camera.coordinate_source,
+            coordinate_approximate=camera.coordinate_approximate,
+            codec=camera.codec,
+            width=camera.width,
+            height=camera.height,
+            rtsp_url=camera.rtsp_url,
+            webrtc_url=camera.webrtc_url,
+            hls_url=camera.hls_url,
+            live=camera.live,
+        )
+
+    def upsert_camera_raw(
+        self,
+        camera_id: str,
+        name: Optional[str] = None,
+        location: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        coordinate_source: Optional[str] = None,
+        coordinate_approximate: Optional[bool] = None,
+        codec: Optional[str] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        rtsp_url: Optional[str] = None,
+        webrtc_url: Optional[str] = None,
+        hls_url: Optional[str] = None,
+        live: bool = False,
+    ) -> int:
         now = _to_utc_iso(None)
-        safe_rtsp = redact_url(camera.rtsp_url) if camera.rtsp_url else camera.rtsp_url
+        safe_rtsp = redact_url(rtsp_url) if rtsp_url else rtsp_url
+        approx_val = (1 if coordinate_approximate else 0) if coordinate_approximate is not None else None
         with self.db.connection() as conn:
             conn.execute(
                 """
                 INSERT INTO cameras (
                     camera_id, name, location, latitude, longitude,
+                    coordinate_source, coordinate_approximate,
                     codec, width, height,
                     rtsp_url, webrtc_url, hls_url, live,
                     created_at, updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (camera_id) DO UPDATE SET
-                    name       = excluded.name,
-                    location   = excluded.location,
-                    latitude   = excluded.latitude,
-                    longitude  = excluded.longitude,
-                    codec      = excluded.codec,
-                    width      = excluded.width,
-                    height     = excluded.height,
-                    rtsp_url   = excluded.rtsp_url,
-                    webrtc_url = excluded.webrtc_url,
-                    hls_url    = excluded.hls_url,
-                    live       = excluded.live,
-                    updated_at = excluded.updated_at
+                    name                   = excluded.name,
+                    location               = excluded.location,
+                    latitude               = excluded.latitude,
+                    longitude              = excluded.longitude,
+                    coordinate_source      = excluded.coordinate_source,
+                    coordinate_approximate = excluded.coordinate_approximate,
+                    codec                  = excluded.codec,
+                    width                  = excluded.width,
+                    height                 = excluded.height,
+                    rtsp_url               = excluded.rtsp_url,
+                    webrtc_url             = excluded.webrtc_url,
+                    hls_url                = excluded.hls_url,
+                    live                   = excluded.live,
+                    updated_at             = excluded.updated_at
                 """,
                 (
-                    camera.camera_id, camera.name, camera.location,
-                    camera.latitude, camera.longitude,
-                    camera.codec, camera.width, camera.height,
-                    safe_rtsp, camera.webrtc_url, camera.hls_url,
-                    1 if camera.live else 0,
+                    camera_id, name, location,
+                    latitude, longitude,
+                    coordinate_source, approx_val,
+                    codec, width, height,
+                    safe_rtsp, webrtc_url, hls_url,
+                    1 if live else 0,
                     now, now,
                 ),
             )
             row = conn.execute(
                 "SELECT id FROM cameras WHERE camera_id = ?",
-                (camera.camera_id,),
+                (camera_id,),
             ).fetchone()
             return int(row["id"])
 

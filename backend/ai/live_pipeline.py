@@ -205,14 +205,38 @@ class LivePipeline:
 
         # PTS -> epoch anchor (event timestamps come from here, never now())
         self._anchor_pts: Optional[float] = None
-        self._anchor_epoch: Optional[float] = None
-
         # Dedup guards (session lifetime only; DB also has unique indexes)
         self._recorded_first: set = set()
         self._persisted_plates: set = set()
 
         # Last-frame data for display overlay / stats.
         self._last_display = None
+
+    def reset_stream_state(self) -> None:
+        """Reset internal tracker, stabilizer, continuity, and session dedup guards on video EOF loop."""
+        if self.tracker is not None:
+            try:
+                self.tracker.reset()
+            except Exception as exc:
+                logger.debug("Tracker reset error: %s", exc)
+        if self.stabilizer is not None:
+            try:
+                if hasattr(self.stabilizer, "reset"):
+                    self.stabilizer.reset()
+                elif hasattr(self.stabilizer, "_track_history"):
+                    self.stabilizer._track_history.clear()
+            except Exception as exc:
+                logger.debug("Stabilizer reset error: %s", exc)
+        if self.continuity is not None:
+            try:
+                if hasattr(self.continuity, "reset"):
+                    self.continuity.reset()
+                elif hasattr(self.continuity, "_active_tracks"):
+                    self.continuity._active_tracks.clear()
+            except Exception as exc:
+                logger.debug("Continuity reset error: %s", exc)
+        self._recorded_first.clear()
+        self._persisted_plates.clear()
 
     # ------------------------------------------------------------------
     # Real component builders (live runtime; not used by mocked tests)

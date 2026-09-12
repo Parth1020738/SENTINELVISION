@@ -1,216 +1,304 @@
-# SentinelVision: AI-Powered Tactical Traffic & Security Intelligence Platform
+# SentinelVision — Unified Tactical AI CCTV Command Platform
 
-![SentinelVision Architecture](frontend/stitch_sentinelvision_traffic_intelligence_platform/sentinelvision_tactical_ai_command_system/code.html)
+**SentinelVision** is an enterprise-grade tactical AI intelligence platform engineered for real-time video analytics, vehicle tracking, Automated Number Plate Recognition (ANPR), and cross-camera vehicle intelligence across large-scale CCTV networks.
 
-**SentinelVision** is an end-to-end, enterprise-grade AI traffic monitoring, ANPR (Automatic Number Plate Recognition), vehicle tracking, and security surveillance platform. Engineered for real-time edge and cloud deployments, it processes high-throughput RTSP video streams with GPU acceleration to deliver dynamic zone counting, vehicle classification, license plate recognition, automated watchlist alerting, and detailed investigative history.
-
----
-
-## Key Features
-
-### 🤖 Advanced AI Computer Vision Pipeline
-- **Real-Time Vehicle Detection:** Powered by YOLO (YOLO11) with PyTorch CUDA GPU acceleration.
-- **Multi-Object Tracking:** ByteTrack integration with track continuity management and class stabilization across multi-frame sequences.
-- **Zone & Directional Traffic Counting:** Region-of-Interest (ROI) IN/OUT spatial counters for lane and perimeter analytics.
-- **ANPR & OCR Engine:** Automatic license plate detection and high-accuracy text extraction with multi-frame confidence aggregation.
-- **Automated Security Alert Engine:** Real-time matching against watchlists (Stolen, BOLO, Suspicious) with instant alert generation.
-
-### 📹 Enterprise Camera Ingestion
-- **RTSP Connection Handling:** Reconnect and exponential backoff retry algorithms with TCP transport support.
-- **Credential Isolation:** Strict environment-based credentials (`.env`) with automated URL redaction in logs to prevent credential leakage.
-- **PTS-Based Synchronization:** Frame timing management to maintain accurate temporal sync.
-
-### ⚡ High-Performance FastAPI Backend
-- **RESTful API Ecosystem:** Endpoints for live camera metadata, vehicle events, zone counters, ANPR reads, watchlist management, system health metrics, and history search.
-- **Database Abstraction:** Optimized SQLite persistence layer with repository patterns.
-- **Robust Verification:** Comprehensive test suite covering DB operations, API endpoints, camera streams, and AI engines.
-
-### 🎨 Modern Command & Control Frontend
-- **Built with React + TypeScript + Vite + Tailwind CSS.**
-- **Tactical Dark Theme:** Glassmorphism UI tailored for defense and surveillance command centers.
-- **Real-Time Live Monitoring:** Live camera grid, zone counter tallies, and stream health status.
-- **Interactive Dashboards:**
-  - **Overview Dashboard:** High-level metrics, real-time activity, and zone counts.
-  - **Live CCTV Monitoring:** Multi-stream layout and camera feed controls.
-  - **Vehicle Intelligence:** Categorized vehicle logs, class distribution, and track timelines.
-  - **ANPR & License Plate Search:** Exact and partial plate queries with confidence scoring.
-  - **Watchlist Management:** Add, edit, or flag vehicles on watchlist tiers.
-  - **Security Alerts Panel:** Real-time threat feed with severity ratings and action items.
-  - **Vehicle History & Investigation:** Advanced multi-filter historical queries.
-  - **System Health:** GPU memory utilization, RTSP pipeline latency, database statistics, and service health status.
+Designed as a high-throughput, security-first command platform, SentinelVision unifies heterogeneous RTSP stream ingestion, deep learning computer vision pipelines, real-time spatial GIS mapping, and automated alert correlation into a centralized operational dashboard.
 
 ---
 
-## Architecture Overview
+## 1. Problem Statement
+
+Modern state-level traffic management and defense infrastructure (such as the Gujarat government CCTV network) faces significant operational challenges:
+
+- **Heterogeneous Camera Networks**: Thousands of cameras deployed across municipalities, highways, and public safety departments utilize disparate hardware, VMS platforms, resolutions, and video codecs.
+- **Fragmented Departmental Silos**: Police, municipal corporations, traffic management authorities, and highway command centers operate isolated video feeds without cross-departmental intelligence sharing.
+- **Geographically Distributed Streams**: Monitoring cameras spread across thousands of square kilometers makes manual human surveillance inefficient and prone to missed critical events.
+- **Scale Requirements**: State-level infrastructure projects require scalable architecture capable of scaling toward **~80,000 concurrent CCTV cameras**.
+- **Lack of Unified Tracking**: Traditional CCTV systems record localized video loops but cannot trace vehicle movement trajectories across multiple physical camera gates.
+
+---
+
+## 2. Solution Architecture
+
+SentinelVision resolves these challenges through a **unified, hybrid AI intelligence platform**:
+
+1. **Centralized Stream Normalization**: Converts raw RTSP streams and evaluation feeds into unified, authenticated low-latency MJPEG frame relays.
+2. **Decoupled Edge/Server AI Pipeline**: Orchestrates real-time object detection (YOLO11m), multi-object tracking (ByteTrack), vehicle class stabilization, and license plate OCR (ANPR) on bounded worker pools.
+3. **Cross-Camera Vehicle Identity Correlation**: Reconstructs global vehicle identity timelines (`GlobalVehicle`) and spatial routes across independent camera gates (`CrossCameraObservation`).
+4. **Interactive GIS Command Map**: Displays real-time geospatial camera nodes, spatial telemetry, and vehicle movement paths on Leaflet-powered GIS maps.
+5. **Real-time Event Hub & Security Engine**: Emits instant WebSocket notifications for watchlist matches (`AlertEngine`), security audit logs, and operational telemetry.
+
+---
+
+## 3. Key Capabilities
+
+- **Multi-Camera CCTV Integration**: Live catalogue management supporting authenticated government RTSP feeds and local evaluation feeds.
+- **Real-Time Live Monitoring**: Low-latency stream relay with dynamic AI worker state indicators (`STARTING`, `ACTIVE`, `INACTIVE`, `STOPPED`, `ERROR`).
+- **YOLO11 Vehicle Detection**: High-accuracy multi-class detection for cars, motorcycles, buses, and trucks.
+- **ByteTrack Vehicle Tracking**: Association of spatial bounding boxes across sequential video frames with unique track IDs.
+- **Vehicle Class Stabilization**: Temporal voting window to resolve ambiguous or fluctuating vehicle class predictions.
+- **Track Continuity Manager**: Persistence of canonical vehicle identities across stream interruptions or re-entries.
+- **ANPR & OCR Engine**: Automated plate detection, character OCR, state-specific text normalization, and multi-frame confidence voting.
+- **Watchlist & Alert Triangulation**: Automated background correlation of detected plates against security watchlists with priority alerts (`CRITICAL`, `HIGH`, `MEDIUM`).
+- **Cross-Camera Vehicle Tracing**: Automated timeline reconstruction and geographic mapping of vehicle routes across multiple camera nodes.
+- **Interactive GIS Map**: Real-time Leaflet map displaying real government camera nodes and vehicle travel paths.
+- **System Telemetry & Health Monitoring**: Continuous monitoring of database connection, RTSP latency, frame rates, and worker CPU/GPU load.
+- **Evidence Reporting**: One-click export of cross-camera vehicle intelligence as CSV data or formatted PDF investigation reports.
+- **Enterprise Security & Audit**: Environment-isolated secrets, Role-Based Access Control (RBAC), JWT authentication, rate limiting, security headers, and SQLite audit logging.
+
+---
+
+## 4. End-to-End AI Pipeline Flow
+
+The production AI processing pipeline operates frame-by-frame with zero external data leakage:
 
 ```
-                          ┌────────────────────────┐
-                          │  RTSP Camera Grid /    │
-                          │   Video Feed Input     │
-                          └───────────┬────────────┘
-                                      │
-                                      ▼
-                          ┌────────────────────────┐
-                          │    Camera Ingestion    │
-                          │ (RTSP / TCP / Backoff) │
-                          └───────────┬────────────┘
-                                      │
-                                      ▼
-        ┌───────────────────────────────────────────────────────────┐
-        │                     AI Vision Engine                      │
-        │  ┌───────────────────────┐    ┌────────────────────────┐  │
-        │  │ YOLO Vehicle Detector │ ──▶│   ByteTrack Tracker    │  │
-        │  └───────────────────────┘    └───────────┬────────────┘  │
-        │                                           │               │
-        │  ┌───────────────────────┐    ┌───────────▼────────────┐  │
-        │  │  ANPR / OCR Pipeline  │ ◀──│ Zone Counter / IN-OUT  │  │
-        │  └───────────────────────┘    └────────────────────────┘  │
-        └─────────────────────────────┬─────────────────────────────┘
-                                      │
-                                      ▼
-                          ┌────────────────────────┐
-                          │ FastAPI Backend & DB   │
-                          │  (SQLite Persistence & │
-                          │   Watchlist Engine)    │
-                          └───────────┬────────────┘
-                                      │
-                                      ▼
-                          ┌────────────────────────┐
-                          │ React + TS Command UI  │
-                          │ (Vite / Tailwind CSS)  │
-                          └────────────────────────┘
+┌─────────────────┐      ┌──────────────────────────┐      ┌─────────────────────────────┐
+│  Camera Stream  │ ---> │     Frame Ingestion      │ ---> │ YOLO11m Vehicle Detector    │
+│  (RTSP / MP4)   │      │ (CameraStream / Worker)  │      │ (Cars, Bikes, Buses, Trucks)│
+└─────────────────┘      └──────────────────────────┘      └─────────────────────────────┘
+                                                                          │
+                                                                          ▼
+┌─────────────────┐      ┌──────────────────────────┐      ┌─────────────────────────────┐
+│ Zone Analytics  │ <--- │ Canonical Continuity ID  │ <--- │      ByteTrack Engine       │
+│ (IN / OUT Count)│      │(TrackContinuityManager)  │      │ (Multi-Object Tracking)     │
+└─────────────────┘      └──────────────────────────┘      └─────────────────────────────┘
+        │
+        ▼
+┌─────────────────┐      ┌──────────────────────────┐      ┌─────────────────────────────┐
+│   ANPR Engine   │ ---> │    Plate OCR & Vote      │ ---> │ Watchlist & Alert Engine    │
+│(Plate Detector) │      │ (EasyOCR + Normalizer)   │      │ (Priority Match & Hub)      │
+└─────────────────┘      └──────────────────────────┘      └─────────────────────────────┘
+                                                                          │
+                                                                          ▼
+┌─────────────────┐      ┌──────────────────────────┐      ┌─────────────────────────────┐
+│  SQLite DB      │ ---> │ WebSocket Event Hub      │ ---> │ Command Center Dashboard    │
+│ Persistence     │      │ (Real-Time Broadcast)    │      │ (React + TS + GIS Map)      │
+└─────────────────┘      └──────────────────────────┘      └─────────────────────────────┘
 ```
 
 ---
 
-## Directory Structure
+## 5. System Architecture
 
-```
-SentinelVision/
-├── backend/
-│   ├── ai/                  # YOLO, ByteTrack, ANPR, OCR, Zone Counter, Class Stabilizer
-│   ├── api/                 # FastAPI routes, schemas, dependency injection
-│   ├── camera/              # RTSP stream abstraction & credential management
-│   ├── db/                  # SQLite models, database initialization, repositories
-│   └── services/            # Security Alert engine & business logic
-├── frontend/
-│   └── sentinelvision/      # React + TypeScript + Vite Frontend Application
-│       ├── src/
-│       │   ├── api/         # Axios API client
-│       │   ├── components/  # Reusable UI components (StatCard, Layout, Loading, etc.)
-│       │   ├── pages/       # Dashboard pages (Overview, Live, ANPR, Watchlist, Alerts, etc.)
-│       │   └── types/       # TypeScript interfaces & API models
-│       ├── index.html
-│       ├── package.json
-│       └── vite.config.ts
-├── .env.example             # Template for local environment configuration
-├── .gitignore               # Excludes secrets, models, database, node_modules, and virtualenvs
-├── package.json
-├── start_frontend.bat       # Helper script to launch frontend dev server
-└── verify_runtime.py        # System verification script
-```
+SentinelVision is structured as a modular, decoupled web application:
+
+- **Backend**: FastAPI (Python 3.12) providing async REST endpoints, WebSocket streaming, and background thread execution.
+- **Database & Persistence**: SQLite relational database using repository pattern (`CameraRepository`, `VehicleRepository`, `PlateRepository`, `ZoneRepository`, `WatchlistRepository`, `AlertRepository`, `GlobalVehicleRepository`, `CameraHealthRepository`, `AuditRepository`).
+- **AI Core**: PyTorch, Ultralytics YOLO11m, ByteTrack, EasyOCR, and custom tracking continuity algorithms.
+- **Frontend**: React 18, TypeScript, Vite, TailwindCSS, React-Leaflet, and Lucide/Material Symbols.
+- **Services**: `EventHub` for WebSocket broadcasting, `AttentionEngine` for operational camera state computation, and `AlertEngine` for watchlist matching.
 
 ---
 
-## Getting Started
+## 6. Camera Feed Integration
+
+SentinelVision supports two distinct camera stream modes:
+
+1. **Real Government CCTV Cameras (`cam01` .. `cam30`)**:
+   - The authoritative catalogue of 30 physical government CCTV feeds.
+   - Configured with official RTSP URLs, authenticating server-side without exposing credentials to frontend clients.
+   - Assigned verified geographic coordinates on the GIS map.
+
+2. **Local Evaluation Demo Feeds (`v_cam01` .. `v_cam06`)**:
+   - Evaluation feeds initialized dynamically from actual local MP4 video assets.
+   - Run through the **exact same production AI pipeline** (YOLO11m + ByteTrack + ANPR) as live RTSP feeds.
+   - Clearly badged as **DEMO / VIRTUAL** in the user interface to ensure operational transparency.
+   - Demo feeds are non-geographical and excluded from the GIS physical camera map.
+
+---
+
+## 7. ANPR & License Plate Recognition
+
+The Automated Number Plate Recognition (ANPR) subsystem operates in five stages:
+
+1. **License Plate Crop Extraction**: Small localized plate regions are extracted from detected vehicle bounding boxes.
+2. **Character OCR Engine**: EasyOCR reads raw textual characters from plate crops.
+3. **Text Normalization**: Converts raw text to uppercase, strips non-alphanumeric noise, and standardizes state registration syntax (e.g., `HR 99 ABV 2812` -> `HR99ABV2812`).
+4. **Format Sanity Validation**: Verifies plate strings against tolerant Indian vehicle registration rules.
+5. **Multi-Frame Confidence Voting**: Aggregates OCR reads across consecutive track frames to select the highest-confidence normalized plate text.
+
+---
+
+## 8. Multi-Camera Vehicle Intelligence
+
+Cross-camera vehicle intelligence resolves isolated camera detections into unified vehicle journeys:
+
+- **Global Vehicle Identity (`GlobalVehicle`)**: Unique ID (e.g., `GV-000001`) assigned to a vehicle based on its normalized license plate.
+- **Cross-Camera Observations (`CrossCameraObservation`)**: Chronological sequence of detections across multiple camera gates.
+- **Movement Route Reconstruction**: Maps camera coordinates and observation timestamps to plot geographical travel routes on Leaflet GIS maps.
+- **Intelligence Export**: One-click CSV and PDF report generation for law enforcement investigations.
+
+---
+
+## 9. GIS Command Map
+
+The embedded GIS Command Map provides real-time spatial awareness:
+
+- Displays the **30 real government CCTV camera nodes** across Gujarat.
+- Live marker color coding:
+  - **Green**: Online & Normal
+  - **Cyan**: Active AI Processing
+  - **Blue Pulsing**: Currently Selected Camera
+  - **Red / Amber**: Offline or Attention Required
+- Interactive popups providing operational metadata, camera location, and streaming controls.
+- Vehicle Route Overlay: Renders directional polyline routes connecting consecutive camera waypoints for tracked vehicles.
+
+---
+
+## 10. Security & Compliance
+
+SentinelVision implements strict government-grade security controls:
+
+- **Isolated Credentials**: RTSP passwords and database secrets reside exclusively in environment variables and are never exposed in source code or API responses.
+- **Role-Based Access Control (RBAC)**: Enforces role permissions (`ADMIN`, `OPERATOR`, `VIEWER`).
+- **Session Security**: JWT bearer tokens and access code verification (`SENTINEL_ACCESS_CODE`).
+- **Rate Limiting**: IP-based rate limiting on authentication and access gate endpoints.
+- **Audit Logging**: Comprehensive security audit log table recording all login attempts, watchlist modifications, and evidence exports.
+- **Security Headers & CORS**: Strict HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`) and origin-restricted CORS middleware.
+
+---
+
+## 11. Scalability Roadmap (~80,000 Cameras)
+
+While the current proof-of-concept (PoC) operates on a bounded multi-worker architecture tailored for evaluation hardware, the system is designed to scale toward **~80,000 state-wide cameras**:
+
+```
+                              ┌─────────────────────────────────────────┐
+                              │     Distributed Edge Ingestion Nodes    │
+                              │ (RTSP Stream Decoding & Motion Filtering)│
+                              └─────────────────────────────────────────┘
+                                                   │
+                                                   ▼
+┌──────────────────────────────────────┐      ┌─────────────────────────────────────────┐
+│     Central Metadata Indexer         │ <--- │ Distributed GPU Inference Cluster       │
+│(Global Vehicle & Spatial Tracking DB)│      │(Bounded YOLO + ByteTrack Worker Nodes)  │
+└──────────────────────────────────────┘      └─────────────────────────────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────┐
+│  State-Wide Command Center Dashboard │
+│  (Distributed Regional Map Buffers)  │
+└──────────────────────────────────────┘
+```
+
+- **Bounded Worker Manager**: Limits concurrent active GPU workers (e.g., `max_workers=3` on local hardware) with dynamic eviction on camera selection.
+- **Distributed Edge Ingestion**: Edge video processing units perform initial frame extraction, offloading heavy inference from central servers.
+- **Event-Driven Broker Architecture**: Transition from in-memory `EventHub` to distributed message brokers (Kafka/RabbitMQ) for multi-region event distribution.
+- **Time-Series Indexing**: Sharded PostgreSQL/TimescaleDB partitioning for rapid querying across billions of vehicle records.
+
+---
+
+## 12. Technology Stack
+
+- **Core Backend**: Python 3.12, FastAPI, Uvicorn, SQLite3.
+- **Computer Vision & AI**: PyTorch, Ultralytics YOLO11m, ByteTrack, EasyOCR, OpenCV.
+- **Frontend Core**: React 18, TypeScript, Vite, TailwindCSS.
+- **GIS & Visualization**: Leaflet, React-Leaflet, Lucide Icons, Material Symbols.
+- **Reporting & Export**: ReportLab, FPDF2.
+- **Testing & Tooling**: Pytest, Pytest-Asyncio, HTTPX, Vite Build.
+
+---
+
+## 13. Local Setup Instructions (Windows)
 
 ### Prerequisites
+- **Python 3.12+**
+- **Node.js 18+** & **npm**
+- Git
 
-- **Python:** 3.10 or higher
-- **Node.js:** v18.x or higher & `npm`
-- **GPU Acceleration (Optional but Recommended):** NVIDIA GPU with CUDA support & PyTorch with CUDA support
+### 1. Clone Repository & Setup Virtual Environment
+```powershell
+git clone https://github.com/Parth1020738/SentinelVision.git
+cd SentinelVision
 
----
+# Create Python virtual environment
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 
-### Setup Instructions
-
-#### 1. Clone the Repository
-```bash
-git clone https://github.com/Parth1020738/SENTINELVISION.git
-cd SENTINELVISION
-```
-
-#### 2. Environment Configuration
-Copy `.env.example` to `.env` in the project root:
-```bash
-cp .env.example .env
-```
-Fill in your configuration details (e.g., RTSP credentials, database path):
-```ini
-SENTINEL_RTSP_EMAIL=your_email@example.com
-SENTINEL_RTSP_PASSWORD=your_secure_password
-SENTINELVISION_DB_PATH=data/sentinelvision.db
-```
-
-> **Security Note:** Never commit your `.env` file or SQLite database file to Git.
-
-#### 3. Backend Setup & Run
-
-Create and activate a virtual environment:
-```bash
-python -m venv myenv
-# On Windows:
-myenv\Scripts\activate
-# On Linux/macOS:
-source myenv/bin/activate
-```
-
-Install backend dependencies:
-```bash
+# Install backend dependencies
 pip install -r requirements.txt
 ```
 
-Launch the FastAPI Backend server:
-```bash
-uvicorn backend.api.main:app --reload --host 127.0.0.1 --port 8000
+### 2. Environment Configuration
+Copy `.env.example` to `.env`:
+```powershell
+copy .env.example .env
 ```
-*API documentation will be accessible at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)*
+*(Optionally adjust configuration parameters in `.env`. Credentials and tokens default to safe development values.)*
 
-#### 4. Frontend Setup & Run
-
-Navigate to the frontend folder and install Node dependencies:
-```bash
-cd frontend/sentinelvision
+### 3. Install Frontend Dependencies
+```powershell
+cd frontend\sentinelvision
 npm install
+cd ..\..
 ```
 
-Start the Vite development server:
-```bash
+### 4. Run Backend Server
+```powershell
+.\venv\Scripts\python.exe -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000
+```
+
+### 5. Run Frontend Development Server
+In a separate terminal:
+```powershell
+cd frontend\sentinelvision
 npm run dev
 ```
-*The command center dashboard will open at [http://127.0.0.1:5173](http://127.0.0.1:5173)*
+Open your browser at `http://localhost:5173`. Access Code default: `SENTINEL2026`.
 
 ---
 
-## Running Verification & Tests
+## 14. Demo Instructions
 
-### Backend Tests
-Compile python source files and execute the pytest suite:
-```bash
-# Verify compilation
-python -m compileall backend
+1. **Live Camera Grid**: Navigate to **Live Monitoring** to inspect the 30 real government CCTV camera catalogue.
+2. **Camera Switching**: Select any camera (e.g., `cam01`, `cam02`, `cam05`). Observe the smooth stream switching overlay (`CONNECTING TO CAMERA... Waiting for first frame...`).
+3. **Demo Video Processing**: Select any registered demo feed (`v_cam01` .. `v_cam06`). The production AI pipeline will run live detection, tracking, and ANPR on video frames.
+4. **GIS Command Map**: Open **GIS Command Map** to view the physical distribution of real government cameras across Gujarat.
+5. **Vehicle Investigation**: Search plates in **Plate Search** or export evidence reports in **Vehicle Investigation**.
 
-# Run backend unit & integration tests
-python -m pytest -q
+*Note: Demo video assets are excluded from Git repository commits due to size considerations.*
+
+---
+
+## 15. Testing & Verification
+
+The test suite contains **416 automated tests** covering API endpoints, AI tracking, ANPR normalization, multi-camera ingestion, database persistence, and RBAC security.
+
+To execute the test suite:
+```powershell
+pytest -q
 ```
 
-### Frontend Build Verification
-Validate TypeScript types and generate production bundle:
-```bash
-cd frontend/sentinelvision
+**Verified Test Result**: `416 passed in 57.77s`.
+
+To verify the frontend production build:
+```powershell
+cd frontend\sentinelvision
 npm run build
 ```
 
+**Verified Build Result**: `built in 4.54s` (Zero TypeScript or Vite compilation errors).
+
 ---
 
-## Security & Best Practices
+## 16. Project Status & PoC Scope
 
-- **Zero Secret Exposure:** Credentials are pulled dynamically from OS environment variables or local `.env`.
-- **RTSP Redaction:** All URL formatting utilities automatically mask username/password details before logging or storing metadata.
-- **Ignored Artifacts:** Binary model files (`*.pt`), SQLite databases (`*.db`), video captures (`videos/`), and Python cache (`__pycache__`) are protected by `.gitignore`.
+| Feature / Module | Status | Notes |
+| :--- | :--- | :--- |
+| **30 Government Camera Grid** | **Implemented** | Authoritative metadata & RTSP stream integration |
+| **Demo Video AI Pipeline** | **Implemented** | Identical pipeline execution on local video feeds |
+| **YOLO11m + ByteTrack** | **Implemented** | Multi-class detection & spatial tracking |
+| **ANPR / EasyOCR Engine** | **Implemented** | Text normalization & multi-frame voting |
+| **Watchlist & Alert Engine** | **Implemented** | Background correlation & WebSocket alerts |
+| **Global Vehicle Identity** | **Implemented** | Cross-camera movement tracing & PDF reports |
+| **GIS Command Map** | **Implemented** | Real camera mapping & route polylines |
+| **System Telemetry & Health** | **Implemented** | Dynamic worker monitoring |
+| **Security / RBAC / Audit** | **Implemented** | JWT auth, access gate & audit log table |
+| **Large-Scale Multi-Node Cluster**| *Future Scope* | Production scale (~80k cameras) architecture |
 
 ---
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Confidential — Prepared for Government CCTV & Tactical AI Demonstration.
